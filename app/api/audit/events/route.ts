@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
-import { appendEventLog, clearEventLog, listEventLog } from "@/src/lib/auditevents";
+import { writeAuditLog } from "@/src/lib/audit";
 
 export async function GET() {
   try {
-    const items = await listEventLog();
-    return NextResponse.json({ ok: true, items });
+    return NextResponse.json({
+      ok: true,
+      message: "Rota de auditoria ativa no banco.",
+    });
   } catch {
-    return NextResponse.json({ ok: false, items: [] }, { status: 500 });
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }
 
@@ -14,39 +16,29 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    await appendEventLog({
-      type: body?.type || "OUTRO",
-      atISO: body?.atISO || new Date().toISOString(),
-
-      actorCpf: body?.actorCpf ? String(body.actorCpf) : undefined,
-      actorNome: body?.actorNome ? String(body.actorNome) : undefined,
-      actorPerfil: body?.actorPerfil ? String(body.actorPerfil) : undefined,
-      actorEmpresa: body?.actorEmpresa ? String(body.actorEmpresa) : undefined,
-
-      targetCpf: body?.targetCpf ? String(body.targetCpf) : undefined,
-
-      module: body?.module ? String(body.module) : undefined,
-      entityId: body?.entityId ? String(body.entityId) : undefined,
-      entityTitle: body?.entityTitle ? String(body.entityTitle) : undefined,
-
-      meta: typeof body?.meta === "object" && body.meta !== null ? body.meta : undefined,
-      obs: body?.obs ? String(body.obs) : undefined,
-
-      ip: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "",
-      userAgent: req.headers.get("user-agent") || "",
+    await writeAuditLog({
+      action: String(body?.type || "OUTRO"),
+      actorCpf: String(body?.actorCpf || body?.cpf || ""),
+      actorName: String(body?.actorNome || body?.nome || "") || null,
+      entity: String(body?.entityTitle || body?.module || "Sistema"),
+      entityId: body?.entityId ? String(body.entityId) : null,
+      metadata: {
+        atISO: String(body?.atISO || new Date().toISOString()),
+        actorPerfil: String(body?.actorPerfil || body?.perfil || ""),
+        actorEmpresa: String(body?.actorEmpresa || body?.empresa || ""),
+        targetCpf: body?.targetCpf ? String(body.targetCpf) : "",
+        module: body?.module ? String(body.module) : "",
+        entityTitle: body?.entityTitle ? String(body.entityTitle) : "",
+        meta: typeof body?.meta === "object" && body?.meta !== null ? body.meta : {},
+        obs: body?.obs ? String(body.obs) : "",
+        ip: req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "",
+        userAgent: req.headers.get("user-agent") || "",
+      },
     });
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error("audit events POST error:", error);
     return NextResponse.json({ ok: false }, { status: 400 });
-  }
-}
-
-export async function DELETE() {
-  try {
-    await clearEventLog();
-    return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }

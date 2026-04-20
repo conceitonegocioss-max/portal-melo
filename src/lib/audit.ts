@@ -21,5 +21,6 @@ export async function writeAuditLog(input: {
     });
   } catch (e) {
     console.error("auditLog error:", e);
+    throw e;
   }
 }
