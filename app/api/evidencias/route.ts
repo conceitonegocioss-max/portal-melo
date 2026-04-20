@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
-import path from "path";
+import { ensureDataDirSync, getDataFilePath } from "@/src/lib/dataDir";
 
 /**
  * Central de Evidências (JSON em /data/evidencias.json)
@@ -103,8 +103,7 @@ function onlyDigits(v: string) {
 }
 
 function getDbPath() {
-  // data/evidencias.json na raiz do projeto
-  return path.join(process.cwd(), "data", "evidencias.json");
+  return getDataFilePath("evidencias.json");
 }
 
 function readDb(): { items: Evidencia[] } {
@@ -121,6 +120,7 @@ function readDb(): { items: Evidencia[] } {
 }
 
 function writeDb(db: { items: Evidencia[] }) {
+  ensureDataDirSync();
   const p = getDbPath();
   fs.writeFileSync(p, JSON.stringify(db, null, 2), "utf-8");
 }

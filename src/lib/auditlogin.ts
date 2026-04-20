@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import path from "path";
+import { getDataDir, getDataFilePath } from "@/src/lib/dataDir";
 
 export type LoginAction = "LOGIN_OK" | "LOGIN_FALHA" | "LOGOUT";
 
@@ -24,12 +24,11 @@ export type AuditLoginEntry = {
 const FILE_NAME = "audit-logins.json";
 
 function dataFilePath() {
-  return path.join(process.cwd(), "data", FILE_NAME);
+  return getDataFilePath(FILE_NAME);
 }
 
 async function ensureDataDir() {
-  const dir = path.join(process.cwd(), "data");
-  await fs.mkdir(dir, { recursive: true });
+  await fs.mkdir(getDataDir(), { recursive: true });
 }
 
 async function readFileSafe(): Promise<AuditLoginEntry[]> {
