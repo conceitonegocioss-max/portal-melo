@@ -1,0 +1,1704 @@
+[
+  {
+    "id": "1776693308706-446542de1896a",
+    "atISO": "2026-04-20T13:55:08.704Z",
+    "type": "TERMO_ACEITO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "termo",
+    "entityId": "termo-confidencialidade",
+    "entityTitle": "Termo de Confidencialidade",
+    "meta": {
+      "documento": "Termo de Confidencialidade",
+      "documentoId": "termo-confidencialidade",
+      "documentoTipo": "termo",
+      "versao": "v3.0",
+      "revisao": "02/2027",
+      "arquivoPdf": "/materiais/termos/termo-confidencialidade-sgq.pdf",
+      "origem": "botao_abrir_termo_biblioteca_governanca"
+    },
+    "obs": "Ciência registrada ao abrir Termo de Confidencialidade pela Biblioteca de Governança.",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776693299764-bdaff394e88dc8",
+    "atISO": "2026-04-20T13:54:59.733Z",
+    "type": "LOGIN_OK",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776693030924-e11d6139cc2ef",
+    "atISO": "2026-04-20T13:50:30.917Z",
+    "type": "TERMO_ACEITO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "termo",
+    "entityId": "termo-confidencialidade",
+    "entityTitle": "Termo de Confidencialidade",
+    "meta": {
+      "documento": "Termo de Confidencialidade",
+      "documentoId": "termo-confidencialidade",
+      "documentoTipo": "termo",
+      "versao": "v3.0",
+      "revisao": "02/2027",
+      "arquivoPdf": "/materiais/termos/termo-confidencialidade-sgq.pdf",
+      "origem": "botao_abrir_termo_biblioteca_governanca"
+    },
+    "obs": "Ciência registrada ao abrir Termo de Confidencialidade pela Biblioteca de Governança.",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776693022772-5aa36659132098",
+    "atISO": "2026-04-20T13:50:22.672Z",
+    "type": "LOGIN_OK",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776693014358-f35c078f3c8798",
+    "atISO": "2026-04-20T13:50:14.193Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776437779487-95c498ccc812f8",
+    "atISO": "2026-04-17T14:56:19.232Z",
+    "type": "LOGIN_OK",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776270092308-70e52d02e17aa",
+    "atISO": "2026-04-15T16:21:32.277Z",
+    "type": "LOGIN_OK",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776265964944-ba100092c695f",
+    "atISO": "2026-04-15T15:12:44.917Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776265958533-2e34b6a09f086",
+    "atISO": "2026-04-15T15:12:38.346Z",
+    "type": "LOGIN_OK",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776263516206-53244a975af92",
+    "atISO": "2026-04-15T14:31:55.767Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776196586759-a966588a916698",
+    "atISO": "2026-04-14T19:56:26.742Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776196581274-f497660106d118",
+    "atISO": "2026-04-14T19:56:21.255Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776196285556-18b9fbedf50d5",
+    "atISO": "2026-04-14T19:51:25.553Z",
+    "type": "TERMO_ACEITO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "termo",
+    "entityId": "termo-confidencialidade",
+    "entityTitle": "Termo de Confidencialidade",
+    "meta": {
+      "documento": "Termo de Confidencialidade",
+      "documentoId": "termo-confidencialidade",
+      "documentoTipo": "termo",
+      "versao": "v3.0",
+      "revisao": "02/2027",
+      "arquivoPdf": "/materiais/termos/termo-confidencialidade-sgq.pdf",
+      "origem": "botao_abrir_termo_biblioteca_governanca"
+    },
+    "obs": "Ciência registrada ao abrir Termo de Confidencialidade pela Biblioteca de Governança.",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776178015161-bb772a187235f8",
+    "atISO": "2026-04-14T14:46:55.144Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776178009467-069ca4313b1898",
+    "atISO": "2026-04-14T14:46:49.441Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177970926-b1d2cf70bd77f",
+    "atISO": "2026-04-14T14:46:10.887Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177921546-48d0e2314b033",
+    "atISO": "2026-04-14T14:45:21.477Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177894211-a895290b43863",
+    "atISO": "2026-04-14T14:44:54.167Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177878697-a989c23fca26c8",
+    "atISO": "2026-04-14T14:44:38.667Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177860372-8520ee88c2373",
+    "atISO": "2026-04-14T14:44:20.340Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177701390-958f0d74e8227",
+    "atISO": "2026-04-14T14:41:41.355Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177688137-65265e6584a748",
+    "atISO": "2026-04-14T14:41:28.100Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177647732-3b84fa04c62fe8",
+    "atISO": "2026-04-14T14:40:47.263Z",
+    "type": "LOGIN_OK",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177638501-2650c0f813bfa8",
+    "atISO": "2026-04-14T14:40:38.482Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177603778-b382158e13b138",
+    "atISO": "2026-04-14T14:40:03.720Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177586341-1695923e1b9828",
+    "atISO": "2026-04-14T14:39:46.258Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177465885-3f09542ef7c578",
+    "atISO": "2026-04-14T14:37:45.841Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177451440-252aa2c60c171",
+    "atISO": "2026-04-14T14:37:31.202Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177434769-c0e2be39fbbcb8",
+    "atISO": "2026-04-14T14:37:14.719Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177427804-a8ea4b759d01f",
+    "atISO": "2026-04-14T14:37:07.740Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177257609-98f3976928854",
+    "atISO": "2026-04-14T14:34:17.539Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177248672-debcb3612a607",
+    "atISO": "2026-04-14T14:34:08.635Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177204600-cf9507a2e0a05",
+    "atISO": "2026-04-14T14:33:24.481Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177183942-72f2f802b6ff08",
+    "atISO": "2026-04-14T14:33:03.939Z",
+    "type": "TERMO_ACEITO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "module": "termo",
+    "entityId": "termo-confidencialidade",
+    "entityTitle": "Termo de Confidencialidade",
+    "meta": {
+      "documento": "Termo de Confidencialidade",
+      "documentoId": "termo-confidencialidade",
+      "documentoTipo": "termo",
+      "versao": "v3.0",
+      "revisao": "02/2027",
+      "arquivoPdf": "/materiais/termos/termo-confidencialidade-sgq.pdf",
+      "origem": "botao_abrir_termo_biblioteca_governanca"
+    },
+    "obs": "Ciência registrada ao abrir Termo de Confidencialidade pela Biblioteca de Governança.",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776173573094-8279c073dfece8",
+    "atISO": "2026-04-14T13:32:52.070Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775487001190-d9fa544975df8",
+    "atISO": "2026-04-06T14:50:01.169Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775486997346-bfe85d7945ae4",
+    "atISO": "2026-04-06T14:49:57.304Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775483788306-325bf7f09eedf8",
+    "atISO": "2026-04-06T13:56:28.208Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775483739802-492b56eb84115",
+    "atISO": "2026-04-06T13:55:39.321Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481367188-7800600f078b2",
+    "atISO": "2026-04-06T13:16:07.134Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481222034-3faafa66b0e0f",
+    "atISO": "2026-04-06T13:13:42.014Z",
+    "type": "LOGOUT",
+    "actorCpf": "05628112305",
+    "actorNome": "Alanna Kelly Santos Pereira",
+    "actorPerfil": "COLABORADOR",
+    "actorEmpresa": "MELO ESTRELA",
+    "module": "auth",
+    "entityId": "05628112305",
+    "entityTitle": "Alanna Kelly Santos Pereira",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481202069-19bdc976f48358",
+    "atISO": "2026-04-06T13:13:21.819Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "05628112305",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481177712-0eb4c595b8e48",
+    "atISO": "2026-04-06T13:12:57.686Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481138134-ae4773dfcb5358",
+    "atISO": "2026-04-06T13:12:18.106Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481087891-6877024700cf28",
+    "atISO": "2026-04-06T13:11:27.845Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481077676-a8ff7160055bb",
+    "atISO": "2026-04-06T13:11:17.633Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481049797-bca9632ba226e8",
+    "atISO": "2026-04-06T13:10:49.747Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480999221-0efad3d6952a28",
+    "atISO": "2026-04-06T13:09:59.087Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480961982-a855764fc7a0b8",
+    "atISO": "2026-04-06T13:09:21.943Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480919984-40b2f9567a9df8",
+    "atISO": "2026-04-06T13:08:39.026Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480752840-8daec4b13daa5",
+    "atISO": "2026-04-06T13:05:52.748Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480733946-cdd7cef9c5e",
+    "atISO": "2026-04-06T13:05:33.899Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480705281-5070febd6f295",
+    "atISO": "2026-04-06T13:05:04.100Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1774632871260-ddf93ad0bacde8",
+    "atISO": "2026-03-27T17:34:31.240Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1774632865101-b68cb4d03035f8",
+    "atISO": "2026-03-27T17:34:24.147Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1774620662087-fa17038431a51",
+    "atISO": "2026-03-27T14:11:02.060Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1774620649981-2c8a2ce2f0fb2",
+    "atISO": "2026-03-27T14:10:48.450Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773335287027-1161895aadbec",
+    "atISO": "2026-03-12T17:08:06.484Z",
+    "type": "LOGOUT",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "entityTitle": "Thaise Morais Da Silva",
+    "obs": "Logout realizado",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240950087-8085e0b9de851",
+    "atISO": "2026-03-11T14:55:50.023Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-concessao-acessos",
+    "entityTitle": "Política de Concessão de Acesso aos Sistemas e Aplicativos Internos",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Governança e TI",
+      "arquivoPdf": "/materiais/politicas/politica-concessao-acesso-sistemas-aplicativos-internos.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240925230-9e24ef5a8b104",
+    "atISO": "2026-03-11T14:55:25.155Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240378480-424e237a9637e",
+    "atISO": "2026-03-11T14:46:18.449Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "institucional-termo-adocao-sgq",
+    "entityTitle": "Termo de Adoção Institucional – SGQ",
+    "meta": {
+      "categoria": "institucional",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade",
+      "arquivoPdf": "/materiais/termos/termo-adocao-institucional-sgq.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240357828-712f5da28a136",
+    "atISO": "2026-03-11T14:45:57.797Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-concessao-acessos-chavej-portal",
+    "entityTitle": "Concessão de Acessos (Chave J e Portal do Correspondente)",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Governança e Operações",
+      "arquivoPdf": "/materiais/concessao-acessos-chavej-portal.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240350841-41394535f33f7",
+    "atISO": "2026-03-11T14:45:50.805Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-tratamento-mailing",
+    "entityTitle": "Procedimento para Tratamento de Lista de Mailing",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Compliance",
+      "arquivoPdf": "/materiais/procedimentos/procedimento-tratamento-lista-mailing.pdf",
+      "restrito": true
+    },
+    "obs": "Documento restrito aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240342077-0bdbf8b3758478",
+    "atISO": "2026-03-11T14:45:42.041Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-contratacao-desenvolvimento",
+    "entityTitle": "Procedimento para Contratação e Desenvolvimento",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Recursos Humanos",
+      "arquivoPdf": "/materiais/procedimentos/procedimento-contratacao-desenvolvimento.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240336626-d01b4fdf82021",
+    "atISO": "2026-03-11T14:45:36.601Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-concessao-acessos-sistemas",
+    "entityTitle": "Procedimento para Concessão de Acesso aos Sistemas",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Governança e TI",
+      "arquivoPdf": "/materiais/procedimentos/procedimento-concessao-acesso-sistemas.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240334034-827a5c558592d",
+    "atISO": "2026-03-11T14:45:34.005Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-prevencao-fraude",
+    "entityTitle": "Procedimento de Prevenção à Fraude",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Compliance",
+      "arquivoPdf": "/materiais/procedimentos/procedimento-prevencao-fraude.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240328900-bda00d4ca9ed98",
+    "atISO": "2026-03-11T14:45:28.870Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-auditoria-interna",
+    "entityTitle": "Procedimento de Auditoria Interna",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Auditoria Interna",
+      "arquivoPdf": "/materiais/procedimentos/procedimento-auditoria-interna.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240324793-1518cc0001e3d8",
+    "atISO": "2026-03-11T14:45:24.761Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "proc-plano-anual-auditoria",
+    "entityTitle": "Plano Anual de Auditoria Interna",
+    "meta": {
+      "categoria": "procedimento",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Auditoria Interna",
+      "arquivoPdf": "/materiais/sgq/sgq-plano-anual-auditoria-interna.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240316065-0eec3a7d5b7c7",
+    "atISO": "2026-03-11T14:45:16.037Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "sgq-manual-atendimento-etico",
+    "entityTitle": "Manual para um Atendimento Ético e Transparente",
+    "meta": {
+      "categoria": "sgq",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/sgq/sgq-manual-atendimento-etico-transparente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240312130-1bf40d1d0966c8",
+    "atISO": "2026-03-11T14:45:12.106Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "sgq-manual-gestao-planejamento-fin",
+    "entityTitle": "Manual de Gestão e Planejamento Financeiro",
+    "meta": {
+      "categoria": "sgq",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Financeiro",
+      "arquivoPdf": "/materiais/sgq/sgq-manual-gestao-planejamento-financeiro.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240307599-2bb5917f08bbe",
+    "atISO": "2026-03-11T14:45:07.562Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "sgq-inventario-tratamento-dados",
+    "entityTitle": "Inventário de Tratamento de Dados",
+    "meta": {
+      "categoria": "sgq",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "LGPD / Compliance",
+      "arquivoPdf": "/materiais/sgq/sgq-inventario-tratamento-dados.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240300367-bec565b473859",
+    "atISO": "2026-03-11T14:45:00.337Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-seguranca-firewall",
+    "entityTitle": "Política de Segurança da Informação e Uso de Firewall",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "TI e Segurança da Informação",
+      "arquivoPdf": "/materiais/politicas/politica-seguranca-informacao-firewall.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240296968-2af4e30d97a04",
+    "atISO": "2026-03-11T14:44:56.921Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-prevencao-fraude",
+    "entityTitle": "Política de Prevenção à Fraude",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-prevencao-fraude.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240291742-4e087605c9a348",
+    "atISO": "2026-03-11T14:44:51.710Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-portabilidade-credito",
+    "entityTitle": "Política de Portabilidade de Crédito",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Crédito e Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-portabilidade-credito.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240288888-e23713277d89d8",
+    "atISO": "2026-03-11T14:44:48.858Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-governanca",
+    "entityTitle": "Política de Governança",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Governança",
+      "arquivoPdf": "/materiais/politicas/politica-governanca.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240281269-aedb92ca02bf88",
+    "atISO": "2026-03-11T14:44:41.237Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-vulnerabilidades",
+    "entityTitle": "Política de Gestão de Vulnerabilidades",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "TI e Segurança da Informação",
+      "arquivoPdf": "/materiais/politicas/politica-gestao-vulnerabilidades-ti.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240277772-df527dec23b658",
+    "atISO": "2026-03-11T14:44:37.730Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-incidentes",
+    "entityTitle": "Política de Gestão de Incidentes",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-gestao-incidentes.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240238761-1488d5385d11c8",
+    "atISO": "2026-03-11T14:43:58.713Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-concessao-acessos",
+    "entityTitle": "Política de Concessão de Acesso aos Sistemas e Aplicativos Internos",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Governança e TI",
+      "arquivoPdf": "/materiais/politicas/politica-concessao-acesso-sistemas-aplicativos-internos.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773240235153-a29ff1bb4ff11",
+    "atISO": "2026-03-11T14:43:55.105Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773239246543-8b012999a45258",
+    "atISO": "2026-03-11T14:27:25.491Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politicas/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773238147915-93f2c1e0a446",
+    "atISO": "2026-03-11T14:09:07.873Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773238139200-a6e4008dfefe88",
+    "atISO": "2026-03-11T14:08:59.132Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773237577697-70c6f815f234c8",
+    "atISO": "2026-03-11T13:59:37.639Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773235544593-e97652af872d18",
+    "atISO": "2026-03-11T13:25:43.814Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1773163772924-6a21fd0e499278",
+    "atISO": "2026-03-10T17:29:29.786Z",
+    "type": "DOCUMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "materiais",
+    "entityId": "politica-atendimento",
+    "entityTitle": "Política de Atendimento ao Cliente",
+    "meta": {
+      "categoria": "politica",
+      "versao": "v2.0",
+      "revisao": "02/2027",
+      "responsavel": "Qualidade e Compliance",
+      "arquivoPdf": "/materiais/politica-atendimento-ao-cliente.pdf",
+      "restrito": false
+    },
+    "obs": "Documento aberto",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1772118342966-caa8d1104f9ea",
+    "atISO": "2026-02-26T15:05:42.679Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610766022-9ddfe0879d35d",
+    "atISO": "2026-02-20T18:06:05.732Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610219016-5345704a6bddd",
+    "atISO": "2026-02-20T17:56:58.989Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610216852-723079196b577",
+    "atISO": "2026-02-20T17:56:56.814Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610195484-b157eae5015b5",
+    "atISO": "2026-02-20T17:56:35.464Z",
+    "type": "TREINAMENTO_CONCLUIDO",
+    "actorCpf": "83695265434",
+    "actorNome": "Cynthia Mylena Lopes De Andrade",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "treinamentos",
+    "entityId": "abertura-de-contas",
+    "entityTitle": "Abertura de Contas",
+    "meta": {
+      "pasta": "abertura-de-contas",
+      "categoria": "Crédito",
+      "publico": "Agente de Crédito",
+      "versao": "2.0",
+      "proximaRevisao": "02/2027",
+      "responsavel": "Área de Qualidade e Compliance"
+    },
+    "obs": "Marcou como concluído",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610185062-f55f031a963f68",
+    "atISO": "2026-02-20T17:56:24.766Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "83695265434",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610160565-e87df44e94147",
+    "atISO": "2026-02-20T17:56:00.541Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610144995-fb8cdd52ec359",
+    "atISO": "2026-02-20T17:55:44.253Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771608259288-a5b1f9bf35dd78",
+    "atISO": "2026-02-20T17:24:19.259Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771608255922-548fcd2333db68",
+    "atISO": "2026-02-20T17:24:15.684Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771606551689-6792535f80cb7",
+    "atISO": "2026-02-20T16:55:51.643Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771606519329-eb7792f39d914",
+    "atISO": "2026-02-20T16:55:18.987Z",
+    "type": "ADMIN_AREA_ACESSO",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auditoria",
+    "entityId": "home",
+    "entityTitle": "Auditoria & Evidências",
+    "meta": {
+      "route": "/colaborador/auditoria"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771605727406-3800a7027967b8",
+    "atISO": "2026-02-20T16:42:07.363Z",
+    "type": "LOGIN_OK",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771605705473-5782d4edad658",
+    "atISO": "2026-02-20T16:41:45.064Z",
+    "type": "LOGIN_FALHA",
+    "actorNome": "",
+    "actorPerfil": "",
+    "actorEmpresa": "",
+    "module": "auth",
+    "entityId": "08862839499",
+    "obs": "CPF ou senha inválidos",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771605130960-3aa189aa92737",
+    "atISO": "2026-02-20T16:32:10.837Z",
+    "type": "TREINAMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "treinamentos",
+    "entityId": "atendimento-ao-cliente",
+    "entityTitle": "Atendimento ao Cliente",
+    "meta": {
+      "pasta": "atendimento-ao-cliente",
+      "categoria": "Atendimento",
+      "publico": "Todos"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771604764907-64a9895c1d389",
+    "atISO": "2026-02-20T16:26:04.883Z",
+    "type": "PROVA_INICIADA",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "provas",
+    "entityId": "abertura-de-contas",
+    "entityTitle": "Abertura de Contas",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771604760112-3b2e5203b26688",
+    "atISO": "2026-02-20T16:26:00.075Z",
+    "type": "TREINAMENTO_ABERTO",
+    "actorCpf": "08862839499",
+    "actorNome": "Thaise Morais Da Silva",
+    "actorPerfil": "ADMIN",
+    "actorEmpresa": "",
+    "module": "treinamentos",
+    "entityId": "abertura-de-contas",
+    "entityTitle": "Abertura de Contas",
+    "meta": {
+      "pasta": "abertura-de-contas",
+      "categoria": "Crédito",
+      "publico": "Agente de Crédito"
+    },
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  }
+]

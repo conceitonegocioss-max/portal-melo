@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Evidence {
+  id              String   @id @default(cuid())
+  title           String
+  kind            String   @default("OTHER")
+  description     String?
+  status          String   @default("ACTIVE")
+  currentVersion  Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  createdByCpf    String
+  createdByName   String?
+
+  updatedAt       DateTime @updatedAt
+
+  versions         EvidenceVersion[]
+  acknowledgements EvidenceAcknowledgement[]
+}
+
+model EvidenceVersion {
+  id              String   @id @default(cuid())
+  evidenceId       String
+  version          Int
+  filePath         String
+  sha256           String
+  notes            String?
+
+  publishedAt      DateTime @default(now())
+  publishedByCpf   String
+  publishedByName  String?
+
+  evidence Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@unique([evidenceId, version])
+}
+
+model EvidenceAcknowledgement {
+  id             String   @id @default(cuid())
+  evidenceId     String
+  cpf            String
+  name           String?
+  version        Int
+  acknowledgedAt DateTime @default(now())
+
+  userAgent      String?
+  ip             String?
+
+  evidence Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@unique([evidenceId, cpf, version])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  actorCpf  String
+  actorName String?
+  entity    String
+  entityId  String?
+  metadata  String?
+  createdAt DateTime @default(now())
+}

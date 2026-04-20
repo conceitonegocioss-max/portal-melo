@@ -1,0 +1,282 @@
+[
+  {
+    "id": "1776693299748-96c6ef80102",
+    "atISO": "2026-04-20T13:54:59.733Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776693022745-05199ce434cb68",
+    "atISO": "2026-04-20T13:50:22.672Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776437779389-04d83650629948",
+    "atISO": "2026-04-17T14:56:19.232Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776270092293-4bfd9e65d54d1",
+    "atISO": "2026-04-15T16:21:32.277Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776265958517-dd4785793785f8",
+    "atISO": "2026-04-15T15:12:38.346Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776177647683-5d73ad0c834358",
+    "atISO": "2026-04-14T14:40:47.263Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1776173572655-42f054795916d",
+    "atISO": "2026-04-14T13:32:52.070Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481367162-01f9697bb36e2",
+    "atISO": "2026-04-06T13:16:07.134Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775481202050-154f4516151e1",
+    "atISO": "2026-04-06T13:13:21.819Z",
+    "action": "LOGIN_OK",
+    "cpf": "05628112305",
+    "nome": "Alanna Kelly Santos Pereira",
+    "empresa": "MELO ESTRELA",
+    "perfil": "COLABORADOR",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480752772-dae019d326bf5",
+    "atISO": "2026-04-06T13:05:52.748Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1775480704775-ca41a49fd45f38",
+    "atISO": "2026-04-06T13:05:04.100Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1774620649619-e165f429e279a",
+    "atISO": "2026-03-27T14:10:48.450Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610216834-0440dc9fa4c5e",
+    "atISO": "2026-02-20T17:56:56.814Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771610185031-368825812d8258",
+    "atISO": "2026-02-20T17:56:24.766Z",
+    "action": "LOGIN_OK",
+    "cpf": "83695265434",
+    "nome": "Cynthia Mylena Lopes De Andrade",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771608255863-906af69cce0f8",
+    "atISO": "2026-02-20T17:24:15.684Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771605727388-20e2c5b0034b8",
+    "atISO": "2026-02-20T16:42:07.363Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771605705350-10953a55e7fed8",
+    "atISO": "2026-02-20T16:41:45.064Z",
+    "action": "LOGIN_FALHA",
+    "cpf": "08862839499",
+    "nome": "",
+    "empresa": "",
+    "perfil": "",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "obs": "CPF ou senha inválidos"
+  },
+  {
+    "id": "1771599965602-8cfb7e4dae616",
+    "atISO": "2026-02-20T15:06:05.243Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771599312017-bd6ef4b68c7f68",
+    "atISO": "2026-02-20T14:55:11.724Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771598532026-db5c331df8e988",
+    "atISO": "2026-02-20T14:42:12.011Z",
+    "action": "LOGIN_FALHA",
+    "cpf": "08862839499",
+    "nome": "",
+    "empresa": "",
+    "perfil": "",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "obs": "CPF ou senha inválidos"
+  },
+  {
+    "id": "1771598522687-8daa60271edc28",
+    "atISO": "2026-02-20T14:42:01.951Z",
+    "action": "LOGIN_OK",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1771590516790-6a936a96cb435",
+    "atISO": "2026-02-20T12:28:36.546Z",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1"
+  },
+  {
+    "id": "1771588515234-c27a3f8c76f96",
+    "atISO": "2026-02-20T11:55:14.504Z",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1"
+  },
+  {
+    "id": "1770321331913-67032d7f3869c",
+    "atISO": "2026-02-05T19:55:31.609Z",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "::1"
+  },
+  {
+    "id": "1770320394356-a9084ea7fbe27",
+    "atISO": "2026-02-05T19:39:54.356Z",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"
+  },
+  {
+    "id": "1770320292964-a6a0e79554ebe8",
+    "atISO": "2026-02-05T19:38:12.964Z",
+    "cpf": "08862839499",
+    "nome": "Thaise Morais Da Silva",
+    "empresa": "",
+    "perfil": "ADMIN",
+    "ip": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"
+  }
+]
