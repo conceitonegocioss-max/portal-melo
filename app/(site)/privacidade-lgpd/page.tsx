@@ -82,6 +82,15 @@ export default function PrivacidadeLGPD() {
               FALAR COM O ENCARREGADO
             </Link>
 
+            <Link
+              className="btn btn-outline"
+              href="/politica-de-privacidade-de-dados.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ABRIR POLÍTICA COMPLETA
+            </Link>
+
             <Link className="btn btn-outline" href="/contato">
               CANAL DE CONTATO
             </Link>
@@ -267,6 +276,17 @@ export default function PrivacidadeLGPD() {
             <li>Compartilhamento apenas quando necessário e com fundamento legal.</li>
             <li>Adoção de medidas de segurança compatíveis com o contexto do tratamento.</li>
           </ul>
+
+          <div style={{ marginTop: 20 }}>
+            <Link
+              className="btn btn-yellow"
+              href="/politica-de-privacidade-de-dados.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ABRIR POLÍTICA DE PRIVACIDADE COMPLETA
+            </Link>
+          </div>
         </section>
 
         <section
