@@ -91,6 +91,10 @@ export default function PrivacidadeLGPD() {
               ABRIR POLÍTICA COMPLETA
             </Link>
 
+            <Link className="btn btn-outline" href="/termo-uso-clientes">
+              TERMO DE USO E AVISO DE PRIVACIDADE
+            </Link>
+
             <Link className="btn btn-outline" href="/contato">
               CANAL DE CONTATO
             </Link>
@@ -277,7 +281,7 @@ export default function PrivacidadeLGPD() {
             <li>Adoção de medidas de segurança compatíveis com o contexto do tratamento.</li>
           </ul>
 
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 20, display: "flex", gap: 12, flexWrap: "wrap" }}>
             <Link
               className="btn btn-yellow"
               href="/politica-de-privacidade-de-dados.pdf"
@@ -285,6 +289,9 @@ export default function PrivacidadeLGPD() {
               rel="noopener noreferrer"
             >
               ABRIR POLÍTICA DE PRIVACIDADE COMPLETA
+            </Link>
+            <Link className="btn btn-outline" href="/termo-uso-clientes">
+              ABRIR TERMO DE USO PARA CLIENTES
             </Link>
           </div>
         </section>
