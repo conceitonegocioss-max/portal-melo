@@ -226,6 +226,103 @@ export default function ContatoPage() {
               fontWeight: 1000,
             }}
           >
+            Canais oficiais Banco do Brasil / Ouvidoria
+          </h2>
+
+          <p
+            style={{
+              marginTop: 12,
+              color: "#29416a",
+              fontWeight: 650,
+              lineHeight: 1.7,
+              maxWidth: 980,
+            }}
+          >
+            Para atendimento, dúvidas, reclamações, cancelamentos, informações
+            sobre produtos e demais manifestações relacionadas aos serviços
+            financeiros contratados, o cliente também poderá utilizar os canais
+            oficiais do Banco do Brasil.
+          </p>
+
+          <div
+            style={{
+              marginTop: 18,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+              gap: 14,
+            }}
+          >
+            <div className="contato-card">
+              <h3 className="contato-card-title">Central de Atendimento BB</h3>
+              <p className="contato-card-text">
+                4004 0001 / 0800 729 0001
+              </p>
+            </div>
+
+            <div className="contato-card">
+              <h3 className="contato-card-title">SAC Banco do Brasil</h3>
+              <p className="contato-card-text">0800 729 0722</p>
+            </div>
+
+            <div className="contato-card">
+              <h3 className="contato-card-title">Ouvidoria Banco do Brasil</h3>
+              <p className="contato-card-text">0800 729 5678</p>
+            </div>
+
+            <div className="contato-card">
+              <h3 className="contato-card-title">
+                Deficiente auditivo ou de fala
+              </h3>
+              <p className="contato-card-text">0800 729 0088</p>
+            </div>
+
+            <div className="contato-card">
+              <h3 className="contato-card-title">WhatsApp BB</h3>
+              <p className="contato-card-text">(61) 4004-0001</p>
+            </div>
+
+            <div className="contato-card">
+              <h3 className="contato-card-title">
+                Banco Central — Reclamações
+              </h3>
+              <p className="contato-card-text">
+                Reclamações contra instituições financeiras podem ser registradas
+                diretamente no Banco Central.
+              </p>
+
+              <div style={{ marginTop: 12 }}>
+                <a
+                  className="btn btn-outline"
+                  href="https://www.bcb.gov.br/meubc/registrar_reclamacao"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  ACESSAR BANCO CENTRAL
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            marginTop: 24,
+            background:
+              "linear-gradient(135deg, rgba(255,212,0,0.12) 0%, rgba(255,255,255,1) 100%)",
+            borderRadius: 22,
+            padding: 24,
+            border: "1px solid rgba(10,42,106,0.08)",
+            boxShadow: "0 10px 28px rgba(0,0,0,0.05)",
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              color: "#0a2a6a",
+              fontSize: 26,
+              fontWeight: 1000,
+            }}
+          >
             Atendimento institucional
           </h2>
 
