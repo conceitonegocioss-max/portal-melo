@@ -84,12 +84,44 @@ export default function ColaboradorLoginPage() {
       return;
     }
 
+    if (user.status === "INATIVO") {
+      const atISO = new Date().toISOString();
+
+      await registrarLoginAudit({
+        cpf: user.cpf,
+        nome: user.nome,
+        perfil: user.perfil,
+        empresa: user.empresa || "",
+        atISO,
+        sucesso: false,
+        motivo: "Usuário inativo",
+      });
+
+      await registrarEventoCentral({
+        type: "LOGIN_BLOQUEADO_INATIVO",
+        module: "auth",
+        entity: "Login",
+        entityId: normalizeCpf(user.cpf),
+        cpf: user.cpf,
+        nome: user.nome,
+        perfil: user.perfil,
+        empresa: user.empresa || "",
+        atISO,
+        obs: "Tentativa de acesso por usuário inativo",
+      });
+
+      setLoading(false);
+      setErro("Usuário inativo. Procure o gestor/qualidade para verificar o acesso.");
+      return;
+    }
+
     const session = {
       id: user.id,
       nome: user.nome,
       cpf: user.cpf,
       perfil: user.perfil,
       empresa: user.empresa || "",
+      status: user.status,
     };
 
     setSession(session);
@@ -101,6 +133,7 @@ export default function ColaboradorLoginPage() {
       nome: session.nome,
       perfil: session.perfil,
       empresa: session.empresa,
+      status: session.status,
       atISO,
       sucesso: true,
     });
@@ -114,6 +147,7 @@ export default function ColaboradorLoginPage() {
       nome: session.nome,
       perfil: session.perfil,
       empresa: session.empresa,
+      status: session.status,
       atISO,
       obs: "",
     });
