@@ -195,7 +195,7 @@ export default function HomePage() {
       <section className="section gray" id="produtos">
         <div className="container">
           <div className="section-title">
-            <h2>Nossos Serviços</h2>
+            <h2>Serviços de Correspondente Bancário</h2>
             <div className="bar" />
           </div>
 
@@ -208,8 +208,8 @@ export default function HomePage() {
               <div className="product-body">
                 <h3>Crédito</h3>
                 <p>
-                  Orientação e condução do processo com foco em segurança,
-                  clareza e conformidade.
+                  Orientação, simulação e encaminhamento de propostas de
+                  crédito, conforme regras da instituição financeira.
                 </p>
               </div>
               <div className="product-action">
@@ -225,8 +225,8 @@ export default function HomePage() {
               <div className="product-body">
                 <h3>Consórcio</h3>
                 <p>
-                  Planejamento para aquisição de bens e serviços, com
-                  acompanhamento.
+                  Apoio e orientação sobre soluções de consórcio para aquisição
+                  de bens e serviços.
                 </p>
               </div>
               <div className="product-action">
@@ -242,7 +242,8 @@ export default function HomePage() {
               <div className="product-body">
                 <h3>Ourocap / Capitalização</h3>
                 <p>
-                  Capitalização com orientação clara e registro de evidências.
+                  Produtos de capitalização com orientação clara e atendimento
+                  transparente.
                 </p>
               </div>
               <div className="product-action">
@@ -258,13 +259,22 @@ export default function HomePage() {
               <div className="product-body">
                 <h3>Abertura de Conta</h3>
                 <p>
-                  Abertura PF/PJ e orientações de segurança e boas práticas.
+                  Apoio na abertura de contas PF/PJ, conforme regras da
+                  instituição financeira.
                 </p>
               </div>
               <div className="product-action">
                 <span className="btn btn-yellow">VER MAIS</span>
               </div>
             </Link>
+          </div>
+
+          <div className="card mt-24">
+            <p style={{ margin: 0 }}>
+              Atuamos como correspondente bancário, prestando atendimento,
+              orientação e encaminhamento de propostas, conforme normas e
+              diretrizes da instituição financeira parceira.
+            </p>
           </div>
         </div>
       </section>
