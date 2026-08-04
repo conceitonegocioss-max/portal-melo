@@ -4,11 +4,11 @@ export default function OurocapPage() {
   const itens = [
     {
       title: "PU (Pagamento Único)",
-      desc: "Modalidade com pagamento único, conforme regras e disponibilidade do produto.",
+      desc: "Modalidade com pagamento único, conforme regras, condições e disponibilidade do produto.",
     },
     {
       title: "PM (Pagamento Mensal/Parcelado)",
-      desc: "Modalidade com pagamentos parcelados, com orientação e acompanhamento.",
+      desc: "Modalidade com pagamentos mensais ou parcelados, com orientação clara durante o atendimento.",
     },
   ];
 
@@ -25,8 +25,8 @@ export default function OurocapPage() {
           <div className="product-hero-left">
             <h1 className="product-title">Ourocap / Capitalização</h1>
             <p className="product-lead">
-              Solução de capitalização com orientação transparente e registro de evidências.
-              Atuamos com clareza, responsabilidade e suporte durante todo o processo.
+              Produto de capitalização com orientação transparente, atendimento responsável
+              e suporte durante todo o processo.
             </p>
 
             <div className="product-tags">
