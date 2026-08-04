@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import TrustStrip from "../components/TrustStrip";
 import HowSection from "../components/HowSection";
 
 export default function HomePage() {
@@ -155,8 +154,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <TrustStrip />
-
       <section className="section about-home">
         <div className="container">
           <div className="section-title">
@@ -174,6 +171,16 @@ export default function HomePage() {
               Trabalhamos com processos padronizados, transparência,
               responsabilidade e foco na segurança do cliente em cada etapa do
               atendimento.
+            </p>
+          </div>
+
+          <div className="mission-box mt-24">
+            <h3>Nossa missão</h3>
+            <p>
+              Oferecer serviços de correspondência bancária com excelência,
+              proporcionando atendimento claro, seguro e responsável. Atuamos
+              com ética, transparência e conformidade, buscando orientar nossos
+              clientes com cuidado em cada etapa do processo.
             </p>
           </div>
 
@@ -330,7 +337,7 @@ export default function HomePage() {
         }
 
         .about-home {
-          padding-top: 70px;
+          padding-top: 72px;
           padding-bottom: 72px;
         }
 
@@ -344,6 +351,28 @@ export default function HomePage() {
 
         .about-intro p {
           margin: 0 0 10px;
+        }
+
+        .mission-box {
+          max-width: 940px;
+          padding: 24px 26px;
+          border-radius: 20px;
+          border: 1px solid #e3e8f3;
+          background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+          box-shadow: 0 14px 34px rgba(0, 27, 80, 0.08);
+        }
+
+        .mission-box h3 {
+          margin: 0 0 10px;
+          color: #002c77;
+          font-size: 24px;
+        }
+
+        .mission-box p {
+          margin: 0;
+          color: #001b50;
+          line-height: 1.65;
+          font-weight: 600;
         }
 
         .about-cards {
