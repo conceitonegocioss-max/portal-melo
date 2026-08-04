@@ -1,13 +1,78 @@
 import { NextResponse } from "next/server";
 import { writeAuditLog } from "@/src/lib/audit";
+import { prisma } from "@/src/lib/prisma";
 
-export async function GET() {
+type ProgressItem = {
+  status: "Concluído";
+  dataISO: string;
+};
+
+function onlyDigits(value: string) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function safeParseMetadata(value: string | null): Record<string, unknown> {
+  if (!value) return {};
   try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const actorCpf = onlyDigits(url.searchParams.get("actorCpf") || url.searchParams.get("cpf") || "");
+    const action = url.searchParams.get("action") || "TREINAMENTO_CONCLUIDO";
+    const moduleFilter = url.searchParams.get("module") || "treinamentos";
+
+    if (!actorCpf) {
+      return NextResponse.json({
+        ok: true,
+        message: "Rota de auditoria ativa no banco.",
+      });
+    }
+
+    const logs = await prisma.auditLog.findMany({
+      where: {
+        actorCpf,
+        action,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      take: 1000,
+    });
+
+    const progress: Record<string, ProgressItem> = {};
+
+    for (const log of logs) {
+      if (!log.entityId) continue;
+
+      const metadata = safeParseMetadata(log.metadata);
+      const logModule = String(metadata.module || "");
+
+      if (moduleFilter && logModule && logModule !== moduleFilter) continue;
+
+      const atISO = String(metadata.atISO || log.createdAt.toISOString());
+
+      progress[log.entityId] = {
+        status: "Concluído",
+        dataISO: atISO,
+      };
+    }
+
     return NextResponse.json({
       ok: true,
-      message: "Rota de auditoria ativa no banco.",
+      actorCpf,
+      action,
+      module: moduleFilter,
+      progress,
     });
-  } catch {
+  } catch (error) {
+    console.error("audit events GET error:", error);
     return NextResponse.json({ ok: false }, { status: 500 });
   }
 }
