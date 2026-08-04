@@ -39,6 +39,28 @@ function keyByCpf(cpf: string) {
   return `portal_treinamentos_progress_v1_${cpf}`;
 }
 
+function lerProgressoLocal(cpf: string): ProgressoPorTreino {
+  try {
+    const raw = localStorage.getItem(keyByCpf(cpf));
+    if (!raw) return {};
+    return JSON.parse(raw) as ProgressoPorTreino;
+  } catch {
+    return {};
+  }
+}
+
+function salvarProgressoLocal(cpf: string, progresso: ProgressoPorTreino) {
+  if (!cpf) return;
+  localStorage.setItem(keyByCpf(cpf), JSON.stringify(progresso));
+}
+
+function mesclarProgresso(local: ProgressoPorTreino, remoto: ProgressoPorTreino): ProgressoPorTreino {
+  return {
+    ...(local || {}),
+    ...(remoto || {}),
+  };
+}
+
 const TREINAMENTOS: Treinamento[] = [
   { id: "abertura-de-contas", titulo: "Abertura de Contas", descricao: "Procedimentos e orientações para abertura de contas.", pasta: "abertura-de-contas", categoria: "Crédito", publico: "Agente de Crédito", capa: CAPA_PADRAO },
   { id: "atendimento-ao-cliente", titulo: "Atendimento ao Cliente", descricao: "Boas práticas de atendimento e postura profissional.", pasta: "atendimento-ao-cliente", categoria: "Atendimento", publico: "Todos", capa: CAPA_PADRAO },
@@ -66,10 +88,35 @@ export default function TreinamentosPage() {
   const [sessionNome, setSessionNome] = useState("");
   const [sessionPerfil, setSessionPerfil] = useState("");
   const [sessionEmpresa, setSessionEmpresa] = useState("");
+  const [syncStatus, setSyncStatus] = useState("Sincronizando progresso…");
 
   const [progresso, setProgresso] = useState<ProgressoPorTreino>({});
 
   const totalTreinos = TREINAMENTOS.length;
+
+  async function carregarProgressoDoBanco(cpf: string) {
+    const local = lerProgressoLocal(cpf);
+    setProgresso(local);
+
+    try {
+      const res = await fetch(
+        `/api/audit/events?actorCpf=${encodeURIComponent(cpf)}&module=treinamentos&action=TREINAMENTO_CONCLUIDO`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+
+      if (!data?.ok) throw new Error("Resposta inválida");
+
+      const remoto = (data.progress || {}) as ProgressoPorTreino;
+      const mesclado = mesclarProgresso(local, remoto);
+
+      setProgresso(mesclado);
+      salvarProgressoLocal(cpf, mesclado);
+      setSyncStatus("Progresso sincronizado com o banco por CPF.");
+    } catch {
+      setSyncStatus("Não foi possível sincronizar agora. Exibindo progresso salvo neste navegador.");
+    }
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -86,14 +133,7 @@ export default function TreinamentosPage() {
     setSessionPerfil(session.perfil || "");
     setSessionEmpresa(session.empresa || "");
 
-    const raw = localStorage.getItem(keyByCpf(cpf));
-    if (raw) {
-      try {
-        setProgresso(JSON.parse(raw));
-      } catch {
-        setProgresso({});
-      }
-    }
+    carregarProgressoDoBanco(cpf);
   }, [router]);
 
   const concluidos = useMemo(() => {
@@ -106,14 +146,13 @@ export default function TreinamentosPage() {
 
   function salvarProgresso(novo: ProgressoPorTreino) {
     setProgresso(novo);
-    if (sessionCpf) localStorage.setItem(keyByCpf(sessionCpf), JSON.stringify(novo));
+    if (sessionCpf) salvarProgressoLocal(sessionCpf, novo);
   }
 
-  function limparProgressoLocal() {
+  async function atualizarProgresso() {
     if (!sessionCpf) return;
-    localStorage.removeItem(keyByCpf(sessionCpf));
-    setProgresso({});
-    alert("✅ Progresso limpo neste navegador (para este CPF).");
+    setSyncStatus("Sincronizando progresso…");
+    await carregarProgressoDoBanco(sessionCpf);
   }
 
   function statusDoTreino(id: string): "Pendente" | "Concluído" {
@@ -165,6 +204,7 @@ export default function TreinamentosPage() {
       },
     });
 
+    setSyncStatus("Conclusão registrada no banco por CPF.");
     alert(`✅ "${t.titulo}" marcado como concluído.`);
   }
 
@@ -203,10 +243,10 @@ export default function TreinamentosPage() {
             </div>
 
             <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-              <div className="trHint">O progresso fica salvo por CPF neste navegador.</div>
+              <div className="trHint">{syncStatus}</div>
 
-              <button type="button" className="miniBtn" onClick={limparProgressoLocal}>
-                Limpar progresso deste navegador
+              <button type="button" className="miniBtn" onClick={atualizarProgresso}>
+                Atualizar progresso
               </button>
             </div>
           </div>
