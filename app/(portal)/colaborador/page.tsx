@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSession } from "@/src/lib/auth";
 import { COLABORADORES } from "@/src/data/colaboradores";
+
 function normalizeCpf(value: unknown) {
   return String(value ?? "").replace(/\D/g, "");
 }
@@ -26,26 +27,34 @@ const ROUTES = {
 
 const TOTAL_TREINAMENTOS = 16;
 
+type ProgressoResumo = { concluidos: number; ultimaISO: string | null };
+type ProgressoPorTreino = Record<string, { status: string; dataISO: string }>;
+
 function keyByCpf(cpf: string) {
   return `portal_treinamentos_progress_v1_${cpf}`;
 }
 
-function lerProgressoPorCpf(cpf: string): { concluidos: number; ultimaISO: string | null } {
-  const raw = localStorage.getItem(keyByCpf(cpf));
-  if (!raw) return { concluidos: 0, ultimaISO: null };
+function resumirProgresso(obj: ProgressoPorTreino): ProgressoResumo {
+  const values = Object.values(obj || {});
+  const concluidos = values.filter((v) => String(v?.status || "").toLowerCase().includes("conclu")).length;
+  const datas = values.map((v) => v?.dataISO).filter(Boolean) as string[];
+  const ultimaISO = datas.length ? datas.sort().slice(-1)[0] : null;
+  return { concluidos, ultimaISO };
+}
 
+function lerProgressoLocal(cpf: string): ProgressoPorTreino {
   try {
-    const obj = JSON.parse(raw) as Record<string, { status: string; dataISO: string }>;
-    const values = Object.values(obj || {});
-    const concluidos = values.filter((v) => String(v?.status || "").toLowerCase().includes("conclu")).length;
-
-    const datas = values.map((v) => v?.dataISO).filter(Boolean) as string[];
-    const ultima = datas.length ? datas.sort().slice(-1)[0] : null;
-
-    return { concluidos, ultimaISO: ultima };
+    const raw = localStorage.getItem(keyByCpf(cpf));
+    if (!raw) return {};
+    return JSON.parse(raw) as ProgressoPorTreino;
   } catch {
-    return { concluidos: 0, ultimaISO: null };
+    return {};
   }
+}
+
+function salvarProgressoLocal(cpf: string, progresso: ProgressoPorTreino) {
+  if (!cpf) return;
+  localStorage.setItem(keyByCpf(cpf), JSON.stringify(progresso));
 }
 
 function formatarData(iso: string | null) {
@@ -65,6 +74,31 @@ export default function ColaboradorHomePage() {
   const [sessionCpf, setSessionCpf] = useState<string>("");
   const [sessionPerfil, setSessionPerfil] = useState<string>("");
   const [sessionEmpresa, setSessionEmpresa] = useState<string>("");
+  const [progresso, setProgresso] = useState<ProgressoResumo>({ concluidos: 0, ultimaISO: null });
+  const [syncStatus, setSyncStatus] = useState<string>("Sincronizando progresso…");
+
+  async function carregarProgresso(cpf: string) {
+    const local = lerProgressoLocal(cpf);
+    setProgresso(resumirProgresso(local));
+
+    try {
+      const res = await fetch(
+        `/api/audit/events?actorCpf=${encodeURIComponent(cpf)}&module=treinamentos&action=TREINAMENTO_CONCLUIDO`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+      if (!data?.ok) throw new Error("Resposta inválida");
+
+      const remoto = (data.progress || {}) as ProgressoPorTreino;
+      const mesclado = { ...local, ...remoto };
+
+      salvarProgressoLocal(cpf, mesclado);
+      setProgresso(resumirProgresso(mesclado));
+      setSyncStatus("Progresso sincronizado com o banco por CPF.");
+    } catch {
+      setSyncStatus("Exibindo progresso salvo neste navegador.");
+    }
+  }
 
   useEffect(() => {
     setMounted(true);
@@ -82,6 +116,8 @@ export default function ColaboradorHomePage() {
 
     const user = COLABORADORES.find((c) => normalizeCpf(c.cpf) === cpfLimpo);
     setSessionEmpresa((user?.empresa || "").trim());
+
+    carregarProgresso(cpfLimpo);
   }, [router]);
 
   const isAdmin = sessionPerfil === "ADMIN";
@@ -90,11 +126,6 @@ export default function ColaboradorHomePage() {
     if (isAdmin) return true;
     return Boolean(sessionEmpresa && sessionEmpresa.trim().length > 0);
   }, [isAdmin, sessionEmpresa]);
-
-  const progresso = useMemo(() => {
-    if (!mounted || !sessionCpf) return { concluidos: 0, ultimaISO: null as string | null };
-    return lerProgressoPorCpf(sessionCpf);
-  }, [mounted, sessionCpf]);
 
   const pct = useMemo(() => {
     return TOTAL_TREINAMENTOS > 0 ? Math.round((progresso.concluidos / TOTAL_TREINAMENTOS) * 100) : 0;
@@ -160,6 +191,7 @@ export default function ColaboradorHomePage() {
 
               <div className="phLast">
                 Última atualização: <strong>{formatarData(progresso.ultimaISO)}</strong>
+                <span style={{ marginLeft: 10 }}>• {syncStatus}</span>
               </div>
             </div>
 
