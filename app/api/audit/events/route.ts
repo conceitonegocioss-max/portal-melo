@@ -21,17 +21,64 @@ function safeParseMetadata(value: string | null): Record<string, unknown> {
   }
 }
 
+function buildEventItem(log: {
+  id: string;
+  action: string;
+  actorCpf: string;
+  actorName: string | null;
+  entity: string;
+  entityId: string | null;
+  metadata: string | null;
+  createdAt: Date;
+}) {
+  const metadata = safeParseMetadata(log.metadata);
+  const meta =
+    typeof metadata.meta === "object" && metadata.meta !== null
+      ? (metadata.meta as Record<string, unknown>)
+      : {};
+
+  return {
+    id: log.id,
+    atISO: String(metadata.atISO || log.createdAt.toISOString()),
+    type: log.action,
+    actorCpf: log.actorCpf,
+    actorNome: log.actorName || "",
+    actorPerfil: String(metadata.actorPerfil || ""),
+    actorEmpresa: String(metadata.actorEmpresa || ""),
+    targetCpf: String(metadata.targetCpf || ""),
+    module: String(metadata.module || ""),
+    entityId: log.entityId || "",
+    entityTitle: String(metadata.entityTitle || log.entity || ""),
+    meta,
+    obs: String(metadata.obs || ""),
+    ip: String(metadata.ip || ""),
+    userAgent: String(metadata.userAgent || ""),
+    createdAt: log.createdAt.toISOString(),
+  };
+}
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const actorCpf = onlyDigits(url.searchParams.get("actorCpf") || url.searchParams.get("cpf") || "");
     const action = url.searchParams.get("action") || "TREINAMENTO_CONCLUIDO";
     const moduleFilter = url.searchParams.get("module") || "treinamentos";
+    const all = url.searchParams.get("all") === "1" || url.searchParams.get("mode") === "all";
 
-    if (!actorCpf) {
+    if (!actorCpf || all) {
+      const logs = await prisma.auditLog.findMany({
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 2000,
+      });
+
+      const items = logs.map(buildEventItem);
+
       return NextResponse.json({
         ok: true,
-        message: "Rota de auditoria ativa no banco.",
+        items,
+        total: items.length,
       });
     }
 
@@ -105,5 +152,15 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("audit events POST error:", error);
     return NextResponse.json({ ok: false }, { status: 400 });
+  }
+}
+
+export async function DELETE() {
+  try {
+    await prisma.auditLog.deleteMany({});
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("audit events DELETE error:", error);
+    return NextResponse.json({ ok: false }, { status: 500 });
   }
 }
