@@ -4,11 +4,11 @@ export default function ConsorcioPage() {
   const itens = [
     {
       title: "Auto",
-      desc: "Planejamento para aquisição de veículo com parcelas e acompanhamento do processo.",
+      desc: "Planejamento para aquisição de veículo, com orientação e acompanhamento do processo.",
     },
     {
       title: "Moto",
-      desc: "Opção para conquistar sua moto com organização financeira e suporte na contratação.",
+      desc: "Opção para planejar a aquisição da sua moto, com organização financeira e suporte no atendimento.",
     },
     {
       title: "Imóveis",
@@ -20,7 +20,7 @@ export default function ConsorcioPage() {
     },
     {
       title: "Pesados",
-      desc: "Opções voltadas a veículos e equipamentos de maior valor, conforme elegibilidade.",
+      desc: "Opções voltadas a veículos e equipamentos pesados, conforme regras, elegibilidade e disponibilidade.",
     },
   ];
 
@@ -37,8 +37,8 @@ export default function ConsorcioPage() {
           <div className="product-hero-left">
             <h1 className="product-title">Consórcio</h1>
             <p className="product-lead">
-              Opções para compra de bens e serviços com planejamento e acompanhamento.
-              Atuamos com orientação clara e suporte em todo o processo.
+              Opções para compra de bens e serviços com planejamento, orientação clara e
+              acompanhamento em todo o processo.
             </p>
 
             <div className="product-tags">
