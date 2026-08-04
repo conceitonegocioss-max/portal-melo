@@ -10,6 +10,7 @@ import { getSession } from "@/src/lib/auth";
 const ROUTES = {
   HOME: "/colaborador",
   EVIDENCIAS: "/colaborador/auditoria/evidencias",
+  RELATORIOS: "/colaborador/auditoria/relatorios",
   DOCUMENTOS_INTERNOS: "/colaborador/auditoria/documentos-internos",
   USUARIOS: "/colaborador/auditoria/usuarios",
   ACESSOS: "/colaborador/auditoria/acessos",
@@ -246,6 +247,27 @@ export default function AuditoriaHomePage() {
             <div className="adminCardActions">
               <Link className="btn btn-yellow" href={ROUTES.EVIDENCIAS} style={{ width: "100%", textAlign: "center" }}>
                 Acessar Central de Evidências
+              </Link>
+            </div>
+          </section>
+
+          {/* ✅ RELATÓRIOS DE AUDITORIA */}
+          <section className="adminCard" aria-label="Relatórios de Auditoria">
+            <div className="adminCardHead">
+              <div className="adminIcon" aria-hidden="true">
+                📊
+              </div>
+              <div>
+                <div className="adminCardTitle">Relatórios de Auditoria</div>
+                <div className="adminCardText">
+                  Relatórios consolidados para apresentação em auditoria: treinamentos, provas, termos, scripts, acessos e eventos gerais.
+                </div>
+              </div>
+            </div>
+
+            <div className="adminCardActions">
+              <Link className="btn btn-yellow" href={ROUTES.RELATORIOS} style={{ width: "100%", textAlign: "center" }}>
+                Abrir Relatórios
               </Link>
             </div>
           </section>
