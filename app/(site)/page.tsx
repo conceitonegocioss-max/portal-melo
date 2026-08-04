@@ -157,34 +157,52 @@ export default function HomePage() {
 
       <TrustStrip />
 
-      <section className="section">
+      <section className="section about-home">
         <div className="container">
           <div className="section-title">
             <h2>Quem Somos</h2>
             <div className="bar" />
           </div>
 
-          <p className="section-text">
-            Somos um Correspondente Autorizado do Banco do Brasil, especializado
-            em soluções financeiras, com atuação pautada pela ética,
-            transparência e conformidade. Trabalhamos com processos
-            padronizados e foco em qualidade operacional, oferecendo
-            atendimento seguro, claro e eficiente do início ao fim da jornada
-            do cliente.
-          </p>
-
-          <div className="mission-box mt-18">
-            <h3>Nossa missão</h3>
+          <div className="about-intro">
             <p>
-              Oferecer serviços de correspondência bancária com excelência,
-              proporcionando soluções financeiras acessíveis, seguras e
-              confiáveis. Atuamos com ética, transparência e responsabilidade,
-              buscando sempre a satisfação e o sucesso de nossos clientes e
-              parceiros.
+              Somos um Correspondente Autorizado Banco do Brasil, com atuação
+              voltada ao atendimento, orientação e encaminhamento de soluções
+              financeiras.
+            </p>
+            <p>
+              Trabalhamos com processos padronizados, transparência,
+              responsabilidade e foco na segurança do cliente em cada etapa do
+              atendimento.
             </p>
           </div>
 
-          <div className="mt-18">
+          <div className="about-cards mt-24">
+            <div className="about-card">
+              <span className="about-icon">💬</span>
+              <h3>Atendimento claro</h3>
+              <p>Orientação simples e acompanhamento durante o processo.</p>
+            </div>
+
+            <div className="about-card">
+              <span className="about-icon">✅</span>
+              <h3>Conformidade</h3>
+              <p>
+                Atuação alinhada às normas da instituição financeira parceira.
+              </p>
+            </div>
+
+            <div className="about-card">
+              <span className="about-icon">🔒</span>
+              <h3>Privacidade e segurança</h3>
+              <p>
+                Proteção de dados, transparência e responsabilidade no
+                atendimento.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-24">
             <Link className="btn btn-yellow" href="/quem-somos">
               SAIBA MAIS
             </Link>
@@ -311,6 +329,62 @@ export default function HomePage() {
           margin: 0;
         }
 
+        .about-home {
+          padding-top: 70px;
+          padding-bottom: 72px;
+        }
+
+        .about-intro {
+          max-width: 920px;
+          font-size: 18px;
+          line-height: 1.75;
+          color: #001b50;
+          font-weight: 600;
+        }
+
+        .about-intro p {
+          margin: 0 0 10px;
+        }
+
+        .about-cards {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .about-card {
+          padding: 22px 22px 24px;
+          border-radius: 18px;
+          border: 1px solid #e3e8f3;
+          background: #ffffff;
+          box-shadow: 0 14px 34px rgba(0, 27, 80, 0.08);
+        }
+
+        .about-icon {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 38px;
+          height: 38px;
+          border-radius: 12px;
+          background: #f4f7ff;
+          margin-bottom: 12px;
+          font-size: 20px;
+        }
+
+        .about-card h3 {
+          margin: 0 0 8px;
+          color: #002c77;
+          font-size: 20px;
+        }
+
+        .about-card p {
+          margin: 0;
+          color: #001b50;
+          line-height: 1.55;
+          font-weight: 600;
+        }
+
         @media (max-width: 900px) {
           .hero-home {
             padding: 56px 0 64px;
@@ -326,6 +400,10 @@ export default function HomePage() {
             padding: 26px 22px;
             border-radius: 22px;
           }
+
+          .about-cards {
+            grid-template-columns: 1fr;
+          }
         }
 
         @media (max-width: 640px) {
@@ -339,6 +417,10 @@ export default function HomePage() {
 
           .hero-glass {
             padding: 22px 18px;
+          }
+
+          .about-intro {
+            font-size: 16px;
           }
         }
       `}</style>
