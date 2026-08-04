@@ -6,25 +6,25 @@ export default function ProdutosPage() {
   const produtos = [
     {
       title: "Crédito",
-      desc: "Soluções de crédito com segurança e conformidade.",
+      desc: "Orientação, simulação e encaminhamento de propostas de crédito, conforme regras da instituição financeira.",
       href: "/produtos/credito",
       img: "/imagens/credito.png",
     },
     {
       title: "Consórcio",
-      desc: "Planejamento para aquisição de bens e serviços.",
+      desc: "Apoio e orientação sobre soluções de consórcio para aquisição de bens e serviços.",
       href: "/produtos/consorcio",
       img: "/imagens/consorcio.png",
     },
     {
       title: "Ourocap / Capitalização",
-      desc: "Capitalização com orientação clara e registro de evidências.",
+      desc: "Produtos de capitalização com orientação clara e atendimento transparente.",
       href: "/produtos/ourocap",
       img: "/imagens/ourocap.png",
     },
     {
       title: "Abertura de Conta",
-      desc: "Abertura PF/PJ e orientações de boas práticas.",
+      desc: "Apoio na abertura de contas PF/PJ, conforme regras da instituição financeira.",
       href: "/produtos/abertura-conta",
       img: "/imagens/abertura-conta.png",
     },
@@ -38,7 +38,7 @@ export default function ProdutosPage() {
         </Link>
 
         <div className="section-title">
-          <h2>Nossos Serviços</h2>
+          <h2>Serviços de Correspondente Bancário</h2>
           <div className="bar" />
         </div>
 
@@ -60,6 +60,14 @@ export default function ProdutosPage() {
               </div>
             </Link>
           ))}
+        </div>
+
+        <div className="card mt-24">
+          <p style={{ margin: 0 }}>
+            Atuamos como correspondente bancário, prestando atendimento, orientação
+            e encaminhamento de propostas, conforme normas e diretrizes da
+            instituição financeira parceira.
+          </p>
         </div>
       </div>
     </main>
