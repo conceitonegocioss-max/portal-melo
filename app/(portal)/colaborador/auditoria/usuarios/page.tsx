@@ -14,7 +14,10 @@ type UsuarioRow = {
   cpf: string;
   empresa: string;
   perfil: string;
+  perfilAuditoria: string;
   status: string;
+  certificacao: string;
+  observacao: string;
   senha: string;
 };
 
@@ -55,7 +58,10 @@ export default function UsuariosPerfisPage() {
       cpf: normalizeCpf(String(c.cpf || "")),
       empresa: String(c.empresa || "SEM EMPRESA"),
       perfil: String(c.perfil || "COLABORADOR"),
+      perfilAuditoria: String(c.perfilAuditoria || c.perfil || "COLABORADOR"),
       status: String(c.status || "ATIVO"),
+      certificacao: String(c.certificacao || ""),
+      observacao: String(c.observacao || ""),
       senha: String(c.senha || ""),
     })).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   }, []);
@@ -82,7 +88,17 @@ export default function UsuariosPerfisPage() {
 
       if (!query) return true;
 
-      const hay = [u.nome, u.cpf, maskCpf(u.cpf), u.empresa, u.perfil, u.status]
+      const hay = [
+        u.nome,
+        u.cpf,
+        maskCpf(u.cpf),
+        u.empresa,
+        u.perfil,
+        u.perfilAuditoria,
+        u.status,
+        u.certificacao,
+        u.observacao,
+      ]
         .join(" ")
         .toLowerCase();
 
@@ -100,8 +116,12 @@ export default function UsuariosPerfisPage() {
   }, [usuarios, rows.length]);
 
   function exportarCsv() {
-    const header = ["Nome", "CPF", "Empresa", "Perfil", "Status", "Senha inicial"];
-    const lines = rows.map((u) => [u.nome, u.cpf, u.empresa, u.perfil, u.status, u.senha].map(csvEscape).join(";"));
+    const header = ["Nome", "CPF", "Empresa", "Perfil portal", "Perfil auditoria", "Status", "Certificação", "Observação", "Senha inicial"];
+    const lines = rows.map((u) =>
+      [u.nome, u.cpf, u.empresa, u.perfil, u.perfilAuditoria, u.status, u.certificacao, u.observacao, u.senha]
+        .map(csvEscape)
+        .join(";")
+    );
     const csv = [header.map(csvEscape).join(";"), ...lines].join("\n");
 
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
@@ -143,8 +163,8 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <p className="section-text" style={{ maxWidth: 980 }}>
-          Controle administrativo de usuários do Portal do Colaborador. Utilize esta tela para consultar a base atual,
-          conferir CPF, empresa, perfil e status, além de gerar evidência para auditoria.
+          Controle administrativo de usuários do Portal do Colaborador, atualizado com a planilha validada para o site.
+          Esta tela consolida CPF, empresa, perfil, status, certificações e observações relevantes para auditoria.
         </p>
 
         <div className="sessionBox noPrint">
@@ -179,7 +199,7 @@ export default function UsuariosPerfisPage() {
             className="input"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nome, CPF, empresa, perfil ou status..."
+            placeholder="Buscar por nome, CPF, empresa, perfil, certificação ou observação..."
           />
 
           <select className="select" value={empresaFiltro} onChange={(e) => setEmpresaFiltro(e.target.value)}>
@@ -210,8 +230,8 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <div className="auditNote">
-          Observação: a atualização de entradas, saídas e alteração de status ainda deve ser feita na base de usuários do portal.
-          Esta tela já está preparada para evidenciar usuários ativos/inativos e perfis administrativos.
+          Base atual: arquivo <strong>nomes para site.xlsx</strong>. Foram importados apenas dados necessários ao portal.
+          Jonas consta com observação de atuação restrita a Consórcio. Perfis administrativos foram mantidos como ADMIN para fins de acesso ao portal.
         </div>
 
         <div className="tableWrap">
@@ -221,8 +241,11 @@ export default function UsuariosPerfisPage() {
                 <th>Nome</th>
                 <th>CPF</th>
                 <th>Empresa</th>
-                <th>Perfil</th>
+                <th>Perfil Portal</th>
+                <th>Perfil Auditoria</th>
                 <th>Status</th>
+                <th>Certificação</th>
+                <th>Observação</th>
                 <th className="noPrint">Senha inicial</th>
               </tr>
             </thead>
@@ -239,8 +262,13 @@ export default function UsuariosPerfisPage() {
                     <span className={`pill ${r.perfil.includes("ADMIN") ? "admin" : "colab"}`}>{r.perfil}</span>
                   </td>
                   <td>
+                    <span className="perfilAudit">{r.perfilAuditoria}</span>
+                  </td>
+                  <td>
                     <span className={`pill ${r.status === "ATIVO" ? "ok" : "off"}`}>{r.status}</span>
                   </td>
+                  <td className="certCell">{r.certificacao || "—"}</td>
+                  <td className="obsCell">{r.observacao || "—"}</td>
                   <td className="mono noPrint">{r.senha || "—"}</td>
                 </tr>
               ))}
@@ -258,7 +286,7 @@ export default function UsuariosPerfisPage() {
 
         <style jsx global>{`
           .usuariosPage {
-            max-width: 1180px;
+            max-width: 1280px;
           }
           .topActions,
           .bottomActions {
@@ -319,7 +347,7 @@ export default function UsuariosPerfisPage() {
           }
           .input {
             flex: 1;
-            min-width: 260px;
+            min-width: 280px;
             border-radius: 999px;
             border: 1px solid rgba(10, 42, 106, 0.14);
             padding: 10px 12px;
@@ -346,7 +374,7 @@ export default function UsuariosPerfisPage() {
           }
           .usersTable {
             width: 100%;
-            min-width: 920px;
+            min-width: 1320px;
             border-collapse: collapse;
           }
           .usersTable th,
@@ -406,6 +434,22 @@ export default function UsuariosPerfisPage() {
             border-color: rgba(10, 42, 106, 0.12);
             color: #0a2a6a;
           }
+          .perfilAudit {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 900;
+            color: #0a2a6a;
+            background: #f8fafc;
+            border: 1px solid rgba(10, 42, 106, 0.1);
+            border-radius: 10px;
+            padding: 5px 7px;
+          }
+          .certCell,
+          .obsCell {
+            max-width: 260px;
+            line-height: 1.35;
+            color: rgba(0, 0, 0, 0.72);
+          }
           .empty {
             margin-top: 12px;
             background: #fff;
@@ -442,8 +486,8 @@ export default function UsuariosPerfisPage() {
             }
             .usersTable th,
             .usersTable td {
-              font-size: 10px !important;
-              padding: 7px !important;
+              font-size: 9px !important;
+              padding: 6px !important;
             }
           }
         `}</style>
