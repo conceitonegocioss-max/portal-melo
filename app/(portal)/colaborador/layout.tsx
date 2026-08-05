@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { getSession } from "@/src/lib/auth";
 import ColaboradorBadge from "@/src/components/ColaboradorBadge";
+import PortalAuditEventSync from "@/src/components/PortalAuditEventSync";
 
 export default function ColaboradorLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -55,6 +56,7 @@ export default function ColaboradorLayout({ children }: { children: React.ReactN
 
   return (
     <div className="portalShell">
+      {!isLoginPage && <PortalAuditEventSync />}
       {!isLoginPage && <ColaboradorBadge />}
 
       <div className="portalContent">{children}</div>
