@@ -18,28 +18,16 @@ const ROUTES = {
   LOGINS: "/colaborador/auditoria/logins",
   EVENTS: "/colaborador/auditoria/events",
   TREINAMENTOS: "/colaborador/treinamentos",
+  TREINAMENTOS_CONTROLE: "/colaborador/auditoria/treinamentos-controle",
   PROVAS: "/colaborador/provas",
+  PROVAS_RESULTADOS: "/colaborador/auditoria/provas-resultados",
 };
 
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "");
 }
 
-function AdminCard({
-  icon,
-  title,
-  text,
-  href,
-  button,
-  tone = "outline",
-}: {
-  icon: string;
-  title: string;
-  text: string;
-  href: string;
-  button: string;
-  tone?: "yellow" | "outline";
-}) {
+function AdminCard({ icon, title, text, href, button, tone = "outline" }: { icon: string; title: string; text: string; href: string; button: string; tone?: "yellow" | "outline" }) {
   return (
     <section className="adminCard" aria-label={title}>
       <div className="adminCardHead">
@@ -50,9 +38,7 @@ function AdminCard({
         </div>
       </div>
       <div className="adminCardActions">
-        <Link className={`btn ${tone === "yellow" ? "btn-yellow" : "btn-outline"}`} href={href} style={{ width: "100%", textAlign: "center" }}>
-          {button}
-        </Link>
+        <Link className={`btn ${tone === "yellow" ? "btn-yellow" : "btn-outline"}`} href={href} style={{ width: "100%", textAlign: "center" }}>{button}</Link>
       </div>
     </section>
   );
@@ -66,11 +52,7 @@ export default function AuditoriaHomePage() {
 
   async function registrarEventoCentral(payload: any) {
     try {
-      await fetch("/api/audit/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      await fetch("/api/audit/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     } catch {}
   }
 
@@ -84,34 +66,14 @@ export default function AuditoriaHomePage() {
       const session = getSession();
       const atISO = new Date().toISOString();
       const cpf = onlyDigits(session?.cpf || "");
-
-      registrarEventoCentral({
-        type: "ADMIN_AREA_ACESSO",
-        module: "auditoria",
-        entity: "AuditoriaHome",
-        entityId: "home",
-        entityTitle: "Auditoria & Evidências",
-        cpf,
-        nome: session?.nome || "",
-        perfil: session?.perfil || "",
-        empresa: session?.empresa || "",
-        atISO,
-        obs: "",
-        meta: { route: "/colaborador/auditoria" },
-      });
+      registrarEventoCentral({ type: "ADMIN_AREA_ACESSO", module: "auditoria", entity: "AuditoriaHome", entityId: "home", entityTitle: "Auditoria & Evidências", cpf, nome: session?.nome || "", perfil: session?.perfil || "", empresa: session?.empresa || "", atISO, obs: "", meta: { route: "/colaborador/auditoria" } });
     }
   }, [router]);
 
   const govBtnLabel = useMemo(() => (openGov ? "Recolher" : "Detalhes"), [openGov]);
 
   if (!ready) {
-    return (
-      <main className="section gray" aria-busy="true">
-        <div className="container">
-          <p style={{ opacity: 0.85, fontWeight: 700 }}>Validando permissões de acesso…</p>
-        </div>
-      </main>
-    );
+    return <main className="section gray" aria-busy="true"><div className="container"><p style={{ opacity: 0.85, fontWeight: 700 }}>Validando permissões de acesso…</p></div></main>;
   }
 
   return (
@@ -120,9 +82,7 @@ export default function AuditoriaHomePage() {
         <div className="adminHeader">
           <h1 className="adminTitle">Auditoria & Evidências</h1>
           <div className="bar" />
-          <p className="adminDesc">
-            Painel administrativo para governança, controles internos, evidências, treinamentos, provas, certificações e rastreabilidade do Portal do Colaborador.
-          </p>
+          <p className="adminDesc">Painel administrativo para governança, controles internos, evidências, treinamentos, provas, certificações e rastreabilidade do Portal do Colaborador.</p>
         </div>
 
         <section className={`adminCard govCard ${openGov ? "expanded" : ""}`} aria-label="Governança e Perfis">
@@ -132,9 +92,7 @@ export default function AuditoriaHomePage() {
               <div className="adminCardTitleRow">
                 <div>
                   <div className="adminCardTitle">Governança & Perfis Administrativos</div>
-                  <div className="adminCardText">
-                    Estrutura formal de perfis, responsabilidades e segregação de funções do ambiente administrativo.
-                  </div>
+                  <div className="adminCardText">Estrutura formal de perfis, responsabilidades e segregação de funções do ambiente administrativo.</div>
                 </div>
                 <button type="button" className="miniBtn" onClick={() => setOpenGov((v) => !v)} aria-expanded={openGov}>{govBtnLabel}</button>
               </div>
@@ -156,11 +114,8 @@ export default function AuditoriaHomePage() {
                     </tbody>
                   </table>
                 </div>
-                <div className="govNote">
-                  Documento de referência disponível em <strong>Documentos Internos</strong>.
-                </div>
+                <div className="govNote">Documento de referência disponível em <strong>Documentos Internos</strong>.</div>
               </div>
-
               <div className="govBox">
                 <div className="govBoxTitle">Distribuição Atual dos Perfis Administrativos</div>
                 <div className="tableWrap" role="region" aria-label="Distribuição Atual de Perfis">
@@ -177,9 +132,7 @@ export default function AuditoriaHomePage() {
                 <div className="govHint">Base para evidência de governança, segregação e rastreabilidade.</div>
               </div>
             </div>
-          ) : (
-            <div className="govCollapsedHint">Clique em <strong>Detalhes</strong> para visualizar os perfis administrativos.</div>
-          )}
+          ) : <div className="govCollapsedHint">Clique em <strong>Detalhes</strong> para visualizar os perfis administrativos.</div>}
         </section>
 
         <div className="areaBlock">
@@ -195,9 +148,11 @@ export default function AuditoriaHomePage() {
         <div className="areaBlock">
           <div className="areaTitle">2. Treinamentos & Avaliações</div>
           <div className="adminGrid">
-            <AdminCard icon="📚" title="Treinamentos" text="Acesso aos treinamentos disponibilizados aos colaboradores. A próxima etapa é consolidar início, conclusão e status por CPF." href={ROUTES.TREINAMENTOS} button="Abrir Treinamentos" />
+            <AdminCard icon="📚" title="Treinamentos" text="Acesso aos treinamentos disponibilizados aos colaboradores." href={ROUTES.TREINAMENTOS} button="Abrir Treinamentos" />
+            <AdminCard icon="✅" title="Controle de Treinamentos" text="Consulta auditável dos treinamentos concluídos por CPF, colaborador, empresa, data/hora, categoria e público." href={ROUTES.TREINAMENTOS_CONTROLE} button="Abrir Controle" tone="yellow" />
             <AdminCard icon="📝" title="Provas e Avaliações" text="Acesso às provas vinculadas aos treinamentos, com regra de 70% mínimo e limite de tentativas." href={ROUTES.PROVAS} button="Abrir Provas" />
-            <AdminCard icon="📊" title="Relatórios de Auditoria" text="Relatórios consolidados para apresentação: treinamentos, provas, termos, scripts, acessos e eventos gerais." href={ROUTES.RELATORIOS} button="Abrir Relatórios" tone="yellow" />
+            <AdminCard icon="🏆" title="Resultados das Provas" text="Consulta auditável das notas, aprovações, reprovações, tentativas e data/hora das avaliações realizadas." href={ROUTES.PROVAS_RESULTADOS} button="Abrir Resultados" tone="yellow" />
+            <AdminCard icon="📊" title="Relatórios de Auditoria" text="Relatórios consolidados para apresentação: treinamentos, provas, termos, scripts, acessos e eventos gerais." href={ROUTES.RELATORIOS} button="Abrir Relatórios" />
             <AdminCard icon="🧠" title="Logger Central — Eventos" text="Registro centralizado das ações do portal, incluindo treinamentos, termos, provas e controles administrativos." href={ROUTES.EVENTS} button="Abrir Logger Central" />
           </div>
         </div>
@@ -208,10 +163,6 @@ export default function AuditoriaHomePage() {
             <AdminCard icon="🧾" title="Central de Evidências" text="Registro e consolidação de evidências administrativas por CPF, vinculadas a atividades e controles internos." href={ROUTES.EVIDENCIAS} button="Acessar Evidências" tone="yellow" />
             <AdminCard icon="📁" title="Documentos Internos" text="Repositório de políticas, procedimentos, governança e documentos vigentes para auditoria e compliance." href={ROUTES.DOCUMENTOS_INTERNOS} button="Acessar Documentos" />
           </div>
-        </div>
-
-        <div className="nextStepBox">
-          <strong>Próxima organização recomendada:</strong> criar telas específicas para <strong>Controle de Treinamentos</strong> e <strong>Resultados das Provas</strong>, com salvamento definitivo no AuditLog, filtros, exportação Excel/CSV e impressão em PDF.
         </div>
 
         <div style={{ marginTop: 14 }}><Link className="btn btn-outline" href={ROUTES.HOME}>← Voltar à Área do Colaborador</Link></div>
@@ -249,7 +200,6 @@ export default function AuditoriaHomePage() {
           .tbl th, .tbl td { border-bottom: 1px solid rgba(10,42,106,.08); padding: 10px; text-align: left; font-size: 12px; font-weight: 700; color: rgba(0,0,0,.75); vertical-align: top; word-break: break-word; }
           .tbl th { font-weight: 900; color: #0a2a6a; background: rgba(11,79,217,.05); }
           .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; font-weight: 900; color: #0a2a6a; word-break: break-word; }
-          .nextStepBox { margin-top: 18px; background: #fff9dd; border: 1px solid rgba(244,196,0,.35); border-radius: 16px; padding: 12px 14px; font-size: 12px; font-weight: 800; color: rgba(0,0,0,.72); line-height: 1.45; }
         `}</style>
       </div>
     </main>
