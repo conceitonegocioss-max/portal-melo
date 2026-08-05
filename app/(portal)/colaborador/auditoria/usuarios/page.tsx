@@ -17,8 +17,15 @@ type UsuarioRow = {
   perfilAuditoria: string;
   status: string;
   certificacao: string;
-  observacao: string;
   senha: string;
+};
+
+type CertStatus = "VÁLIDA" | "VENCIDA" | "NÃO INFORMADO";
+
+type CertificacoesUsuario = {
+  consignado: CertStatus;
+  lgpd: CertStatus;
+  pldf: CertStatus;
 };
 
 function maskCpf(cpf: string) {
@@ -32,6 +39,31 @@ function csvEscape(value: string | number) {
   return `"${str.replace(/"/g, '""')}"`;
 }
 
+function isJonas(u: { nome: string; cpf: string; id: string }) {
+  const nome = String(u.nome || "").toLowerCase();
+  const cpf = normalizeCpf(u.cpf || "");
+  const id = String(u.id || "").toLowerCase();
+
+  return cpf === "00598282343" || id.includes("antonio-jonas") || nome.includes("antonio jonas");
+}
+
+function statusInicialCertificacao(texto: string, tipo: "consignado" | "lgpd" | "pldf"): CertStatus {
+  const t = String(texto || "").toUpperCase();
+
+  if (tipo === "consignado" && !t.includes("CONSIGNADO")) return "NÃO INFORMADO";
+  if (tipo === "lgpd" && !t.includes("LGPD")) return "NÃO INFORMADO";
+  if (tipo === "pldf" && !t.includes("PLDF") && !t.includes("PLD")) return "NÃO INFORMADO";
+
+  if (t.includes("VENCIDA") || t.includes("EXPIRADA")) return "VENCIDA";
+  return "VÁLIDA";
+}
+
+function classeCert(status: CertStatus) {
+  if (status === "VÁLIDA") return "valid";
+  if (status === "VENCIDA") return "expired";
+  return "unknown";
+}
+
 export default function UsuariosPerfisPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -42,6 +74,9 @@ export default function UsuariosPerfisPage() {
   const [perfilFiltro, setPerfilFiltro] = useState("TODOS");
   const [statusFiltro, setStatusFiltro] = useState("TODOS");
 
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, string>>({});
+  const [certOverrides, setCertOverrides] = useState<Record<string, CertificacoesUsuario>>({});
+
   useEffect(() => {
     const g = guardAdmin(router);
     if (!g.ok) return;
@@ -51,7 +86,7 @@ export default function UsuariosPerfisPage() {
     setReady(true);
   }, [router]);
 
-  const usuarios = useMemo<UsuarioRow[]>(() => {
+  const usuariosBase = useMemo<UsuarioRow[]>(() => {
     return COLABORADORES.map((c: any) => ({
       id: String(c.id || normalizeCpf(c.cpf)),
       nome: String(c.nome || ""),
@@ -61,10 +96,42 @@ export default function UsuariosPerfisPage() {
       perfilAuditoria: String(c.perfilAuditoria || c.perfil || "COLABORADOR"),
       status: String(c.status || "ATIVO"),
       certificacao: String(c.certificacao || ""),
-      observacao: String(c.observacao || ""),
       senha: String(c.senha || ""),
-    })).sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+    }))
+      .filter((u) => !isJonas(u))
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
   }, []);
+
+  const usuarios = useMemo<UsuarioRow[]>(() => {
+    return usuariosBase.map((u) => ({
+      ...u,
+      status: statusOverrides[u.id] || u.status,
+    }));
+  }, [usuariosBase, statusOverrides]);
+
+  function certsDoUsuario(u: UsuarioRow): CertificacoesUsuario {
+    return (
+      certOverrides[u.id] || {
+        consignado: statusInicialCertificacao(u.certificacao, "consignado"),
+        lgpd: statusInicialCertificacao(u.certificacao, "lgpd"),
+        pldf: statusInicialCertificacao(u.certificacao, "pldf"),
+      }
+    );
+  }
+
+  function alterarCertificacao(id: string, campo: keyof CertificacoesUsuario, valor: CertStatus) {
+    const usuario = usuariosBase.find((u) => u.id === id);
+    if (!usuario) return;
+
+    setCertOverrides((prev) => ({
+      ...prev,
+      [id]: {
+        ...certsDoUsuario(usuario),
+        ...(prev[id] || {}),
+        [campo]: valor,
+      },
+    }));
+  }
 
   const empresas = useMemo(() => {
     return ["TODAS", ...Array.from(new Set(usuarios.map((u) => u.empresa || "SEM EMPRESA"))).sort()];
@@ -75,13 +142,15 @@ export default function UsuariosPerfisPage() {
   }, [usuarios]);
 
   const statusList = useMemo(() => {
-    return ["TODOS", ...Array.from(new Set(usuarios.map((u) => u.status || "ATIVO"))).sort()];
-  }, [usuarios]);
+    return ["TODOS", "ATIVO", "INATIVO"];
+  }, []);
 
   const rows = useMemo(() => {
     const query = q.trim().toLowerCase();
 
     return usuarios.filter((u) => {
+      const certs = certsDoUsuario(u);
+
       if (empresaFiltro !== "TODAS" && u.empresa !== empresaFiltro) return false;
       if (perfilFiltro !== "TODOS" && u.perfil !== perfilFiltro) return false;
       if (statusFiltro !== "TODOS" && u.status !== statusFiltro) return false;
@@ -97,14 +166,16 @@ export default function UsuariosPerfisPage() {
         u.perfilAuditoria,
         u.status,
         u.certificacao,
-        u.observacao,
+        certs.consignado,
+        certs.lgpd,
+        certs.pldf,
       ]
         .join(" ")
         .toLowerCase();
 
       return hay.includes(query);
     });
-  }, [usuarios, q, empresaFiltro, perfilFiltro, statusFiltro]);
+  }, [usuarios, q, empresaFiltro, perfilFiltro, statusFiltro, certOverrides]);
 
   const resumo = useMemo(() => {
     const ativos = usuarios.filter((u) => u.status === "ATIVO").length;
@@ -116,12 +187,13 @@ export default function UsuariosPerfisPage() {
   }, [usuarios, rows.length]);
 
   function exportarCsv() {
-    const header = ["Nome", "CPF", "Empresa", "Perfil portal", "Perfil auditoria", "Status", "Certificação", "Observação", "Senha inicial"];
-    const lines = rows.map((u) =>
-      [u.nome, u.cpf, u.empresa, u.perfil, u.perfilAuditoria, u.status, u.certificacao, u.observacao, u.senha]
+    const header = ["Nome", "CPF", "Empresa", "Perfil portal", "Perfil auditoria", "Status", "Consignado", "LGPD", "PLDF", "Senha inicial"];
+    const lines = rows.map((u) => {
+      const certs = certsDoUsuario(u);
+      return [u.nome, u.cpf, u.empresa, u.perfil, u.perfilAuditoria, u.status, certs.consignado, certs.lgpd, certs.pldf, u.senha]
         .map(csvEscape)
-        .join(";")
-    );
+        .join(";");
+    });
     const csv = [header.map(csvEscape).join(";"), ...lines].join("\n");
 
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
@@ -163,8 +235,8 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <p className="section-text" style={{ maxWidth: 980 }}>
-          Controle administrativo de usuários do Portal do Colaborador, atualizado com a planilha validada para o site.
-          Esta tela consolida CPF, empresa, perfil, status, certificações e observações relevantes para auditoria.
+          Controle administrativo visual de usuários, perfis e certificações. Nesta etapa, as alterações de status feitas nos campos abaixo
+          são apenas para conferência na tela; o salvamento definitivo será implementado posteriormente.
         </p>
 
         <div className="sessionBox noPrint">
@@ -199,7 +271,7 @@ export default function UsuariosPerfisPage() {
             className="input"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nome, CPF, empresa, perfil, certificação ou observação..."
+            placeholder="Buscar por nome, CPF, empresa, perfil ou certificação..."
           />
 
           <select className="select" value={empresaFiltro} onChange={(e) => setEmpresaFiltro(e.target.value)}>
@@ -230,8 +302,7 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <div className="auditNote">
-          Base atual: arquivo <strong>nomes para site.xlsx</strong>. Foram importados apenas dados necessários ao portal.
-          Jonas consta com observação de atuação restrita a Consórcio. Perfis administrativos foram mantidos como ADMIN para fins de acesso ao portal.
+          Base atual: arquivo <strong>nomes para site.xlsx</strong>. A coluna Observação foi removida da visualização. O registro de Jonas foi retirado da listagem por solicitação administrativa.
         </div>
 
         <div className="tableWrap">
@@ -244,34 +315,77 @@ export default function UsuariosPerfisPage() {
                 <th>Perfil Portal</th>
                 <th>Perfil Auditoria</th>
                 <th>Status</th>
-                <th>Certificação</th>
-                <th>Observação</th>
+                <th>Consignado</th>
+                <th>LGPD</th>
+                <th>PLDF</th>
                 <th className="noPrint">Senha inicial</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.id}>
-                  <td>
-                    <strong>{r.nome}</strong>
-                    <div className="muted">ID: {r.id}</div>
-                  </td>
-                  <td className="mono">{maskCpf(r.cpf)}</td>
-                  <td>{r.empresa}</td>
-                  <td>
-                    <span className={`pill ${r.perfil.includes("ADMIN") ? "admin" : "colab"}`}>{r.perfil}</span>
-                  </td>
-                  <td>
-                    <span className="perfilAudit">{r.perfilAuditoria}</span>
-                  </td>
-                  <td>
-                    <span className={`pill ${r.status === "ATIVO" ? "ok" : "off"}`}>{r.status}</span>
-                  </td>
-                  <td className="certCell">{r.certificacao || "—"}</td>
-                  <td className="obsCell">{r.observacao || "—"}</td>
-                  <td className="mono noPrint">{r.senha || "—"}</td>
-                </tr>
-              ))}
+              {rows.map((r) => {
+                const certs = certsDoUsuario(r);
+
+                return (
+                  <tr key={r.id}>
+                    <td>
+                      <strong>{r.nome}</strong>
+                      <div className="muted">ID: {r.id}</div>
+                    </td>
+                    <td className="mono">{maskCpf(r.cpf)}</td>
+                    <td>{r.empresa}</td>
+                    <td>
+                      <span className={`pill ${r.perfil.includes("ADMIN") ? "admin" : "colab"}`}>{r.perfil}</span>
+                    </td>
+                    <td>
+                      <span className="perfilAudit">{r.perfilAuditoria}</span>
+                    </td>
+                    <td>
+                      <select
+                        className={`statusSelect ${r.status === "ATIVO" ? "ativo" : "inativo"}`}
+                        value={r.status}
+                        onChange={(e) => setStatusOverrides((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                      >
+                        <option value="ATIVO">ATIVO</option>
+                        <option value="INATIVO">INATIVO</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className={`certSelect ${classeCert(certs.consignado)}`}
+                        value={certs.consignado}
+                        onChange={(e) => alterarCertificacao(r.id, "consignado", e.target.value as CertStatus)}
+                      >
+                        <option value="VÁLIDA">VÁLIDA</option>
+                        <option value="VENCIDA">VENCIDA</option>
+                        <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className={`certSelect ${classeCert(certs.lgpd)}`}
+                        value={certs.lgpd}
+                        onChange={(e) => alterarCertificacao(r.id, "lgpd", e.target.value as CertStatus)}
+                      >
+                        <option value="VÁLIDA">VÁLIDA</option>
+                        <option value="VENCIDA">VENCIDA</option>
+                        <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                      </select>
+                    </td>
+                    <td>
+                      <select
+                        className={`certSelect ${classeCert(certs.pldf)}`}
+                        value={certs.pldf}
+                        onChange={(e) => alterarCertificacao(r.id, "pldf", e.target.value as CertStatus)}
+                      >
+                        <option value="VÁLIDA">VÁLIDA</option>
+                        <option value="VENCIDA">VENCIDA</option>
+                        <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                      </select>
+                    </td>
+                    <td className="mono noPrint">{r.senha || "—"}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -355,14 +469,40 @@ export default function UsuariosPerfisPage() {
             outline: none;
             font-weight: 700;
           }
-          .select {
-            height: 40px;
+          .select,
+          .statusSelect,
+          .certSelect {
+            height: 38px;
             border-radius: 999px;
             border: 1px solid rgba(10, 42, 106, 0.14);
             background: #fff;
-            padding: 0 12px;
-            font-weight: 800;
+            padding: 0 10px;
+            font-weight: 900;
             color: #0a2a6a;
+            outline: none;
+          }
+          .statusSelect,
+          .certSelect {
+            width: 100%;
+            min-width: 128px;
+            font-size: 11px;
+          }
+          .statusSelect.ativo,
+          .certSelect.valid {
+            background: #eaf7ef;
+            border-color: rgba(27, 122, 58, 0.22);
+            color: #0f5132;
+          }
+          .statusSelect.inativo,
+          .certSelect.expired {
+            background: #fff1f1;
+            border-color: rgba(180, 40, 40, 0.22);
+            color: #8a1f1f;
+          }
+          .certSelect.unknown {
+            background: #f7f9ff;
+            border-color: rgba(10, 42, 106, 0.12);
+            color: rgba(10, 42, 106, 0.72);
           }
           .tableWrap {
             width: 100%;
@@ -374,7 +514,7 @@ export default function UsuariosPerfisPage() {
           }
           .usersTable {
             width: 100%;
-            min-width: 1320px;
+            min-width: 1240px;
             border-collapse: collapse;
           }
           .usersTable th,
@@ -414,16 +554,6 @@ export default function UsuariosPerfisPage() {
             border: 1px solid;
             white-space: nowrap;
           }
-          .pill.ok {
-            background: #eaf7ef;
-            border-color: rgba(27, 122, 58, 0.18);
-            color: #0f5132;
-          }
-          .pill.off {
-            background: #fff1f1;
-            border-color: rgba(180, 40, 40, 0.18);
-            color: #8a1f1f;
-          }
           .pill.admin {
             background: #e7efff;
             border-color: #cfe0ff;
@@ -435,20 +565,15 @@ export default function UsuariosPerfisPage() {
             color: #0a2a6a;
           }
           .perfilAudit {
-            display: inline-block;
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 5px 8px;
             font-size: 11px;
             font-weight: 900;
+            background: #f7f9ff;
+            border: 1px solid rgba(10, 42, 106, 0.12);
             color: #0a2a6a;
-            background: #f8fafc;
-            border: 1px solid rgba(10, 42, 106, 0.1);
-            border-radius: 10px;
-            padding: 5px 7px;
-          }
-          .certCell,
-          .obsCell {
-            max-width: 260px;
-            line-height: 1.35;
-            color: rgba(0, 0, 0, 0.72);
+            white-space: nowrap;
           }
           .empty {
             margin-top: 12px;
@@ -486,8 +611,16 @@ export default function UsuariosPerfisPage() {
             }
             .usersTable th,
             .usersTable td {
-              font-size: 9px !important;
-              padding: 6px !important;
+              font-size: 10px !important;
+              padding: 7px !important;
+            }
+            .statusSelect,
+            .certSelect {
+              border: 0 !important;
+              padding: 0 !important;
+              height: auto !important;
+              min-width: 0 !important;
+              appearance: none !important;
             }
           }
         `}</style>
