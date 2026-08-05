@@ -17,10 +17,45 @@ const ROUTES = {
   ACESSOS: "/colaborador/auditoria/acessos",
   LOGINS: "/colaborador/auditoria/logins",
   EVENTS: "/colaborador/auditoria/events",
+  TREINAMENTOS: "/colaborador/treinamentos",
+  PROVAS: "/colaborador/provas",
 };
 
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "");
+}
+
+function AdminCard({
+  icon,
+  title,
+  text,
+  href,
+  button,
+  tone = "outline",
+}: {
+  icon: string;
+  title: string;
+  text: string;
+  href: string;
+  button: string;
+  tone?: "yellow" | "outline";
+}) {
+  return (
+    <section className="adminCard" aria-label={title}>
+      <div className="adminCardHead">
+        <div className="adminIcon" aria-hidden="true">{icon}</div>
+        <div>
+          <div className="adminCardTitle">{title}</div>
+          <div className="adminCardText">{text}</div>
+        </div>
+      </div>
+      <div className="adminCardActions">
+        <Link className={`btn ${tone === "yellow" ? "btn-yellow" : "btn-outline"}`} href={href} style={{ width: "100%", textAlign: "center" }}>
+          {button}
+        </Link>
+      </div>
+    </section>
+  );
 }
 
 export default function AuditoriaHomePage() {
@@ -81,127 +116,123 @@ export default function AuditoriaHomePage() {
 
   return (
     <main className="section gray">
-      <div className="container">
+      <div className="container auditoriaPage">
         <div className="adminHeader">
-          <h1 className="adminTitle">Auditoria & Evidências — Governança e Controles Internos (Admin)</h1>
+          <h1 className="adminTitle">Auditoria & Evidências</h1>
           <div className="bar" />
           <p className="adminDesc">
-            Acesso restrito a perfis administrativos. Este ambiente consolida registros formais de governança, evidências e documentos internos, destinados à auditoria interna e ao atendimento de requisitos de compliance, LGPD/PLDFT e controles operacionais.
+            Painel administrativo para governança, controles internos, evidências, treinamentos, provas, certificações e rastreabilidade do Portal do Colaborador.
           </p>
         </div>
 
-        <div className="adminGrid">
-          <section className={`adminCard govCard ${openGov ? "expanded" : ""}`} aria-label="Governança e Perfis">
-            <div className="adminCardHead">
-              <div className="adminIcon" aria-hidden="true">🧩</div>
-              <div className="adminCardHeadText">
-                <div className="adminCardTitleRow">
-                  <div>
-                    <div className="adminCardTitle">Governança & Perfis</div>
-                    <div className="adminCardText">Estrutura formal de perfis administrativos do Portal do Colaborador: responsabilidades, segregação de funções e critérios de acesso.</div>
+        <section className={`adminCard govCard ${openGov ? "expanded" : ""}`} aria-label="Governança e Perfis">
+          <div className="adminCardHead">
+            <div className="adminIcon" aria-hidden="true">🧩</div>
+            <div className="adminCardHeadText">
+              <div className="adminCardTitleRow">
+                <div>
+                  <div className="adminCardTitle">Governança & Perfis Administrativos</div>
+                  <div className="adminCardText">
+                    Estrutura formal de perfis, responsabilidades e segregação de funções do ambiente administrativo.
                   </div>
-                  <button type="button" className="miniBtn" onClick={() => setOpenGov((v) => !v)} aria-expanded={openGov}>{govBtnLabel}</button>
                 </div>
+                <button type="button" className="miniBtn" onClick={() => setOpenGov((v) => !v)} aria-expanded={openGov}>{govBtnLabel}</button>
               </div>
             </div>
+          </div>
 
-            {openGov ? (
-              <div className="govDetailsGrid">
-                <div className="govBox">
-                  <div className="govBoxTitle">Perfis Administrativos do Portal</div>
-                  <div className="tableWrap" role="region" aria-label="Perfis Administrativos do Portal">
-                    <table className="tbl">
-                      <thead><tr><th>Perfil</th><th>Finalidade</th><th>Capacidade operacional</th></tr></thead>
-                      <tbody>
-                        <tr><td className="mono">ADMIN_GESTOR</td><td>Diretrizes e governança</td><td>Não operacional</td></tr>
-                        <tr><td className="mono">ADMIN_COMPLIANCE</td><td>Operação e registro de evidências</td><td>Operacional</td></tr>
-                        <tr><td className="mono">ADMIN_AUDITORIA</td><td>Verificação e acompanhamento técnico</td><td>Somente leitura</td></tr>
-                        <tr><td className="mono">COLABORADOR</td><td>Usuário final</td><td>Conteúdos, termos e confirmações</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="govNote">Referência formal: a governança de acessos e segregação de funções é definida em documento interno vigente, disponível em <strong>Documentos Internos</strong>.</div>
-                  <div className="govActionRow"><Link className="btn btn-outline" href={ROUTES.DOCUMENTOS_INTERNOS} style={{ width: "100%", textAlign: "center" }}>Abrir documento de governança</Link></div>
+          {openGov ? (
+            <div className="govDetailsGrid">
+              <div className="govBox">
+                <div className="govBoxTitle">Perfis do Portal</div>
+                <div className="tableWrap" role="region" aria-label="Perfis Administrativos do Portal">
+                  <table className="tbl">
+                    <thead><tr><th>Perfil</th><th>Finalidade</th><th>Capacidade</th></tr></thead>
+                    <tbody>
+                      <tr><td className="mono">ADMIN_GESTOR</td><td>Diretrizes e governança</td><td>Não operacional</td></tr>
+                      <tr><td className="mono">ADMIN_COMPLIANCE</td><td>Operação e registro de evidências</td><td>Operacional</td></tr>
+                      <tr><td className="mono">ADMIN_AUDITORIA</td><td>Verificação e acompanhamento técnico</td><td>Somente leitura</td></tr>
+                      <tr><td className="mono">COLABORADOR</td><td>Usuário final</td><td>Treinamentos, provas e termos</td></tr>
+                    </tbody>
+                  </table>
                 </div>
-
-                <div className="govBox">
-                  <div className="govBoxTitle">Distribuição Atual de Perfis (Admin)</div>
-                  <div className="tableWrap" role="region" aria-label="Distribuição Atual de Perfis">
-                    <table className="tbl">
-                      <thead><tr><th>Pessoa</th><th>Perfil</th><th>Justificativa de segregação</th></tr></thead>
-                      <tbody>
-                        <tr><td>Micaele da Silva Melo</td><td className="mono">ADMIN_GESTOR</td><td>Governança e decisão estratégica</td></tr>
-                        <tr><td>Thaise Morais da Silva</td><td className="mono">ADMIN_COMPLIANCE</td><td>Execução e registro de evidências</td></tr>
-                        <tr><td>Cynthia Mylena Lopes de Andrade</td><td className="mono">ADMIN_COMPLIANCE</td><td>Execução e registro de evidências</td></tr>
-                        <tr><td>Wantuiller de Oliveira Trindade</td><td className="mono">ADMIN_AUDITORIA</td><td>Verificação técnica, sem poder operacional</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="govHint">Tela destinada à evidência de governança, segregação e rastreabilidade de perfis administrativos.</div>
+                <div className="govNote">
+                  Documento de referência disponível em <strong>Documentos Internos</strong>.
                 </div>
               </div>
-            ) : (
-              <div className="govCollapsedHint">Clique em <strong>Detalhes</strong> para visualizar perfis e distribuição atual.</div>
-            )}
-          </section>
 
-          <section className="adminCard" aria-label="Central de Evidências">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">🧾</div><div><div className="adminCardTitle">Central de Evidências</div><div className="adminCardText">Registro e consolidação de evidências administrativas por CPF, vinculadas a atividades e controles internos.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-yellow" href={ROUTES.EVIDENCIAS} style={{ width: "100%", textAlign: "center" }}>Acessar Central de Evidências</Link></div>
-          </section>
+              <div className="govBox">
+                <div className="govBoxTitle">Distribuição Atual dos Perfis Administrativos</div>
+                <div className="tableWrap" role="region" aria-label="Distribuição Atual de Perfis">
+                  <table className="tbl">
+                    <thead><tr><th>Pessoa</th><th>Perfil</th><th>Função</th></tr></thead>
+                    <tbody>
+                      <tr><td>Micaele da Silva Melo</td><td className="mono">ADMIN_GESTOR</td><td>Governança e decisão estratégica</td></tr>
+                      <tr><td>Thaise Morais da Silva</td><td className="mono">ADMIN_COMPLIANCE</td><td>Execução e registro de evidências</td></tr>
+                      <tr><td>Cynthia Mylena Lopes de Andrade</td><td className="mono">ADMIN_COMPLIANCE</td><td>Execução e registro de evidências</td></tr>
+                      <tr><td>Wantuiller de Oliveira Trindade</td><td className="mono">ADMIN_AUDITORIA</td><td>Verificação técnica, sem poder operacional</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="govHint">Base para evidência de governança, segregação e rastreabilidade.</div>
+              </div>
+            </div>
+          ) : (
+            <div className="govCollapsedHint">Clique em <strong>Detalhes</strong> para visualizar os perfis administrativos.</div>
+          )}
+        </section>
 
-          <section className="adminCard" aria-label="Relatórios de Auditoria">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">📊</div><div><div className="adminCardTitle">Relatórios de Auditoria</div><div className="adminCardText">Relatórios consolidados para apresentação em auditoria: treinamentos, provas, termos, scripts, acessos e eventos gerais.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-yellow" href={ROUTES.RELATORIOS} style={{ width: "100%", textAlign: "center" }}>Abrir Relatórios</Link></div>
-          </section>
+        <div className="areaBlock">
+          <div className="areaTitle">1. Controles Administrativos</div>
+          <div className="adminGrid">
+            <AdminCard icon="👤" title="Usuários & Perfis" text="Controle de colaboradores, perfil do portal, perfil de auditoria, status ativo/inativo e senha inicial." href={ROUTES.USUARIOS} button="Abrir Usuários & Perfis" />
+            <AdminCard icon="🎓" title="Controle de Certificações" text="Controle específico de Consignado, LGPD e PLDFT, com status, datas de vencimento e histórico salvo." href={ROUTES.CERTIFICACOES} button="Abrir Certificações" />
+            <AdminCard icon="🛡️" title="Alterações de Acesso" text="Trilha de alterações administrativas: quem alterou, usuário afetado, antes/depois e data/hora." href={ROUTES.ACESSOS} button="Abrir Alterações" />
+            <AdminCard icon="🔐" title="Log de Login" text="Histórico de autenticações no portal, incluindo acessos autorizados, falhas, data/hora e contexto técnico." href={ROUTES.LOGINS} button="Abrir Log de Login" />
+          </div>
+        </div>
 
-          <section className="adminCard" aria-label="Documentos Internos">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">📁</div><div><div className="adminCardTitle">Documentos Internos</div><div className="adminCardText">Repositório de documentos vigentes: políticas, procedimentos e governança. Base oficial para auditoria interna e compliance.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-outline" href={ROUTES.DOCUMENTOS_INTERNOS} style={{ width: "100%", textAlign: "center" }}>Acessar Documentos Internos</Link></div>
-          </section>
+        <div className="areaBlock">
+          <div className="areaTitle">2. Treinamentos & Avaliações</div>
+          <div className="adminGrid">
+            <AdminCard icon="📚" title="Treinamentos" text="Acesso aos treinamentos disponibilizados aos colaboradores. A próxima etapa é consolidar início, conclusão e status por CPF." href={ROUTES.TREINAMENTOS} button="Abrir Treinamentos" />
+            <AdminCard icon="📝" title="Provas e Avaliações" text="Acesso às provas vinculadas aos treinamentos, com regra de 70% mínimo e limite de tentativas." href={ROUTES.PROVAS} button="Abrir Provas" />
+            <AdminCard icon="📊" title="Relatórios de Auditoria" text="Relatórios consolidados para apresentação: treinamentos, provas, termos, scripts, acessos e eventos gerais." href={ROUTES.RELATORIOS} button="Abrir Relatórios" tone="yellow" />
+            <AdminCard icon="🧠" title="Logger Central — Eventos" text="Registro centralizado das ações do portal, incluindo treinamentos, termos, provas e controles administrativos." href={ROUTES.EVENTS} button="Abrir Logger Central" />
+          </div>
+        </div>
 
-          <section className="adminCard" aria-label="Usuários e Perfis">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">👤</div><div><div className="adminCardTitle">Usuários & Perfis</div><div className="adminCardText">Controle operacional de acessos: perfil do portal, perfil de auditoria, status ativo/inativo e evidência exportável.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-outline" href={ROUTES.USUARIOS} style={{ width: "100%", textAlign: "center" }}>Abrir Usuários & Perfis</Link></div>
-          </section>
+        <div className="areaBlock">
+          <div className="areaTitle">3. Evidências, Documentos & Compliance</div>
+          <div className="adminGrid">
+            <AdminCard icon="🧾" title="Central de Evidências" text="Registro e consolidação de evidências administrativas por CPF, vinculadas a atividades e controles internos." href={ROUTES.EVIDENCIAS} button="Acessar Evidências" tone="yellow" />
+            <AdminCard icon="📁" title="Documentos Internos" text="Repositório de políticas, procedimentos, governança e documentos vigentes para auditoria e compliance." href={ROUTES.DOCUMENTOS_INTERNOS} button="Acessar Documentos" />
+          </div>
+        </div>
 
-          <section className="adminCard" aria-label="Controle de Certificações">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">🎓</div><div><div className="adminCardTitle">Controle de Certificações</div><div className="adminCardText">Controle específico de certificações por colaborador: Consignado, LGPD, PLDFT, status, datas de vencimento e status geral.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-outline" href={ROUTES.CERTIFICACOES} style={{ width: "100%", textAlign: "center" }}>Abrir Certificações</Link></div>
-          </section>
-
-          <section className="adminCard" aria-label="Registro de Alterações de Acesso">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">🛡️</div><div><div className="adminCardTitle">Registro de Alterações de Acesso</div><div className="adminCardText">Trilha de auditoria do controle de acessos: registra alterações de perfil/status, usuário afetado, data/hora e antes/depois.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-outline" href={ROUTES.ACESSOS} style={{ width: "100%", textAlign: "center" }}>Abrir registro de alterações</Link></div>
-          </section>
-
-          <section className="adminCard" aria-label="Log de Login">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">🔐</div><div><div className="adminCardTitle">Log de Login</div><div className="adminCardText">Histórico de autenticações no portal. Registra sucesso e falha, com data/hora, IP e contexto técnico.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-outline" href={ROUTES.LOGINS} style={{ width: "100%", textAlign: "center" }}>Abrir log de login</Link></div>
-          </section>
-
-          <section className="adminCard" aria-label="Logger Central — Eventos">
-            <div className="adminCardHead"><div className="adminIcon" aria-hidden="true">🧠</div><div><div className="adminCardTitle">Logger Central — Eventos</div><div className="adminCardText">Registro centralizado de ações do portal: treinamentos, termos, provas e ações administrativas, para rastreabilidade.</div></div></div>
-            <div className="adminCardActions"><Link className="btn btn-outline" href={ROUTES.EVENTS} style={{ width: "100%", textAlign: "center" }}>Abrir Logger Central</Link></div>
-          </section>
+        <div className="nextStepBox">
+          <strong>Próxima organização recomendada:</strong> criar telas específicas para <strong>Controle de Treinamentos</strong> e <strong>Resultados das Provas</strong>, com salvamento definitivo no AuditLog, filtros, exportação Excel/CSV e impressão em PDF.
         </div>
 
         <div style={{ marginTop: 14 }}><Link className="btn btn-outline" href={ROUTES.HOME}>← Voltar à Área do Colaborador</Link></div>
 
         <style jsx global>{`
+          .auditoriaPage { max-width: 1280px; }
           .adminHeader { margin-bottom: 14px; }
-          .adminTitle { margin: 0; font-size: 28px; font-weight: 900; color: #0b1f3a; }
-          .adminDesc { margin: 10px 0 0; max-width: 920px; font-size: 13px; font-weight: 700; color: rgba(0,0,0,.65); line-height: 1.45; }
-          .adminGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 14px; align-items: start; }
-          .govCard { grid-column: 1 / -1; }
-          @media (max-width: 980px) { .adminGrid { grid-template-columns: 1fr; } .govCard { grid-column: auto; } }
-          .adminCard { position: relative; z-index: 1; padding: 16px !important; border-radius: 18px !important; background: #fff !important; border: 1px solid rgba(10,42,106,.1) !important; box-shadow: 0 12px 28px rgba(15,23,42,.06) !important; display: flex; flex-direction: column; min-height: 160px; }
+          .adminTitle { margin: 0; font-size: 30px; font-weight: 900; color: #0b1f3a; }
+          .adminDesc { margin: 10px 0 0; max-width: 920px; font-size: 13px; font-weight: 750; color: rgba(0,0,0,.65); line-height: 1.45; }
+          .areaBlock { margin-top: 18px; }
+          .areaTitle { margin: 0 0 10px; font-size: 14px; font-weight: 950; color: #0a2a6a; text-transform: uppercase; letter-spacing: .04em; }
+          .adminGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+          @media (max-width: 980px) { .adminGrid { grid-template-columns: 1fr; } }
+          .adminCard { position: relative; z-index: 1; padding: 16px !important; border-radius: 18px !important; background: #fff !important; border: 1px solid rgba(10,42,106,.1) !important; box-shadow: 0 12px 28px rgba(15,23,42,.06) !important; display: flex; flex-direction: column; min-height: 150px; }
+          .govCard { margin-top: 16px; min-height: auto; }
           .govCard.expanded { z-index: 20; }
           .adminCardHead { display: flex; gap: 10px; align-items: flex-start; }
           .adminIcon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: rgba(11,79,217,.08); border: 1px solid rgba(11,79,217,.12); flex: 0 0 auto; }
           .adminCardHeadText { width: 100%; }
           .adminCardTitleRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-          .adminCardTitle { font-weight: 900; font-size: 16px; margin: 0; }
+          .adminCardTitle { font-weight: 900; font-size: 16px; margin: 0; color: #0b1f3a; }
           .adminCardText { margin-top: 4px; font-size: 13px; font-weight: 650; color: rgba(0,0,0,.72); line-height: 1.35; }
           .adminCardActions { margin-top: auto; padding-top: 12px; }
           .miniBtn { border: 1px solid rgba(10,42,106,.14); background: rgba(255,255,255,.9); padding: 8px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; color: #0a2a6a; cursor: pointer; white-space: nowrap; }
@@ -212,13 +243,13 @@ export default function AuditoriaHomePage() {
           .govBoxTitle { font-weight: 900; font-size: 13px; margin-bottom: 10px; color: #0b1f3a; }
           .govNote, .govHint { margin-top: 10px; font-size: 12px; font-weight: 800; color: rgba(0,0,0,.65); }
           .govNote { border-top: 1px dashed rgba(10,42,106,.18); padding-top: 10px; }
-          .govActionRow { margin-top: 10px; }
           .tableWrap { width: 100%; overflow: visible; border-radius: 14px; border: 1px solid rgba(10,42,106,.08); background: #fff; }
           .tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
           @media (max-width: 980px) { .tableWrap { overflow-x: auto; } .tbl { min-width: 620px; table-layout: auto; } }
           .tbl th, .tbl td { border-bottom: 1px solid rgba(10,42,106,.08); padding: 10px; text-align: left; font-size: 12px; font-weight: 700; color: rgba(0,0,0,.75); vertical-align: top; word-break: break-word; }
           .tbl th { font-weight: 900; color: #0a2a6a; background: rgba(11,79,217,.05); }
           .mono { font-family: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace; font-weight: 900; color: #0a2a6a; word-break: break-word; }
+          .nextStepBox { margin-top: 18px; background: #fff9dd; border: 1px solid rgba(244,196,0,.35); border-radius: 16px; padding: 12px 14px; font-size: 12px; font-weight: 800; color: rgba(0,0,0,.72); line-height: 1.45; }
         `}</style>
       </div>
     </main>
