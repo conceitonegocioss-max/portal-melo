@@ -154,13 +154,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 }
-
-export async function DELETE() {
-  try {
-    await prisma.auditLog.deleteMany({});
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error("audit events DELETE error:", error);
-    return NextResponse.json({ ok: false }, { status: 500 });
-  }
-}
