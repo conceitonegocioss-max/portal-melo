@@ -233,7 +233,7 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <div className="auditNote">
-          Base atual: <strong>nomes para site.xlsx</strong>. Jonas foi retirado da listagem por solicitação administrativa.
+          Base atual: <strong>nomes para site.xlsx</strong>. Lista administrativa para conferência visual de usuários, perfis e certificações.
         </div>
 
         <div className="tableWrap">
