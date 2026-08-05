@@ -25,8 +25,10 @@ type CertStatus = "VÁLIDA" | "VENCIDA" | "NÃO INFORMADO";
 type CertificacoesUsuario = {
   consignado: CertStatus;
   lgpd: CertStatus;
-  pldf: CertStatus;
+  pldft: CertStatus;
 };
+
+const CERT_OPTIONS: CertStatus[] = ["VÁLIDA", "VENCIDA", "NÃO INFORMADO"];
 
 function maskCpf(cpf: string) {
   const d = normalizeCpf(cpf);
@@ -47,12 +49,12 @@ function isJonas(u: { nome: string; cpf: string; id: string }) {
   return cpf === "00598282343" || id.includes("antonio-jonas") || nome.includes("antonio jonas");
 }
 
-function statusInicialCertificacao(texto: string, tipo: "consignado" | "lgpd" | "pldf"): CertStatus {
+function statusInicialCertificacao(texto: string, tipo: "consignado" | "lgpd" | "pldft"): CertStatus {
   const t = String(texto || "").toUpperCase();
 
   if (tipo === "consignado" && !t.includes("CONSIGNADO")) return "NÃO INFORMADO";
   if (tipo === "lgpd" && !t.includes("LGPD")) return "NÃO INFORMADO";
-  if (tipo === "pldf" && !t.includes("PLDF") && !t.includes("PLD")) return "NÃO INFORMADO";
+  if (tipo === "pldft" && !t.includes("PLDFT") && !t.includes("PLDF") && !t.includes("PLD")) return "NÃO INFORMADO";
 
   if (t.includes("VENCIDA") || t.includes("EXPIRADA")) return "VENCIDA";
   return "VÁLIDA";
@@ -114,7 +116,7 @@ export default function UsuariosPerfisPage() {
       certOverrides[u.id] || {
         consignado: statusInicialCertificacao(u.certificacao, "consignado"),
         lgpd: statusInicialCertificacao(u.certificacao, "lgpd"),
-        pldf: statusInicialCertificacao(u.certificacao, "pldf"),
+        pldft: statusInicialCertificacao(u.certificacao, "pldft"),
       }
     );
   }
@@ -141,9 +143,7 @@ export default function UsuariosPerfisPage() {
     return ["TODOS", ...Array.from(new Set(usuarios.map((u) => u.perfil || "COLABORADOR"))).sort()];
   }, [usuarios]);
 
-  const statusList = useMemo(() => {
-    return ["TODOS", "ATIVO", "INATIVO"];
-  }, []);
+  const statusList = useMemo(() => ["TODOS", "ATIVO", "INATIVO"], []);
 
   const rows = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -168,7 +168,8 @@ export default function UsuariosPerfisPage() {
         u.certificacao,
         certs.consignado,
         certs.lgpd,
-        certs.pldf,
+        certs.pldft,
+        "PLDFT",
       ]
         .join(" ")
         .toLowerCase();
@@ -187,10 +188,10 @@ export default function UsuariosPerfisPage() {
   }, [usuarios, rows.length]);
 
   function exportarCsv() {
-    const header = ["Nome", "CPF", "Empresa", "Perfil portal", "Perfil auditoria", "Status", "Consignado", "LGPD", "PLDF", "Senha inicial"];
+    const header = ["Nome", "CPF", "Empresa", "Perfil portal", "Perfil auditoria", "Status", "Consignado", "LGPD", "PLDFT", "Senha inicial"];
     const lines = rows.map((u) => {
       const certs = certsDoUsuario(u);
-      return [u.nome, u.cpf, u.empresa, u.perfil, u.perfilAuditoria, u.status, certs.consignado, certs.lgpd, certs.pldf, u.senha]
+      return [u.nome, u.cpf, u.empresa, u.perfil, u.perfilAuditoria, u.status, certs.consignado, certs.lgpd, certs.pldft, u.senha]
         .map(csvEscape)
         .join(";");
     });
@@ -235,8 +236,7 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <p className="section-text" style={{ maxWidth: 980 }}>
-          Controle administrativo visual de usuários, perfis e certificações. Nesta etapa, as alterações de status feitas nos campos abaixo
-          são apenas para conferência na tela; o salvamento definitivo será implementado posteriormente.
+          Controle administrativo visual de usuários, perfis e certificações. Nesta etapa, as alterações de status feitas nos campos abaixo são apenas para conferência na tela; o salvamento definitivo será implementado posteriormente.
         </p>
 
         <div className="sessionBox noPrint">
@@ -244,26 +244,11 @@ export default function UsuariosPerfisPage() {
         </div>
 
         <div className="summaryGrid">
-          <div className="summaryCard">
-            <span>Total na base</span>
-            <strong>{resumo.total}</strong>
-          </div>
-          <div className="summaryCard">
-            <span>Ativos</span>
-            <strong>{resumo.ativos}</strong>
-          </div>
-          <div className="summaryCard">
-            <span>Inativos</span>
-            <strong>{resumo.inativos}</strong>
-          </div>
-          <div className="summaryCard">
-            <span>Admins</span>
-            <strong>{resumo.admins}</strong>
-          </div>
-          <div className="summaryCard">
-            <span>Filtrados</span>
-            <strong>{resumo.filtrados}</strong>
-          </div>
+          <div className="summaryCard"><span>Total na base</span><strong>{resumo.total}</strong></div>
+          <div className="summaryCard"><span>Ativos</span><strong>{resumo.ativos}</strong></div>
+          <div className="summaryCard"><span>Inativos</span><strong>{resumo.inativos}</strong></div>
+          <div className="summaryCard"><span>Admins</span><strong>{resumo.admins}</strong></div>
+          <div className="summaryCard"><span>Filtrados</span><strong>{resumo.filtrados}</strong></div>
         </div>
 
         <div className="tools noPrint">
@@ -275,30 +260,19 @@ export default function UsuariosPerfisPage() {
           />
 
           <select className="select" value={empresaFiltro} onChange={(e) => setEmpresaFiltro(e.target.value)}>
-            {empresas.map((e) => (
-              <option key={e} value={e}>{e}</option>
-            ))}
+            {empresas.map((e) => <option key={e} value={e}>{e}</option>)}
           </select>
 
           <select className="select" value={perfilFiltro} onChange={(e) => setPerfilFiltro(e.target.value)}>
-            {perfis.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
+            {perfis.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
 
           <select className="select" value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}>
-            {statusList.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
+            {statusList.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
 
-          <button className="btn btn-yellow small" type="button" onClick={exportarCsv}>
-            Exportar Excel/CSV
-          </button>
-
-          <button className="btn btn-outline small" type="button" onClick={() => window.print()}>
-            Imprimir / Salvar PDF
-          </button>
+          <button className="btn btn-yellow small" type="button" onClick={exportarCsv}>Exportar Excel/CSV</button>
+          <button className="btn btn-outline small" type="button" onClick={() => window.print()}>Imprimir / Salvar PDF</button>
         </div>
 
         <div className="auditNote">
@@ -317,7 +291,7 @@ export default function UsuariosPerfisPage() {
                 <th>Status</th>
                 <th>Consignado</th>
                 <th>LGPD</th>
-                <th>PLDF</th>
+                <th>PLDFT</th>
                 <th className="noPrint">Senha inicial</th>
               </tr>
             </thead>
@@ -333,12 +307,8 @@ export default function UsuariosPerfisPage() {
                     </td>
                     <td className="mono">{maskCpf(r.cpf)}</td>
                     <td>{r.empresa}</td>
-                    <td>
-                      <span className={`pill ${r.perfil.includes("ADMIN") ? "admin" : "colab"}`}>{r.perfil}</span>
-                    </td>
-                    <td>
-                      <span className="perfilAudit">{r.perfilAuditoria}</span>
-                    </td>
+                    <td><span className={`pill ${r.perfil.includes("ADMIN") ? "admin" : "colab"}`}>{r.perfil}</span></td>
+                    <td><span className="perfilAudit">{r.perfilAuditoria}</span></td>
                     <td>
                       <select
                         className={`statusSelect ${r.status === "ATIVO" ? "ativo" : "inativo"}`}
@@ -355,9 +325,7 @@ export default function UsuariosPerfisPage() {
                         value={certs.consignado}
                         onChange={(e) => alterarCertificacao(r.id, "consignado", e.target.value as CertStatus)}
                       >
-                        <option value="VÁLIDA">VÁLIDA</option>
-                        <option value="VENCIDA">VENCIDA</option>
-                        <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                        {CERT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
                     </td>
                     <td>
@@ -366,20 +334,16 @@ export default function UsuariosPerfisPage() {
                         value={certs.lgpd}
                         onChange={(e) => alterarCertificacao(r.id, "lgpd", e.target.value as CertStatus)}
                       >
-                        <option value="VÁLIDA">VÁLIDA</option>
-                        <option value="VENCIDA">VENCIDA</option>
-                        <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                        {CERT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
                     </td>
                     <td>
                       <select
-                        className={`certSelect ${classeCert(certs.pldf)}`}
-                        value={certs.pldf}
-                        onChange={(e) => alterarCertificacao(r.id, "pldf", e.target.value as CertStatus)}
+                        className={`certSelect ${classeCert(certs.pldft)}`}
+                        value={certs.pldft}
+                        onChange={(e) => alterarCertificacao(r.id, "pldft", e.target.value as CertStatus)}
                       >
-                        <option value="VÁLIDA">VÁLIDA</option>
-                        <option value="VENCIDA">VENCIDA</option>
-                        <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                        {CERT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
                     </td>
                     <td className="mono noPrint">{r.senha || "—"}</td>
@@ -393,235 +357,46 @@ export default function UsuariosPerfisPage() {
         {rows.length === 0 ? <div className="empty">Nenhum usuário encontrado para os filtros aplicados.</div> : null}
 
         <div className="bottomActions noPrint">
-          <Link href="/colaborador/auditoria" className="btn btn-outline small">
-            ← Voltar para Auditoria
-          </Link>
+          <Link href="/colaborador/auditoria" className="btn btn-outline small">← Voltar para Auditoria</Link>
         </div>
 
         <style jsx global>{`
-          .usuariosPage {
-            max-width: 1280px;
-          }
-          .topActions,
-          .bottomActions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-          }
-          .bottomActions {
-            margin-top: 16px;
-          }
-          .sessionBox,
-          .auditNote {
-            background: #fff;
-            border: 1px solid rgba(10, 42, 106, 0.1);
-            border-radius: 14px;
-            padding: 10px 12px;
-            font-size: 12px;
-            font-weight: 800;
-            color: rgba(0, 0, 0, 0.7);
-            margin: 12px 0;
-          }
-          .auditNote {
-            background: #fff9dd;
-            border-color: rgba(244, 196, 0, 0.35);
-          }
-          .summaryGrid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 10px;
-            margin: 14px 0;
-          }
-          .summaryCard {
-            background: #fff;
-            border: 1px solid rgba(10, 42, 106, 0.1);
-            border-radius: 16px;
-            padding: 12px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
-          }
-          .summaryCard span {
-            display: block;
-            font-size: 12px;
-            opacity: 0.7;
-            font-weight: 800;
-          }
-          .summaryCard strong {
-            display: block;
-            font-size: 24px;
-            color: #0a2a6a;
-            margin-top: 3px;
-          }
-          .tools {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin: 14px 0;
-          }
-          .input {
-            flex: 1;
-            min-width: 280px;
-            border-radius: 999px;
-            border: 1px solid rgba(10, 42, 106, 0.14);
-            padding: 10px 12px;
-            background: #fff;
-            outline: none;
-            font-weight: 700;
-          }
-          .select,
-          .statusSelect,
-          .certSelect {
-            height: 38px;
-            border-radius: 999px;
-            border: 1px solid rgba(10, 42, 106, 0.14);
-            background: #fff;
-            padding: 0 10px;
-            font-weight: 900;
-            color: #0a2a6a;
-            outline: none;
-          }
-          .statusSelect,
-          .certSelect {
-            width: 100%;
-            min-width: 128px;
-            font-size: 11px;
-          }
-          .statusSelect.ativo,
-          .certSelect.valid {
-            background: #eaf7ef;
-            border-color: rgba(27, 122, 58, 0.22);
-            color: #0f5132;
-          }
-          .statusSelect.inativo,
-          .certSelect.expired {
-            background: #fff1f1;
-            border-color: rgba(180, 40, 40, 0.22);
-            color: #8a1f1f;
-          }
-          .certSelect.unknown {
-            background: #f7f9ff;
-            border-color: rgba(10, 42, 106, 0.12);
-            color: rgba(10, 42, 106, 0.72);
-          }
-          .tableWrap {
-            width: 100%;
-            overflow: auto;
-            background: #fff;
-            border: 1px solid rgba(10, 42, 106, 0.08);
-            border-radius: 16px;
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
-          }
-          .usersTable {
-            width: 100%;
-            min-width: 1240px;
-            border-collapse: collapse;
-          }
-          .usersTable th,
-          .usersTable td {
-            padding: 11px 12px;
-            border-bottom: 1px solid rgba(10, 42, 106, 0.08);
-            text-align: left;
-            vertical-align: top;
-            font-size: 12px;
-            font-weight: 750;
-          }
-          .usersTable th {
-            background: #f5f7fd;
-            color: #0a2a6a;
-            font-weight: 900;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-          }
-          .muted {
-            margin-top: 3px;
-            opacity: 0.55;
-            font-size: 11px;
-            font-weight: 700;
-          }
-          .mono {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            color: #0a2a6a;
-            font-weight: 900;
-          }
-          .pill {
-            display: inline-flex;
-            border-radius: 999px;
-            padding: 5px 8px;
-            font-size: 11px;
-            font-weight: 900;
-            border: 1px solid;
-            white-space: nowrap;
-          }
-          .pill.admin {
-            background: #e7efff;
-            border-color: #cfe0ff;
-            color: #0b3b8a;
-          }
-          .pill.colab {
-            background: #f7f9ff;
-            border-color: rgba(10, 42, 106, 0.12);
-            color: #0a2a6a;
-          }
-          .perfilAudit {
-            display: inline-flex;
-            border-radius: 999px;
-            padding: 5px 8px;
-            font-size: 11px;
-            font-weight: 900;
-            background: #f7f9ff;
-            border: 1px solid rgba(10, 42, 106, 0.12);
-            color: #0a2a6a;
-            white-space: nowrap;
-          }
-          .empty {
-            margin-top: 12px;
-            background: #fff;
-            border-radius: 14px;
-            padding: 14px;
-            font-weight: 800;
-            opacity: 0.75;
-          }
-          @media (max-width: 900px) {
-            .summaryGrid {
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-          }
+          .usuariosPage { max-width: 1280px; }
+          .topActions, .bottomActions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+          .bottomActions { margin-top: 16px; }
+          .sessionBox, .auditNote { background: #fff; border: 1px solid rgba(10, 42, 106, 0.1); border-radius: 14px; padding: 10px 12px; font-size: 12px; font-weight: 800; color: rgba(0, 0, 0, 0.7); margin: 12px 0; }
+          .auditNote { background: #fff9dd; border-color: rgba(244, 196, 0, 0.35); }
+          .summaryGrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+          .summaryCard { background: #fff; border: 1px solid rgba(10, 42, 106, 0.1); border-radius: 16px; padding: 12px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); }
+          .summaryCard span { display: block; font-size: 12px; opacity: 0.7; font-weight: 800; }
+          .summaryCard strong { display: block; font-size: 24px; color: #0a2a6a; margin-top: 3px; }
+          .tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 14px 0; }
+          .input { flex: 1; min-width: 280px; border-radius: 999px; border: 1px solid rgba(10, 42, 106, 0.14); padding: 10px 12px; background: #fff; outline: none; font-weight: 700; }
+          .select { height: 40px; border-radius: 999px; border: 1px solid rgba(10, 42, 106, 0.14); background: #fff; padding: 0 12px; font-weight: 800; color: #0a2a6a; }
+          .tableWrap { width: 100%; overflow: auto; background: #fff; border: 1px solid rgba(10, 42, 106, 0.08); border-radius: 16px; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06); }
+          .usersTable { width: 100%; min-width: 1250px; border-collapse: collapse; }
+          .usersTable th, .usersTable td { padding: 11px 12px; border-bottom: 1px solid rgba(10, 42, 106, 0.08); text-align: left; vertical-align: top; font-size: 12px; font-weight: 750; }
+          .usersTable th { background: #f5f7fd; color: #0a2a6a; font-weight: 900; position: sticky; top: 0; z-index: 1; }
+          .muted { margin-top: 3px; opacity: 0.55; font-size: 11px; font-weight: 700; }
+          .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; color: #0a2a6a; font-weight: 900; }
+          .pill { display: inline-flex; border-radius: 999px; padding: 5px 8px; font-size: 11px; font-weight: 900; border: 1px solid; white-space: nowrap; }
+          .pill.admin { background: #e7efff; border-color: #cfe0ff; color: #0b3b8a; }
+          .pill.colab { background: #f7f9ff; border-color: rgba(10, 42, 106, 0.12); color: #0a2a6a; }
+          .perfilAudit { display: inline-flex; border-radius: 999px; padding: 5px 8px; font-size: 11px; font-weight: 900; background: #f7f9ff; border: 1px solid rgba(10, 42, 106, 0.12); color: #0a2a6a; white-space: nowrap; }
+          .statusSelect, .certSelect { width: 100%; min-width: 126px; border-radius: 999px; padding: 7px 8px; font-size: 11px; font-weight: 900; border: 1px solid rgba(10, 42, 106, 0.14); outline: none; }
+          .statusSelect.ativo, .certSelect.valid { background: #eaf7ef; border-color: rgba(27, 122, 58, 0.18); color: #0f5132; }
+          .statusSelect.inativo, .certSelect.expired { background: #fff1f1; border-color: rgba(180, 40, 40, 0.18); color: #8a1f1f; }
+          .certSelect.unknown { background: #f4f4f5; border-color: rgba(82, 82, 91, 0.18); color: #52525b; }
+          .empty { margin-top: 12px; background: #fff; border-radius: 14px; padding: 14px; font-weight: 800; opacity: 0.75; }
+          @media (max-width: 900px) { .summaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
           @media print {
-            .noPrint {
-              display: none !important;
-            }
-            body {
-              background: #fff !important;
-            }
-            .section.gray {
-              background: #fff !important;
-            }
-            .container {
-              max-width: 100% !important;
-            }
-            .tableWrap {
-              box-shadow: none !important;
-              border: 1px solid #ccd3e0 !important;
-              overflow: visible !important;
-            }
-            .usersTable {
-              min-width: 0 !important;
-            }
-            .usersTable th,
-            .usersTable td {
-              font-size: 10px !important;
-              padding: 7px !important;
-            }
-            .statusSelect,
-            .certSelect {
-              border: 0 !important;
-              padding: 0 !important;
-              height: auto !important;
-              min-width: 0 !important;
-              appearance: none !important;
-            }
+            .noPrint { display: none !important; }
+            body, .section.gray { background: #fff !important; }
+            .container { max-width: 100% !important; }
+            .tableWrap { box-shadow: none !important; border: 1px solid #ccd3e0 !important; overflow: visible !important; }
+            .usersTable { min-width: 0 !important; }
+            .usersTable th, .usersTable td { font-size: 10px !important; padding: 7px !important; }
+            .statusSelect, .certSelect { border: 0 !important; background: transparent !important; color: #000 !important; padding: 0 !important; appearance: none !important; }
           }
         `}</style>
       </div>
