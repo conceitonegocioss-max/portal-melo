@@ -23,6 +23,8 @@ type Evidencia = {
   itens: EvidenciaItem[];
 };
 
+type Situacao = "TODAS" | "PENDENTE" | "PARCIAL" | "COMPLETO" | "SEM_CONCLUSAO";
+
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "");
 }
@@ -47,6 +49,50 @@ function pct(concluidos: number, total: number) {
   return Math.round((concluidos / total) * 100);
 }
 
+function situacaoEvidencia(ev: Evidencia) {
+  if (!ev.total || ev.concluidos <= 0) return "SEM_CONCLUSAO" as const;
+  if (ev.concluidos >= ev.total) return "COMPLETO" as const;
+  return "PARCIAL" as const;
+}
+
+function situacaoLabel(s: ReturnType<typeof situacaoEvidencia>) {
+  if (s === "COMPLETO") return "✅ Completo";
+  if (s === "PARCIAL") return "🟡 Parcial";
+  return "⏳ Pendente";
+}
+
+function situacaoClass(s: ReturnType<typeof situacaoEvidencia>) {
+  if (s === "COMPLETO") return "ok";
+  if (s === "PARCIAL") return "partial";
+  return "pend";
+}
+
+function consolidarPorColaborador(items: Evidencia[]) {
+  const map = new Map<string, Evidencia>();
+
+  for (const ev of items) {
+    const key = onlyDigits(ev.cpf) || `${ev.colaborador}::${ev.empresa}`;
+    const atual = map.get(key);
+
+    if (!atual) {
+      map.set(key, ev);
+      continue;
+    }
+
+    const evPct = pct(ev.concluidos, ev.total);
+    const atualPct = pct(atual.concluidos, atual.total);
+    const evTime = new Date(ev.emitidoEmISO || 0).getTime();
+    const atualTime = new Date(atual.emitidoEmISO || 0).getTime();
+
+    // Mantém o registro mais completo. Em empate, mantém o mais recente.
+    if (evPct > atualPct || (evPct === atualPct && evTime > atualTime)) {
+      map.set(key, ev);
+    }
+  }
+
+  return Array.from(map.values()).sort((a, b) => (a.colaborador || "").localeCompare(b.colaborador || "", "pt-BR"));
+}
+
 export default function EvidenciasPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -62,8 +108,8 @@ export default function EvidenciasPage() {
   const [sessionCpf, setSessionCpf] = useState("");
   const [evidencias, setEvidencias] = useState<Evidencia[]>([]);
 
-  // filtros
   const [filtroEmpresa, setFiltroEmpresa] = useState("TODAS");
+  const [filtroSituacao, setFiltroSituacao] = useState<Situacao>("TODAS");
   const [busca, setBusca] = useState("");
 
   useEffect(() => {
@@ -93,8 +139,7 @@ export default function EvidenciasPage() {
         if (!json?.ok) throw new Error("Resposta inválida da API.");
 
         const items = (json.items || []) as Evidencia[];
-        items.sort((a, b) => (a.emitidoEmISO < b.emitidoEmISO ? 1 : -1)); // recente primeiro
-        setEvidencias(items);
+        setEvidencias(consolidarPorColaborador(items));
       } catch (e: any) {
         setErro(e?.message || "Erro ao carregar evidências.");
       } finally {
@@ -116,8 +161,15 @@ export default function EvidenciasPage() {
     const q = busca.trim().toLowerCase();
 
     return evidencias.filter((ev) => {
+      const situacao = situacaoEvidencia(ev);
       const okEmpresa = filtroEmpresa === "TODAS" ? true : ev.empresa === filtroEmpresa;
       const okCpfQuery = !cpfQuery ? true : onlyDigits(ev.cpf) === cpfQuery;
+      const okSituacao =
+        filtroSituacao === "TODAS"
+          ? true
+          : filtroSituacao === "PENDENTE"
+            ? situacao !== "COMPLETO"
+            : filtroSituacao === situacao;
 
       const okBusca =
         !q ||
@@ -126,118 +178,91 @@ export default function EvidenciasPage() {
         (ev.empresa || "").toLowerCase().includes(q) ||
         (ev.emitidoPor || "").toLowerCase().includes(q);
 
-      return okEmpresa && okCpfQuery && okBusca;
+      return okEmpresa && okCpfQuery && okSituacao && okBusca;
     });
-  }, [mounted, evidencias, filtroEmpresa, busca, cpfQuery]);
+  }, [mounted, evidencias, filtroEmpresa, filtroSituacao, busca, cpfQuery]);
 
   const resumo = useMemo(() => {
     const total = evidenciasFiltradas.length;
-    const completos = evidenciasFiltradas.filter((e) => e.concluidos >= e.total).length;
-    return { total, completos };
+    const completos = evidenciasFiltradas.filter((e) => situacaoEvidencia(e) === "COMPLETO").length;
+    const parciais = evidenciasFiltradas.filter((e) => situacaoEvidencia(e) === "PARCIAL").length;
+    const semConclusao = evidenciasFiltradas.filter((e) => situacaoEvidencia(e) === "SEM_CONCLUSAO").length;
+    return { total, completos, parciais, semConclusao };
   }, [evidenciasFiltradas]);
 
   if (!mounted) {
     return (
       <main className="section gray">
-        <div className="container">
-          <p>Carregando…</p>
-        </div>
+        <div className="container"><p>Carregando…</p></div>
       </main>
     );
   }
 
   return (
     <main className="section gray">
-      <div className="container">
-        {/* Topo */}
+      <div className="container evPage">
         <div className="evHead">
           <div>
             <div className="section-title" style={{ marginTop: 0 }}>
-              <h2>
-                Central de Evidências <span style={{ opacity: 0.65 }}>(Admin)</span>
-              </h2>
+              <h2>Central de Evidências <span style={{ opacity: 0.65 }}>(Admin)</span></h2>
               <div className="bar" />
             </div>
 
             <p className="section-text" style={{ maxWidth: 920 }}>
-              Registro e consulta de evidências por colaborador (CPF), destinadas à auditoria interna e ao atendimento de requisitos de compliance, LGPD/PLDFT e controles operacionais. Recomenda-se manter registros objetivos, verificáveis e estritamente necessários.
+              Consulta consolidada por colaborador, com evidências de treinamentos, pendências e detalhamento para auditoria. A listagem exibe uma linha por CPF, mantendo o registro mais completo/recente.
             </p>
           </div>
 
-          {/* ✅ sessão sem sobrepor */}
           <div className="evSession">
             <div className="evSessionLeft">
-              <div className="evSessionLine">
-                Sessão: <strong className="evSessName">{sessionNome || "—"}</strong>
-              </div>
-              <div className="evSessionLine">
-                CPF: <strong>{mascararCpf(sessionCpf || "—")}</strong>
-              </div>
+              <div className="evSessionLine">Sessão: <strong className="evSessName">{sessionNome || "—"}</strong></div>
+              <div className="evSessionLine">CPF: <strong>{mascararCpf(sessionCpf || "—")}</strong></div>
             </div>
-
             <div className="evSessionBadge">ADMIN</div>
           </div>
         </div>
 
-        {/* Filtro CPF vindo na URL */}
         {cpfQuery && (
           <div className="card evChipCard">
             <div className="evChipRow">
-              <div style={{ fontSize: 13 }}>
-                Filtrando por CPF: <strong>{mascararCpf(cpfQuery)}</strong>
-              </div>
-
-              <Link className="btn btn-outline evBtnPill" href="/colaborador/auditoria/evidencias">
-                Limpar filtro CPF
-              </Link>
+              <div style={{ fontSize: 13 }}>Filtrando por CPF: <strong>{mascararCpf(cpfQuery)}</strong></div>
+              <Link className="btn btn-outline evBtnPill" href="/colaborador/auditoria/evidencias">Limpar filtro CPF</Link>
             </div>
           </div>
         )}
 
-        {/* Card filtros + resumo */}
         <div className="card evFiltersCard">
           <div className="evFiltersLeft">
-            <div className="evLabel">Filtro</div>
+            <div className="evLabel">Filtros</div>
 
             <select className="evSelect" value={filtroEmpresa} onChange={(e) => setFiltroEmpresa(e.target.value)}>
-              {empresas.map((emp) => (
-                <option key={emp} value={emp}>
-                  {emp}
-                </option>
-              ))}
+              {empresas.map((emp) => <option key={emp} value={emp}>{emp}</option>)}
             </select>
 
-            <input
-              className="evSearch"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-              placeholder="Buscar por nome, CPF, empresa, admin…"
-            />
+            <select className="evSelect" value={filtroSituacao} onChange={(e) => setFiltroSituacao(e.target.value as Situacao)}>
+              <option value="TODAS">Todas as situações</option>
+              <option value="PENDENTE">Pendentes ou parciais</option>
+              <option value="SEM_CONCLUSAO">Sem conclusão</option>
+              <option value="PARCIAL">Parcial</option>
+              <option value="COMPLETO">Completo</option>
+            </select>
+
+            <input className="evSearch" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por nome, CPF, empresa, admin…" />
           </div>
 
           <div className="evResumo">
-            <div className="evResumoItem">
-              <div className="evResumoNum">{resumo.total}</div>
-              <div className="evResumoLabel">Registros (filtro atual)</div>
-            </div>
-            <div className="evResumoItem">
-              <div className="evResumoNum">{resumo.completos}</div>
-              <div className="evResumoLabel">Registros completos</div>
-            </div>
+            <div className="evResumoItem"><div className="evResumoNum">{resumo.total}</div><div className="evResumoLabel">Colaboradores</div></div>
+            <div className="evResumoItem"><div className="evResumoNum">{resumo.completos}</div><div className="evResumoLabel">Completos</div></div>
+            <div className="evResumoItem"><div className="evResumoNum">{resumo.parciais}</div><div className="evResumoLabel">Parciais</div></div>
+            <div className="evResumoItem"><div className="evResumoNum">{resumo.semConclusao}</div><div className="evResumoLabel">Sem conclusão</div></div>
           </div>
         </div>
 
-        {carregando && (
-          <div className="card evInfoCard">
-            <div className="evInfoTitle">Carregando evidências…</div>
-            <div className="evInfoSub">Aguarde alguns segundos.</div>
-          </div>
-        )}
+        {carregando && <div className="card evInfoCard"><div className="evInfoTitle">Carregando evidências…</div><div className="evInfoSub">Aguarde alguns segundos.</div></div>}
 
         {erro && (
           <div className="card evInfoCard" style={{ borderColor: "rgba(210, 30, 30, 0.25)" }}>
-            <div className="evInfoTitle">Erro ao carregar</div>
-            <div className="evInfoSub">{erro}</div>
+            <div className="evInfoTitle">Erro ao carregar</div><div className="evInfoSub">{erro}</div>
           </div>
         )}
 
@@ -247,56 +272,42 @@ export default function EvidenciasPage() {
               <table className="evTable">
                 <thead>
                   <tr>
-                    <th>Data</th>
+                    <th>Última emissão</th>
                     <th>Colaborador</th>
                     <th>Empresa</th>
                     <th>CPF</th>
-                    <th>Concluídos</th>
-                    <th>Responsável</th>
+                    <th>Treinamentos</th>
+                    <th>Status geral</th>
                     <th style={{ textAlign: "right" }}>Ação</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {evidenciasFiltradas.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="evEmpty">
-                        Nenhuma evidência encontrada.
-                      </td>
-                    </tr>
+                    <tr><td colSpan={7} className="evEmpty">Nenhuma evidência encontrada.</td></tr>
                   ) : (
                     evidenciasFiltradas.map((ev) => {
                       const percentual = pct(ev.concluidos, ev.total);
-                      const ok = ev.concluidos >= ev.total;
+                      const situacao = situacaoEvidencia(ev);
 
                       return (
                         <tr key={ev.id}>
                           <td className="evTdMuted">{formatarData(ev.emitidoEmISO)}</td>
-
                           <td className="evTdStrong">{ev.colaborador || "-"}</td>
-
                           <td className="evTdMuted">{ev.empresa || "-"}</td>
-
                           <td className="evTdMuted">{mascararCpf(ev.cpf)}</td>
 
                           <td>
                             <div className="evProgRow">
-                              <span className="evTdMuted">
-                                {ev.concluidos}/{ev.total} ({percentual}%)
-                              </span>
-                              <span className={`evStatus ${ok ? "ok" : "pend"}`}>{ok ? "✅ Completo" : "⏳ Pendente"}</span>
+                              <span className="evTdMuted">{ev.concluidos}/{ev.total} ({percentual}%)</span>
                             </div>
-                            <div className="evBar">
-                              <div className="evBarFill" style={{ width: `${Math.min(100, Math.max(0, percentual))}%` }} />
-                            </div>
+                            <div className="evBar"><div className="evBarFill" style={{ width: `${Math.min(100, Math.max(0, percentual))}%` }} /></div>
                           </td>
 
-                          <td className="evTdMuted">{ev.emitidoPor || "ADMIN"}</td>
+                          <td><span className={`evStatus ${situacaoClass(situacao)}`}>{situacaoLabel(situacao)}</span></td>
 
                           <td style={{ textAlign: "right" }}>
-                            <Link className="btn btn-outline evBtnPill" href={`/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`}>
-                              Consultar evidência
-                            </Link>
+                            <Link className="btn btn-outline evBtnPill" href={`/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`}>Consultar evidência</Link>
                           </td>
                         </tr>
                       );
@@ -307,299 +318,57 @@ export default function EvidenciasPage() {
             </div>
 
             <div className="evObs">
-              Nota de auditoria: a listagem apresenta apenas evidências já registradas (“salvas”). Cada registro deve possuir conteúdo verificável e aderente ao controle/obrigação correspondente.
+              Nota de auditoria: a listagem é consolidada por colaborador. O histórico completo permanece no Logger Central; o detalhe apresenta os treinamentos e provas vinculadas.
             </div>
           </div>
         )}
 
         <div className="evBottom">
-          <Link className="btn btn-outline evBtnPill" href="/colaborador/auditoria">
-            ← Voltar para Auditoria
-          </Link>
-          <Link className="btn btn-outline evBtnPill" href="/colaborador">
-            ← Área do Colaborador
-          </Link>
+          <Link className="btn btn-outline evBtnPill" href="/colaborador/auditoria">← Voltar para Auditoria</Link>
+          <Link className="btn btn-outline evBtnPill" href="/colaborador">← Área do Colaborador</Link>
         </div>
 
         <style jsx global>{`
-          .evHead {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-          }
-
-          /* ✅ CORRIGIDO */
-          .evSession {
-            background: #fff;
-            border: 1px solid rgba(10, 42, 106, 0.12);
-            border-radius: 18px;
-            padding: 12px 14px;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
-            min-width: 260px;
-
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-          }
-
-          .evSessionLeft {
-            min-width: 0;
-          }
-
-          .evSessionLine {
-            font-size: 12px;
-            opacity: 0.75;
-            font-weight: 800;
-          }
-
-          .evSessName {
-            display: inline-block;
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            vertical-align: bottom;
-          }
-
-          .evSessionBadge {
-            flex: 0 0 auto;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(11, 59, 138, 0.06);
-            border: 1px solid rgba(11, 59, 138, 0.14);
-            font-size: 11px;
-            font-weight: 900;
-            color: rgba(11, 59, 138, 1);
-            white-space: nowrap;
-            margin-top: 2px;
-          }
-
-          .evChipCard {
-            padding: 12px !important;
-            border-radius: 18px !important;
-            margin-top: 12px;
-          }
-          .evChipRow {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-          }
-
-          .evFiltersCard {
-            padding: 14px !important;
-            border-radius: 18px !important;
-            border: 1px solid rgba(10, 42, 106, 0.12) !important;
-            background: linear-gradient(180deg, #ffffff, #f7f9ff) !important;
-            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.06) !important;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-            margin-top: 12px;
-          }
-
-          .evFiltersLeft {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            flex: 1;
-            min-width: 260px;
-          }
-
-          .evLabel {
-            font-weight: 900;
-            font-size: 12px;
-            opacity: 0.75;
-          }
-
-          .evSelect,
-          .evSearch {
-            border-radius: 14px;
-            border: 1px solid rgba(10, 42, 106, 0.12);
-            background: #fff;
-            padding: 10px 12px;
-            outline: none;
-          }
-
-          .evSearch {
-            min-width: 280px;
-          }
-
-          .evResumo {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-            min-width: 260px;
-          }
-          .evResumoItem {
-            background: #fff;
-            border: 1px solid rgba(10, 42, 106, 0.12);
-            border-radius: 14px;
-            padding: 10px;
-          }
-          .evResumoNum {
-            font-size: 18px;
-            font-weight: 900;
-            color: #0a2a6a;
-            line-height: 1;
-          }
-          .evResumoLabel {
-            font-size: 12px;
-            opacity: 0.75;
-            margin-top: 3px;
-            font-weight: 800;
-          }
-
-          .evInfoCard {
-            padding: 16px !important;
-            border-radius: 18px !important;
-            border: 1px solid rgba(10, 42, 106, 0.12) !important;
-            background: #fff !important;
-          }
-          .evInfoTitle {
-            font-weight: 900;
-            color: #0a2a6a;
-          }
-          .evInfoSub {
-            margin-top: 6px;
-            font-size: 12px;
-            opacity: 0.75;
-            font-weight: 700;
-          }
-
-          .evTableCard {
-            padding: 16px !important;
-            border-radius: 18px !important;
-          }
-
-          .evTableWrap {
-            overflow-x: auto;
-          }
-
-          .evTable {
-            width: 100%;
-            min-width: 980px;
-            border-collapse: collapse;
-          }
-
-          .evTable thead th {
-            text-align: left;
-            font-size: 12px;
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(10, 42, 106, 0.12);
-            color: rgba(0, 0, 0, 0.7);
-            font-weight: 900;
-            background: rgba(247, 249, 255, 0.7);
-          }
-
-          .evTable tbody td {
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(10, 42, 106, 0.08);
-            vertical-align: top;
-          }
-
-          .evEmpty {
-            padding: 14px !important;
-            opacity: 0.8;
-          }
-
-          .evTdStrong {
-            font-weight: 900;
-            color: #0a2a6a;
-          }
-
-          .evTdMuted {
-            font-weight: 700;
-            opacity: 0.85;
-          }
-
-          .evProgRow {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-          }
-
-          .evStatus {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 11px;
-            font-weight: 900;
-            line-height: 1;
-            border: 1px solid rgba(10, 42, 106, 0.12);
-            background: #f7f9ff;
-            color: #0a2a6a;
-          }
-
-          .evStatus.ok {
-            background: rgba(20, 180, 90, 0.1);
-            border-color: rgba(20, 180, 90, 0.22);
-            color: rgba(14, 122, 61, 1);
-          }
-
-          .evStatus.pend {
-            background: rgba(247, 198, 0, 0.12);
-            border-color: rgba(247, 198, 0, 0.26);
-            color: rgba(140, 104, 0, 1);
-          }
-
-          .evBar {
-            margin-top: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: rgba(10, 42, 106, 0.08);
-            overflow: hidden;
-          }
-          .evBarFill {
-            height: 8px;
-            border-radius: 999px;
-            background: #0b3b8a;
-          }
-
-          .evObs {
-            margin-top: 12px;
-            font-size: 12px;
-            opacity: 0.75;
-            font-weight: 700;
-          }
-
-          .evBottom {
-            margin-top: 14px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-          }
-
-          .evBtnPill {
-            padding: 8px 12px !important;
-            border-radius: 999px !important;
-          }
-
-          @media (max-width: 820px) {
-            .evSearch {
-              min-width: 0;
-              width: 100%;
-            }
-            .evResumo {
-              width: 100%;
-              min-width: 0;
-            }
-            .evSessName {
-              max-width: 160px;
-            }
-          }
+          .evPage { max-width: 1280px; }
+          .evHead { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+          .evSession { background:#fff; border:1px solid rgba(10,42,106,.12); border-radius:18px; padding:12px 14px; box-shadow:0 12px 28px rgba(15,23,42,.06); min-width:260px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+          .evSessionLeft { min-width:0; }
+          .evSessionLine { font-size:12px; opacity:.75; font-weight:800; }
+          .evSessName { display:inline-block; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; }
+          .evSessionBadge { flex:0 0 auto; padding:6px 10px; border-radius:999px; background:rgba(11,59,138,.06); border:1px solid rgba(11,59,138,.14); font-size:11px; font-weight:900; color:#0b3b8a; white-space:nowrap; margin-top:2px; }
+          .evChipCard { padding:12px!important; border-radius:18px!important; margin-top:12px; }
+          .evChipRow { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+          .evFiltersCard { padding:14px!important; border-radius:18px!important; border:1px solid rgba(10,42,106,.12)!important; background:linear-gradient(180deg,#fff,#f7f9ff)!important; box-shadow:0 14px 35px rgba(15,23,42,.06)!important; display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:14px; margin-top:12px; }
+          .evFiltersLeft { display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex:1; min-width:260px; }
+          .evLabel { font-weight:900; font-size:12px; opacity:.75; }
+          .evSelect,.evSearch { border-radius:14px; border:1px solid rgba(10,42,106,.12); background:#fff; padding:10px 12px; outline:none; font-weight:700; }
+          .evSearch { min-width:280px; }
+          .evResumo { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; min-width:480px; }
+          .evResumoItem { background:#fff; border:1px solid rgba(10,42,106,.12); border-radius:14px; padding:10px; }
+          .evResumoNum { font-size:18px; font-weight:900; color:#0a2a6a; line-height:1; }
+          .evResumoLabel { font-size:12px; opacity:.75; margin-top:3px; font-weight:800; }
+          .evInfoCard { padding:16px!important; border-radius:18px!important; border:1px solid rgba(10,42,106,.12)!important; background:#fff!important; }
+          .evInfoTitle { font-weight:900; color:#0a2a6a; }
+          .evInfoSub { margin-top:6px; font-size:12px; opacity:.75; font-weight:700; }
+          .evTableCard { padding:16px!important; border-radius:18px!important; }
+          .evTableWrap { overflow-x:auto; }
+          .evTable { width:100%; min-width:980px; border-collapse:collapse; }
+          .evTable thead th { text-align:left; font-size:12px; padding:12px 10px; border-bottom:1px solid rgba(10,42,106,.12); color:rgba(0,0,0,.7); font-weight:900; background:rgba(247,249,255,.7); }
+          .evTable tbody td { padding:12px 10px; border-bottom:1px solid rgba(10,42,106,.08); vertical-align:top; }
+          .evEmpty { padding:14px!important; opacity:.8; }
+          .evTdStrong { font-weight:900; color:#0a2a6a; }
+          .evTdMuted { font-weight:700; opacity:.85; }
+          .evProgRow { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+          .evStatus { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:900; line-height:1; border:1px solid rgba(10,42,106,.12); background:#f7f9ff; color:#0a2a6a; white-space:nowrap; }
+          .evStatus.ok { background:rgba(20,180,90,.1); border-color:rgba(20,180,90,.22); color:#0e7a3d; }
+          .evStatus.partial { background:rgba(247,198,0,.12); border-color:rgba(247,198,0,.26); color:#8c6800; }
+          .evStatus.pend { background:#fff4f4; border-color:rgba(180,40,40,.18); color:#8a1f1f; }
+          .evBar { margin-top:8px; height:8px; border-radius:999px; background:rgba(10,42,106,.08); overflow:hidden; }
+          .evBarFill { height:8px; border-radius:999px; background:#0b3b8a; }
+          .evObs { margin-top:12px; font-size:12px; opacity:.75; font-weight:700; }
+          .evBottom { margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+          .evBtnPill { padding:8px 12px!important; border-radius:999px!important; }
+          @media (max-width: 820px) { .evSearch{min-width:0;width:100%;} .evResumo{grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; min-width:0;} .evSessName{max-width:160px;} }
         `}</style>
       </div>
     </main>
