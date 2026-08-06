@@ -1,410 +1,133 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { getSession } from "@/src/lib/auth";
 
-type DocumentoCategoria = "politica" | "sgq" | "procedimento" | "institucional" | "termo";
+type DocTipo = "politica" | "procedimento" | "termo" | "sgq" | "institucional";
+type DocStatus = "vigente" | "atualizar";
 
 type Documento = {
   id: string;
   titulo: string;
-  categoria: DocumentoCategoria;
-  restrito?: boolean;
+  tipo: DocTipo;
+  status: DocStatus;
+  arquivoPdf: string;
+  versao?: string;
+  data?: string;
+  descricao?: string;
+  obrigatorio?: boolean;
 };
 
-type Indicador = {
-  titulo: string;
-  valor: number;
-  icone: string;
+const TAGS: Record<DocTipo, { label: string; badgeClass: string; icon: string }> = {
+  politica: { label: "Política", badgeClass: "badge badge-blue", icon: "📘" },
+  procedimento: { label: "Procedimento", badgeClass: "badge badge-green", icon: "🧩" },
+  termo: { label: "Termo", badgeClass: "badge badge-red", icon: "🔐" },
+  sgq: { label: "SGQ", badgeClass: "badge badge-purple", icon: "🗂️" },
+  institucional: { label: "Institucional", badgeClass: "badge badge-gray", icon: "🏛️" },
 };
 
-const DOCUMENTOS: Documento[] = [
-  { id: "termo-confidencialidade", titulo: "Termo de Confidencialidade", categoria: "termo" },
+const STATUS: Record<DocStatus, { label: string; badgeClass: string }> = {
+  vigente: { label: "Vigente", badgeClass: "badge badge-ok" },
+  atualizar: { label: "Revisar", badgeClass: "badge badge-warn" },
+};
 
-  { id: "politica-atendimento", titulo: "Política de Atendimento ao Cliente", categoria: "politica" },
-  { id: "politica-concessao-acessos", titulo: "Política de Concessão de Acesso aos Sistemas e Aplicativos Internos", categoria: "politica" },
-  { id: "politica-incidentes", titulo: "Política de Gestão de Incidentes", categoria: "politica" },
-  { id: "politica-vulnerabilidades", titulo: "Política de Gestão de Vulnerabilidades", categoria: "politica" },
-  { id: "politica-governanca", titulo: "Política de Governança", categoria: "politica" },
-  { id: "politica-portabilidade-credito", titulo: "Política de Portabilidade de Crédito", categoria: "politica" },
-  { id: "politica-prevencao-fraude", titulo: "Política de Prevenção à Fraude", categoria: "politica" },
-  { id: "politica-privacidade", titulo: "Política de Privacidade de Dados (LGPD)", categoria: "politica" },
-  { id: "politica-rh", titulo: "Política de Recursos Humanos", categoria: "politica" },
-  { id: "politica-seguranca-firewall", titulo: "Política de Segurança da Informação e Uso de Firewall", categoria: "politica" },
-
-  { id: "sgq-inventario-tratamento-dados", titulo: "Inventário de Tratamento de Dados", categoria: "sgq" },
-  { id: "sgq-manual-gestao-planejamento-fin", titulo: "Manual de Gestão e Planejamento Financeiro", categoria: "sgq" },
-  { id: "sgq-manual-atendimento-etico", titulo: "Manual para um Atendimento Ético e Transparente", categoria: "sgq" },
-
-  { id: "proc-plano-anual-auditoria", titulo: "Plano Anual de Auditoria Interna", categoria: "procedimento" },
-  { id: "proc-auditoria-interna", titulo: "Procedimento de Auditoria Interna", categoria: "procedimento" },
-  { id: "proc-prevencao-fraude", titulo: "Procedimento de Prevenção à Fraude", categoria: "procedimento" },
-  { id: "proc-concessao-acessos-sistemas", titulo: "Procedimento para Concessão de Acesso aos Sistemas", categoria: "procedimento" },
-  { id: "proc-contratacao-desenvolvimento", titulo: "Procedimento para Contratação e Desenvolvimento", categoria: "procedimento" },
-  { id: "proc-tratamento-mailing", titulo: "Procedimento para Tratamento de Lista de Mailing", categoria: "procedimento", restrito: true },
-  { id: "proc-concessao-acessos-chavej-portal", titulo: "Concessão de Acessos (Chave J e Portal do Correspondente)", categoria: "procedimento" },
-
-  { id: "institucional-termo-adocao-sgq", titulo: "Termo de Adoção Institucional – SGQ", categoria: "institucional" },
+const TERMOS: Documento[] = [
+  {
+    id: "termo-confidencialidade",
+    titulo: "Termo de Confidencialidade",
+    tipo: "termo",
+    status: "vigente",
+    arquivoPdf: "/materiais/termos/termo-confidencialidade-sgq.pdf",
+    versao: "v3.0",
+    data: "02/2027",
+    obrigatorio: true,
+    descricao: "Documento obrigatório para ciência e compromisso de sigilo, conformidade e boas práticas de tratamento das informações.",
+  },
 ];
 
-const TOTAL_TREINAMENTOS = 16;
+const POLITICAS: Documento[] = [
+  { id: "politica-atendimento", titulo: "Política de Atendimento ao Cliente", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-atendimento-ao-cliente.pdf", descricao: "Diretrizes de atendimento, postura e relacionamento com clientes." },
+  { id: "politica-prevencao-fraude", titulo: "Política de Prevenção à Fraude", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-prevencao-fraude.pdf", descricao: "Diretrizes de prevenção, detecção e resposta a fraudes." },
+  { id: "politica-privacidade", titulo: "Política de Privacidade de Dados (LGPD)", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-privacidade-dados.pdf", descricao: "Regras de privacidade, tratamento e proteção de dados pessoais." },
+  { id: "politica-seguranca-firewall", titulo: "Política de Segurança da Informação e Uso de Firewall", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-seguranca-informacao-firewall.pdf", descricao: "Controles e boas práticas de segurança da informação e uso de infraestrutura." },
+  { id: "politica-concessao-acessos", titulo: "Política de Concessão de Acesso aos Sistemas e Aplicativos Internos", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-concessao-acesso-sistemas-aplicativos-internos.pdf", descricao: "Regras para concessão, manutenção e revogação de acessos internos." },
+  { id: "politica-governanca", titulo: "Política de Governança", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-governanca.pdf", descricao: "Princípios, responsabilidades e diretrizes de governança corporativa." },
+  { id: "politica-portabilidade-credito", titulo: "Política de Portabilidade de Crédito", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-portabilidade-credito.pdf", descricao: "Normas e controles aplicáveis ao processo de portabilidade de crédito." },
+  { id: "politica-rh", titulo: "Política de Recursos Humanos", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-recursos-humanos.pdf", descricao: "Diretrizes institucionais relacionadas à gestão de pessoas e conduta interna." },
+  { id: "politica-incidentes", titulo: "Política de Gestão de Incidentes", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-gestao-incidentes.pdf", descricao: "Fluxos e responsabilidades para identificação, tratamento e comunicação de incidentes." },
+  { id: "politica-vulnerabilidades", titulo: "Política de Gestão de Vulnerabilidades", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-gestao-vulnerabilidades-ti.pdf", descricao: "Diretrizes de segurança para gestão de vulnerabilidades de sistemas e infraestrutura." },
+];
 
-function formatarPerfil(perfil: string) {
-  return perfil || "COLABORADOR";
+const SGQ: Documento[] = [
+  { id: "sgq-inventario-tratamento-dados", titulo: "Inventário de Tratamento de Dados", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-inventario-tratamento-dados.pdf", descricao: "Registro institucional de operações e fluxos de tratamento de dados." },
+  { id: "sgq-manual-gestao-planejamento-fin", titulo: "Manual de Gestão e Planejamento Financeiro", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-manual-gestao-planejamento-financeiro.pdf", descricao: "Documento de referência para controles e organização financeira interna." },
+  { id: "sgq-manual-atendimento-etico", titulo: "Manual para um Atendimento Ético e Transparente", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-manual-atendimento-etico-transparente.pdf", descricao: "Manual orientativo para conduta ética e transparência no atendimento." },
+  { id: "proc-plano-anual-auditoria", titulo: "Plano Anual de Auditoria Interna", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-plano-anual-auditoria-interna.pdf", descricao: "Planejamento anual das atividades e frentes de auditoria interna." },
+];
+
+const PROCEDIMENTOS: Documento[] = [
+  { id: "proc-auditoria-interna", titulo: "Procedimento de Auditoria Interna", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-auditoria-interna.pdf", descricao: "Fluxo operacional para execução e registro de auditorias internas." },
+  { id: "proc-prevencao-fraude", titulo: "Procedimento de Prevenção à Fraude", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-prevencao-fraude.pdf", descricao: "Procedimentos formais de apoio ao controle e prevenção de fraudes." },
+  { id: "proc-concessao-acessos-sistemas", titulo: "Procedimento para Concessão de Acesso aos Sistemas", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-concessao-acesso-sistemas.pdf", descricao: "Fluxo operacional para concessão, alteração e revogação de acessos." },
+  { id: "proc-contratacao-desenvolvimento", titulo: "Procedimento para Contratação e Desenvolvimento", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-contratacao-desenvolvimento.pdf", descricao: "Procedimento de contratação, integração e desenvolvimento de colaboradores e parceiros." },
+  { id: "proc-tratamento-mailing", titulo: "Procedimento para Tratamento de Lista de Mailing", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-tratamento-lista-mailing.pdf", descricao: "Procedimento formal para uso, controle e tratamento de listas de mailing." },
+  { id: "proc-concessao-acessos-chavej-portal", titulo: "Concessão de Acessos (Chave J e Portal do Correspondente)", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/concessao-acessos-chavej-portal.pdf", descricao: "Procedimento operacional para concessão de acessos a ambientes críticos." },
+];
+
+const INSTITUCIONAIS: Documento[] = [
+  { id: "institucional-termo-adocao-sgq", titulo: "Termo de Adoção Institucional – SGQ", tipo: "institucional", status: "vigente", arquivoPdf: "/materiais/termos/termo-adocao-institucional-sgq.pdf", descricao: "Documento institucional de formalização e adesão ao Sistema de Gestão da Qualidade." },
+];
+
+function DocRow({ doc }: { doc: Documento }) {
+  const tipo = TAGS[doc.tipo];
+  const status = STATUS[doc.status];
+  return (
+    <div className="doc-row">
+      <div className="doc-left">
+        <div className="doc-title"><span className="doc-icon" aria-hidden="true">{tipo.icon}</span><span>{doc.titulo}</span></div>
+        <div className="doc-meta">
+          <span className={tipo.badgeClass}>{tipo.label}</span>
+          <span className={status.badgeClass}>{status.label}</span>
+          {doc.obrigatorio ? <span className="badge badge-red">Obrigatório</span> : null}
+          {doc.versao ? <span className="meta-pill">Versão: {doc.versao}</span> : null}
+          {doc.data ? <span className="meta-pill">Revisão: {doc.data}</span> : null}
+        </div>
+        <div className="doc-sub">{doc.descricao || "Documento institucional para consulta, padronização e conformidade."}</div>
+      </div>
+      <div className="doc-actions">
+        <a className="btn btn-yellow btn-sm" href={doc.arquivoPdf} target="_blank" rel="noopener noreferrer">Abrir</a>
+        <a className="btn btn-outline btn-sm" href={doc.arquivoPdf} download>Baixar</a>
+      </div>
+    </div>
+  );
+}
+
+function SectionBox({ title, subtitle, docs }: { title: string; subtitle: string; docs: Documento[] }) {
+  if (!docs.length) return null;
+  return <div className="box"><div className="box-head"><div><h3 className="box-title">{title}</h3><p className="box-sub">{subtitle}</p></div><div className="box-count">{docs.length}</div></div><div className="doc-list">{docs.map((d) => <DocRow key={d.id} doc={d} />)}</div></div>;
 }
 
 export default function GovernancaPage() {
-  const [nome, setNome] = useState("");
-  const [perfil, setPerfil] = useState("");
-
-  useEffect(() => {
-    const session = getSession();
-    if (!session) return;
-
-    setNome(session.nome || "");
-    setPerfil(session.perfil || "");
-  }, []);
-
-  const totais = useMemo(() => {
-    return {
-      politicas: DOCUMENTOS.filter((d) => d.categoria === "politica").length,
-      procedimentos: DOCUMENTOS.filter((d) => d.categoria === "procedimento").length,
-      sgq: DOCUMENTOS.filter((d) => d.categoria === "sgq").length,
-      institucionais: DOCUMENTOS.filter((d) => d.categoria === "institucional").length,
-      termos: DOCUMENTOS.filter((d) => d.categoria === "termo").length,
-      restritos: DOCUMENTOS.filter((d) => d.restrito).length,
-    };
-  }, []);
-
-  const indicadores: Indicador[] = useMemo(
-    () => [
-      {
-        titulo: "Políticas Institucionais",
-        valor: totais.politicas,
-        icone: "📘",
-      },
-      {
-        titulo: "Procedimentos Internos",
-        valor: totais.procedimentos,
-        icone: "🧩",
-      },
-      {
-        titulo: "Documentos SGQ",
-        valor: totais.sgq,
-        icone: "🗂️",
-      },
-      {
-        titulo: "Treinamentos Obrigatórios",
-        valor: TOTAL_TREINAMENTOS,
-        icone: "🎓",
-      },
-      {
-        titulo: "Documentos Institucionais",
-        valor: totais.institucionais,
-        icone: "🏛️",
-      },
-      {
-        titulo: "Documentos Restritos",
-        valor: totais.restritos,
-        icone: "🔒",
-      },
-    ],
-    [totais]
-  );
-
+  const termo = TERMOS[0];
   return (
     <main className="section gray">
       <div className="container">
-        <div style={{ marginBottom: 12 }}>
-          <Link href="/colaborador" className="btn btn-outline small">
-            ← Voltar para Área do Colaborador
-          </Link>
+        <div style={{ marginBottom: 12 }}><Link href="/colaborador" className="btn btn-outline small">← Voltar para Área do Colaborador</Link></div>
+        <div className="section-title"><h2>Biblioteca de Governança</h2><div className="bar" /></div>
+        <p className="section-text">Documentos institucionais para consulta: políticas internas, procedimentos, materiais do Sistema de Gestão da Qualidade e documentos obrigatórios de suporte às atividades.</p>
+        <div className="highlight">
+          <div className="highlight-top"><div className="highlight-title">🔐 Termo de Confidencialidade (Obrigatório)</div><div className="highlight-badges"><span className="badge badge-red">Termo</span><span className="badge badge-ok">Vigente</span></div></div>
+          <div className="highlight-desc">Documento obrigatório para ciência e compromisso de sigilo, conformidade e boas práticas de tratamento das informações.</div>
+          <div className="highlight-actions"><Link className="btn btn-yellow" href="/colaborador/termo-de-confidencialidade">Registrar ciência</Link><a className="btn btn-outline" href={termo.arquivoPdf} target="_blank" rel="noopener noreferrer">Abrir PDF</a><a className="btn btn-outline" href={termo.arquivoPdf} download>Baixar</a></div>
         </div>
-
-        <div className="section-title">
-          <h2>Central de Governança</h2>
-          <div className="bar" />
-        </div>
-
-        <p className="section-text" style={{ maxWidth: 920 }}>
-          Painel institucional de acompanhamento de políticas, procedimentos, documentos do Sistema de Gestão da Qualidade,
-          treinamentos obrigatórios e estrutura de conformidade do portal.
-        </p>
-
-        <div className="gov-top">
-          <div className="gov-user">
-            <div className="gov-user-title">Sessão atual</div>
-            <div className="gov-user-name">{nome || "Usuário"}</div>
-            <div className="gov-user-sub">Perfil: {formatarPerfil(perfil)}</div>
-          </div>
-
-          <div className="gov-user gov-user-soft">
-            <div className="gov-user-title">Escopo monitorado</div>
-            <div className="gov-user-name">Governança documental</div>
-            <div className="gov-user-sub">Políticas, procedimentos, SGQ, termos e treinamentos</div>
-          </div>
-        </div>
-
-        <div className="govern-grid">
-          {indicadores.map((item, i) => (
-            <div className="gov-card" key={i}>
-              <div className="gov-icon">{item.icone}</div>
-              <div className="gov-number">{item.valor}</div>
-              <div className="gov-title">{item.titulo}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="gov-box">
-          <h3>Status de Conformidade</h3>
-
-          <div className="gov-line">
-            <span>Políticas institucionais cadastradas</span>
-            <strong>{totais.politicas}</strong>
-          </div>
-
-          <div className="gov-line">
-            <span>Procedimentos internos cadastrados</span>
-            <strong>{totais.procedimentos}</strong>
-          </div>
-
-          <div className="gov-line">
-            <span>Documentos do SGQ</span>
-            <strong>{totais.sgq}</strong>
-          </div>
-
-          <div className="gov-line">
-            <span>Documentos institucionais</span>
-            <strong>{totais.institucionais}</strong>
-          </div>
-
-          <div className="gov-line">
-            <span>Termos obrigatórios</span>
-            <strong>{totais.termos}</strong>
-          </div>
-
-          <div className="gov-line">
-            <span>Próxima revisão prevista</span>
-            <strong>02/2027</strong>
-          </div>
-        </div>
-
-        <div className="gov-box">
-          <h3>Mapa do Sistema de Governança</h3>
-
-          <div className="gov-structure">
-            <div className="gov-node">📘 Políticas</div>
-            <div className="gov-node">🧩 Procedimentos</div>
-            <div className="gov-node">🗂️ SGQ</div>
-            <div className="gov-node">🎓 Treinamentos</div>
-            <div className="gov-node">🔐 Termos</div>
-            <div className="gov-node">🧾 Auditoria</div>
-          </div>
-        </div>
-
-        <div className="gov-box">
-          <h3>Resumo Executivo</h3>
-
-          <div className="gov-summary">
-            <div className="gov-summary-card">
-              <div className="gov-summary-title">Base documental</div>
-              <div className="gov-summary-text">
-                O portal mantém uma biblioteca institucional organizada por categoria, com políticas, procedimentos,
-                documentos do SGQ e termos obrigatórios.
-              </div>
-            </div>
-
-            <div className="gov-summary-card">
-              <div className="gov-summary-title">Treinamentos</div>
-              <div className="gov-summary-text">
-                O ambiente considera atualmente <strong>{TOTAL_TREINAMENTOS}</strong> treinamentos obrigatórios vinculados ao
-                processo de conformidade.
-              </div>
-            </div>
-
-            <div className="gov-summary-card">
-              <div className="gov-summary-title">Controle de acesso</div>
-              <div className="gov-summary-text">
-                Há <strong>{totais.restritos}</strong> documento(s) com acesso restrito por perfil, reforçando governança e
-                segregação de acesso.
-              </div>
-            </div>
-          </div>
-        </div>
+        <SectionBox title="📘 Políticas Institucionais" subtitle="Diretrizes internas obrigatórias para governança, segurança, privacidade, RH e prevenção de riscos." docs={POLITICAS} />
+        <SectionBox title="🗂️ Sistema de Gestão da Qualidade (SGQ)" subtitle="Documentos formais de apoio, gestão, qualidade e estrutura institucional." docs={SGQ} />
+        <SectionBox title="🧩 Procedimentos Internos" subtitle="Procedimentos e manuais utilizados como evidência formal em auditorias internas e externas." docs={PROCEDIMENTOS} />
+        <SectionBox title="🏛️ Documentos Institucionais" subtitle="Documentos institucionais complementares de formalização, adesão e governança." docs={INSTITUCIONAIS} />
+        <div className="mt-18"><Link className="btn btn-outline" href="/colaborador">← Voltar para Área do Colaborador</Link></div>
+        <style jsx global>{`
+          .highlight{background:#fff;border-radius:18px;padding:18px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:14px;margin-bottom:18px;position:relative;overflow:hidden}.highlight::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 10%,rgba(247,198,0,.18),transparent 55%);pointer-events:none}.highlight-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;z-index:1}.highlight-title{font-weight:900;font-size:16px;color:#0b1f3a}.highlight-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.highlight-desc{margin-top:10px;color:rgba(0,0,0,.7);font-size:13px;font-weight:600;position:relative;z-index:1;max-width:840px}.highlight-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}.box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}.box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px 6px;border-bottom:1px dashed rgba(0,0,0,.12)}.box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}.box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(0,0,0,.7)}.doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}.doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}.doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.meta-pill,.badge{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}.btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-red{background:rgba(210,30,30,.08);border-color:rgba(210,30,30,.18);color:rgba(150,20,20,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}@media(max-width:780px){.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}.highlight-top{flex-direction:column}}
+        `}</style>
       </div>
-
-      <style jsx global>{`
-        .gov-top {
-          margin-top: 18px;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 16px;
-        }
-
-        .gov-user {
-          background: #fff;
-          border-radius: 16px;
-          padding: 18px;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
-        }
-
-        .gov-user-soft {
-          background: linear-gradient(180deg, #ffffff, #f7f9ff);
-        }
-
-        .gov-user-title {
-          font-size: 12px;
-          font-weight: 900;
-          opacity: 0.65;
-        }
-
-        .gov-user-name {
-          font-size: 20px;
-          font-weight: 900;
-          color: #0b3b8a;
-          margin-top: 6px;
-        }
-
-        .gov-user-sub {
-          font-size: 13px;
-          font-weight: 700;
-          opacity: 0.8;
-          margin-top: 6px;
-        }
-
-        .govern-grid {
-          margin-top: 20px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-        }
-
-        .gov-card {
-          background: #fff;
-          border-radius: 16px;
-          padding: 22px;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          text-align: center;
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
-        }
-
-        .gov-icon {
-          font-size: 26px;
-        }
-
-        .gov-number {
-          font-size: 32px;
-          font-weight: 900;
-          margin-top: 6px;
-          color: #0b3b8a;
-        }
-
-        .gov-title {
-          font-size: 13px;
-          margin-top: 6px;
-          font-weight: 700;
-          opacity: 0.85;
-        }
-
-        .gov-box {
-          margin-top: 24px;
-          background: #fff;
-          border-radius: 16px;
-          padding: 20px;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
-        }
-
-        .gov-box h3 {
-          margin-bottom: 12px;
-          color: #0b1f3a;
-        }
-
-        .gov-line {
-          display: flex;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 10px 0;
-          border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-          font-size: 14px;
-        }
-
-        .gov-line:last-child {
-          border-bottom: none;
-        }
-
-        .gov-structure {
-          margin-top: 10px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-        }
-
-        .gov-node {
-          background: #f5f7fb;
-          padding: 14px;
-          border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          font-weight: 700;
-          text-align: center;
-        }
-
-        .gov-summary {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 12px;
-        }
-
-        .gov-summary-card {
-          background: #f8faff;
-          border: 1px solid rgba(10, 42, 106, 0.08);
-          border-radius: 14px;
-          padding: 14px;
-        }
-
-        .gov-summary-title {
-          font-weight: 900;
-          color: #0a2a6a;
-          margin-bottom: 8px;
-        }
-
-        .gov-summary-text {
-          font-size: 13px;
-          line-height: 1.5;
-          font-weight: 700;
-          color: rgba(0, 0, 0, 0.72);
-        }
-
-        @media (max-width: 1000px) {
-          .gov-top {
-            grid-template-columns: 1fr;
-          }
-
-          .govern-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .gov-structure {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .gov-summary {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .govern-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .gov-structure {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </main>
   );
 }
