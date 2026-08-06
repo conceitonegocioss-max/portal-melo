@@ -347,7 +347,7 @@ export default function EvidenciasPage() {
             </div>
 
             <p className="section-text" style={{ maxWidth: 920 }}>
-              Consulta consolidada por colaborador, com evidências automáticas de treinamentos/provas registradas no Logger Central e evidências emitidas manualmente.
+              Consulta consolidada por colaborador, com evidências de treinamentos e provas registradas no portal.
             </p>
           </div>
 
@@ -396,7 +396,7 @@ export default function EvidenciasPage() {
           </div>
         </div>
 
-        {carregando && <div className="card evInfoCard"><div className="evInfoTitle">Carregando evidências…</div><div className="evInfoSub">Consultando evidências salvas e Logger Central.</div></div>}
+        {carregando && <div className="card evInfoCard"><div className="evInfoTitle">Carregando evidências…</div><div className="evInfoSub">Consultando registros de treinamentos e provas.</div></div>}
 
         {erro && (
           <div className="card evInfoCard" style={{ borderColor: "rgba(210, 30, 30, 0.25)" }}>
@@ -417,21 +417,18 @@ export default function EvidenciasPage() {
                     <th>Treinamentos</th>
                     <th>Provas</th>
                     <th>Status geral</th>
-                    <th>Origem</th>
                     <th style={{ textAlign: "right" }}>Ação</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {evidenciasFiltradas.length === 0 ? (
-                    <tr><td colSpan={9} className="evEmpty">Nenhuma evidência encontrada.</td></tr>
+                    <tr><td colSpan={8} className="evEmpty">Nenhuma evidência encontrada.</td></tr>
                   ) : (
                     evidenciasFiltradas.map((ev) => {
                       const percentual = pct(ev.concluidos, ev.total);
                       const situacao = situacaoEvidencia(ev);
-                      const linkDetalhe = ev.id.startsWith("auto-")
-                        ? `/colaborador/auditoria/logger?busca=${encodeURIComponent(ev.cpf)}`
-                        : `/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`;
+                      const linkDetalhe = `/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`;
 
                       return (
                         <tr key={ev.id}>
@@ -449,10 +446,9 @@ export default function EvidenciasPage() {
 
                           <td className="evTdMuted">{ev.provasAprovadas || 0}/{ev.provas || 0}</td>
                           <td><span className={`evStatus ${situacaoClass(situacao)}`}>{situacaoLabel(situacao)}</span></td>
-                          <td className="evTdMuted">{ev.origem === "LOGGER" ? "Automática" : ev.origem === "MISTA" ? "Mista" : "Manual"}</td>
 
                           <td style={{ textAlign: "right" }}>
-                            <Link className="btn btn-outline evBtnPill" href={linkDetalhe}>{ev.id.startsWith("auto-") ? "Ver no logger" : "Consultar evidência"}</Link>
+                            <Link className="btn btn-outline evBtnPill" href={linkDetalhe}>Consultar evidência</Link>
                           </td>
                         </tr>
                       );
@@ -463,7 +459,7 @@ export default function EvidenciasPage() {
             </div>
 
             <div className="evObs">
-              Nota de auditoria: esta listagem consolida evidências salvas e eventos automáticos do Logger Central. O histórico bruto permanece disponível no Logger Central.
+              Nota de auditoria: esta listagem consolida as evidências de treinamentos e provas por colaborador. O histórico bruto permanece disponível no Logger Central.
             </div>
           </div>
         )}
@@ -497,7 +493,7 @@ export default function EvidenciasPage() {
           .evInfoSub { margin-top:6px; font-size:12px; opacity:.75; font-weight:700; }
           .evTableCard { padding:16px!important; border-radius:18px!important; }
           .evTableWrap { overflow-x:auto; }
-          .evTable { width:100%; min-width:1120px; border-collapse:collapse; }
+          .evTable { width:100%; min-width:1040px; border-collapse:collapse; }
           .evTable thead th { text-align:left; font-size:12px; padding:12px 10px; border-bottom:1px solid rgba(10,42,106,.12); color:rgba(0,0,0,.7); font-weight:900; background:rgba(247,249,255,.7); }
           .evTable tbody td { padding:12px 10px; border-bottom:1px solid rgba(10,42,106,.08); vertical-align:top; }
           .evEmpty { padding:14px!important; opacity:.8; }
