@@ -167,7 +167,6 @@ export default function TermoConfidencialidadePage() {
       <div className="container termoPage">
         <div className="termoTop noPrint">
           <Link className="btn btn-outline termoBtnPill" href="/colaborador">← Voltar para Área do Colaborador</Link>
-          <Link className="btn btn-outline termoBtnPill" href="/colaborador/governanca">Biblioteca de Governança</Link>
         </div>
 
         <div className="section-title" style={{ marginTop: 0 }}>
