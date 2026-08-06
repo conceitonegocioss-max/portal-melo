@@ -43,7 +43,14 @@ function lerProgressoLocal(cpf: string): ProgressoPorTreino {
   try {
     const raw = localStorage.getItem(keyByCpf(cpf));
     if (!raw) return {};
-    return JSON.parse(raw) as ProgressoPorTreino;
+    const parsed = JSON.parse(raw) as ProgressoPorTreino;
+
+    // Compatibilidade com versão anterior em que Ourocap estava como "ourocapp".
+    if (parsed.ourocapp && !parsed.ourocap) {
+      parsed.ourocap = parsed.ourocapp;
+    }
+
+    return parsed;
   } catch {
     return {};
   }
@@ -55,10 +62,17 @@ function salvarProgressoLocal(cpf: string, progresso: ProgressoPorTreino) {
 }
 
 function mesclarProgresso(local: ProgressoPorTreino, remoto: ProgressoPorTreino): ProgressoPorTreino {
-  return {
+  const mesclado = {
     ...(local || {}),
     ...(remoto || {}),
   };
+
+  // Compatibilidade com registros antigos do treinamento Ourocap.
+  if (mesclado.ourocapp && !mesclado.ourocap) {
+    mesclado.ourocap = mesclado.ourocapp;
+  }
+
+  return mesclado;
 }
 
 const TREINAMENTOS: Treinamento[] = [
@@ -69,7 +83,7 @@ const TREINAMENTOS: Treinamento[] = [
   { id: "credito-responsavel", titulo: "Crédito Responsável", descricao: "Práticas para concessão responsável e orientações ao cliente.", pasta: "credito-responsavel", categoria: "Crédito", publico: "Agente de Crédito", capa: CAPA_PADRAO },
   { id: "lgpd", titulo: "LGPD", descricao: "Lei Geral de Proteção de Dados e boas práticas.", pasta: "lgpd", categoria: "Compliance", publico: "Todos", capa: CAPA_PADRAO },
   { id: "lista-de-mailing", titulo: "Lista de Mailing", descricao: "Boas práticas no uso de listas e abordagem a clientes.", pasta: "lista-de-mailing", categoria: "Atendimento", publico: "Todos", capa: CAPA_PADRAO },
-  { id: "ourocapp", titulo: "Ourocap", descricao: "Produto Ourocap: conceitos e orientações comerciais.", pasta: "ourocapp", categoria: "Produtos", publico: "Agente de Crédito", capa: CAPA_PADRAO },
+  { id: "ourocap", titulo: "Ourocap", descricao: "Produto Ourocap: conceitos e orientações comerciais.", pasta: "ourocap", categoria: "Produtos", publico: "Agente de Crédito", capa: CAPA_PADRAO, provaHref: "/colaborador/provas/ourocap" },
   { id: "pld-ft", titulo: "PLD-FT", descricao: "Prevenção à lavagem de dinheiro e financiamento ao terrorismo.", pasta: "pld-ft", categoria: "Compliance", publico: "Todos", capa: CAPA_PADRAO },
   { id: "prevencao-a-fraude", titulo: "Prevenção à Fraude", descricao: "Identificação de riscos e boas práticas antifraude.", pasta: "prevencao-a-fraude", categoria: "Compliance", publico: "Todos", capa: CAPA_PADRAO },
   { id: "produtos-modalidades-credito", titulo: "Produtos e Modalidades de Crédito", descricao: "Visão geral de produtos e modalidades de crédito.", pasta: "produtos-modalidades-credito", categoria: "Crédito", publico: "Agente de Crédito", capa: CAPA_PADRAO },
