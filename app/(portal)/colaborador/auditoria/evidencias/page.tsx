@@ -21,12 +21,53 @@ type Evidencia = {
   concluidos: number;
   total: number;
   itens: EvidenciaItem[];
+  origem?: "MANUAL" | "LOGGER" | "MISTA";
+  provas?: number;
+  provasAprovadas?: number;
+};
+
+type AuditEvent = {
+  id: string;
+  atISO: string;
+  type: string;
+  actorCpf?: string;
+  actorNome?: string;
+  actorEmpresa?: string;
+  entityId?: string;
+  entityTitle?: string;
+  module?: string;
+  meta?: Record<string, any>;
 };
 
 type Situacao = "TODAS" | "PENDENTE" | "PARCIAL" | "COMPLETO" | "SEM_CONCLUSAO";
 
+const TREINAMENTOS_BASE = [
+  "atendimento-ao-cliente",
+  "codigo-de-etica-e-conduta",
+  "resumo-contratual",
+  "credito-responsavel",
+  "resolucao-autorregulacao",
+  "prevencao-a-fraude",
+  "publico-vulneravel",
+  "lgpd",
+  "pld-ft",
+  "seguranca-da-informacao",
+  "produtos-modalidades-credito",
+  "basico-consorcio",
+  "ourocap",
+  "abertura-de-contas",
+  "seguridade",
+  "lista-de-mailing",
+];
+
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "");
+}
+
+function normalizarTreinamentoId(id: string) {
+  const value = String(id || "").trim();
+  if (value === "ourocapp") return "ourocap";
+  return value;
 }
 
 function mascararCpf(cpf: string) {
@@ -67,6 +108,91 @@ function situacaoClass(s: ReturnType<typeof situacaoEvidencia>) {
   return "pend";
 }
 
+function dataMaisRecente(a?: string, b?: string) {
+  const at = a ? new Date(a).getTime() : 0;
+  const bt = b ? new Date(b).getTime() : 0;
+  return bt > at ? b || a || "" : a || b || "";
+}
+
+function evidenciaFromLogger(events: AuditEvent[]) {
+  const porCpf = new Map<string, {
+    cpf: string;
+    nome: string;
+    empresa: string;
+    ultimaData: string;
+    treinamentos: Map<string, string>;
+    provas: number;
+    provasAprovadas: number;
+  }>();
+
+  for (const ev of events) {
+    const type = String(ev.type || "").toUpperCase();
+    const module = String(ev.module || "").toLowerCase();
+    const isTreinamento = type === "TREINAMENTO_CONCLUIDO" || module === "treinamentos";
+    const isProva = type.startsWith("PROVA_") || module === "provas";
+
+    if (!isTreinamento && !isProva) continue;
+
+    const cpf = onlyDigits(ev.actorCpf || String(ev.meta?.cpf || ""));
+    if (!cpf) continue;
+
+    const atual = porCpf.get(cpf) || {
+      cpf,
+      nome: ev.actorNome || String(ev.meta?.nome || ""),
+      empresa: ev.actorEmpresa || String(ev.meta?.empresa || ""),
+      ultimaData: ev.atISO || "",
+      treinamentos: new Map<string, string>(),
+      provas: 0,
+      provasAprovadas: 0,
+    };
+
+    if (!atual.nome && ev.actorNome) atual.nome = ev.actorNome;
+    if (!atual.empresa && ev.actorEmpresa) atual.empresa = ev.actorEmpresa;
+    atual.ultimaData = dataMaisRecente(atual.ultimaData, ev.atISO);
+
+    if (isTreinamento) {
+      const treinoId = normalizarTreinamentoId(ev.entityId || String(ev.meta?.treinamentoId || ev.meta?.pasta || ""));
+      if (treinoId) {
+        const atualData = atual.treinamentos.get(treinoId);
+        atual.treinamentos.set(treinoId, dataMaisRecente(atualData, ev.atISO));
+      }
+    }
+
+    if (isProva) {
+      atual.provas += 1;
+      const aprovadoMeta = String(ev.meta?.aprovado || "").toUpperCase();
+      if (type === "PROVA_APROVADA" || aprovadoMeta === "SIM" || aprovadoMeta === "TRUE") {
+        atual.provasAprovadas += 1;
+      }
+    }
+
+    porCpf.set(cpf, atual);
+  }
+
+  return Array.from(porCpf.values()).map((x): Evidencia => {
+    const itens = TREINAMENTOS_BASE.map((id) => ({
+      treinamentoId: id,
+      status: x.treinamentos.has(id) ? "concluido" as const : "pendente" as const,
+      dataISO: x.treinamentos.get(id) || null,
+    }));
+
+    return {
+      id: `auto-${x.cpf}`,
+      cpf: x.cpf,
+      colaborador: x.nome || "—",
+      empresa: x.empresa || "—",
+      emitidoEmISO: x.ultimaData || new Date().toISOString(),
+      emitidoPor: "Logger Central",
+      concluidos: itens.filter((i) => i.status === "concluido").length,
+      total: itens.length,
+      itens,
+      origem: "LOGGER",
+      provas: x.provas,
+      provasAprovadas: x.provasAprovadas,
+    };
+  });
+}
+
 function consolidarPorColaborador(items: Evidencia[]) {
   const map = new Map<string, Evidencia>();
 
@@ -84,9 +210,8 @@ function consolidarPorColaborador(items: Evidencia[]) {
     const evTime = new Date(ev.emitidoEmISO || 0).getTime();
     const atualTime = new Date(atual.emitidoEmISO || 0).getTime();
 
-    // Mantém o registro mais completo. Em empate, mantém o mais recente.
     if (evPct > atualPct || (evPct === atualPct && evTime > atualTime)) {
-      map.set(key, ev);
+      map.set(key, { ...ev, origem: atual.origem && atual.origem !== ev.origem ? "MISTA" : ev.origem });
     }
   }
 
@@ -133,13 +258,26 @@ export default function EvidenciasPage() {
         setCarregando(true);
         setErro(null);
 
-        const res = await fetch("/api/evidencias", { cache: "no-store" });
-        const json = await res.json();
+        const [evidenciasRes, eventosRes] = await Promise.allSettled([
+          fetch("/api/evidencias", { cache: "no-store" }),
+          fetch("/api/audit/events?all=1", { cache: "no-store" }),
+        ]);
 
-        if (!json?.ok) throw new Error("Resposta inválida da API.");
+        let manuais: Evidencia[] = [];
+        let automaticas: Evidencia[] = [];
 
-        const items = (json.items || []) as Evidencia[];
-        setEvidencias(consolidarPorColaborador(items));
+        if (evidenciasRes.status === "fulfilled") {
+          const json = await evidenciasRes.value.json();
+          manuais = Array.isArray(json?.items) ? json.items.map((x: Evidencia) => ({ ...x, origem: "MANUAL" as const })) : [];
+        }
+
+        if (eventosRes.status === "fulfilled") {
+          const json = await eventosRes.value.json();
+          const eventos = Array.isArray(json?.items) ? json.items : [];
+          automaticas = evidenciaFromLogger(eventos);
+        }
+
+        setEvidencias(consolidarPorColaborador([...manuais, ...automaticas]));
       } catch (e: any) {
         setErro(e?.message || "Erro ao carregar evidências.");
       } finally {
@@ -151,7 +289,7 @@ export default function EvidenciasPage() {
   const empresas = useMemo(() => {
     const set = new Set<string>();
     for (const ev of evidencias) {
-      if (ev.empresa) set.add(ev.empresa);
+      if (ev.empresa && ev.empresa !== "—") set.add(ev.empresa);
     }
     return ["TODAS", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [evidencias]);
@@ -209,7 +347,7 @@ export default function EvidenciasPage() {
             </div>
 
             <p className="section-text" style={{ maxWidth: 920 }}>
-              Consulta consolidada por colaborador, com evidências de treinamentos, pendências e detalhamento para auditoria. A listagem exibe uma linha por CPF, mantendo o registro mais completo/recente.
+              Consulta consolidada por colaborador, com evidências automáticas de treinamentos/provas registradas no Logger Central e evidências emitidas manualmente.
             </p>
           </div>
 
@@ -258,7 +396,7 @@ export default function EvidenciasPage() {
           </div>
         </div>
 
-        {carregando && <div className="card evInfoCard"><div className="evInfoTitle">Carregando evidências…</div><div className="evInfoSub">Aguarde alguns segundos.</div></div>}
+        {carregando && <div className="card evInfoCard"><div className="evInfoTitle">Carregando evidências…</div><div className="evInfoSub">Consultando evidências salvas e Logger Central.</div></div>}
 
         {erro && (
           <div className="card evInfoCard" style={{ borderColor: "rgba(210, 30, 30, 0.25)" }}>
@@ -272,23 +410,28 @@ export default function EvidenciasPage() {
               <table className="evTable">
                 <thead>
                   <tr>
-                    <th>Última emissão</th>
+                    <th>Último registro</th>
                     <th>Colaborador</th>
                     <th>Empresa</th>
                     <th>CPF</th>
                     <th>Treinamentos</th>
+                    <th>Provas</th>
                     <th>Status geral</th>
+                    <th>Origem</th>
                     <th style={{ textAlign: "right" }}>Ação</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {evidenciasFiltradas.length === 0 ? (
-                    <tr><td colSpan={7} className="evEmpty">Nenhuma evidência encontrada.</td></tr>
+                    <tr><td colSpan={9} className="evEmpty">Nenhuma evidência encontrada.</td></tr>
                   ) : (
                     evidenciasFiltradas.map((ev) => {
                       const percentual = pct(ev.concluidos, ev.total);
                       const situacao = situacaoEvidencia(ev);
+                      const linkDetalhe = ev.id.startsWith("auto-")
+                        ? `/colaborador/auditoria/logger?busca=${encodeURIComponent(ev.cpf)}`
+                        : `/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`;
 
                       return (
                         <tr key={ev.id}>
@@ -304,10 +447,12 @@ export default function EvidenciasPage() {
                             <div className="evBar"><div className="evBarFill" style={{ width: `${Math.min(100, Math.max(0, percentual))}%` }} /></div>
                           </td>
 
+                          <td className="evTdMuted">{ev.provasAprovadas || 0}/{ev.provas || 0}</td>
                           <td><span className={`evStatus ${situacaoClass(situacao)}`}>{situacaoLabel(situacao)}</span></td>
+                          <td className="evTdMuted">{ev.origem === "LOGGER" ? "Automática" : ev.origem === "MISTA" ? "Mista" : "Manual"}</td>
 
                           <td style={{ textAlign: "right" }}>
-                            <Link className="btn btn-outline evBtnPill" href={`/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`}>Consultar evidência</Link>
+                            <Link className="btn btn-outline evBtnPill" href={linkDetalhe}>{ev.id.startsWith("auto-") ? "Ver no logger" : "Consultar evidência"}</Link>
                           </td>
                         </tr>
                       );
@@ -318,7 +463,7 @@ export default function EvidenciasPage() {
             </div>
 
             <div className="evObs">
-              Nota de auditoria: a listagem é consolidada por colaborador. O histórico completo permanece no Logger Central; o detalhe apresenta os treinamentos e provas vinculadas.
+              Nota de auditoria: esta listagem consolida evidências salvas e eventos automáticos do Logger Central. O histórico bruto permanece disponível no Logger Central.
             </div>
           </div>
         )}
@@ -352,7 +497,7 @@ export default function EvidenciasPage() {
           .evInfoSub { margin-top:6px; font-size:12px; opacity:.75; font-weight:700; }
           .evTableCard { padding:16px!important; border-radius:18px!important; }
           .evTableWrap { overflow-x:auto; }
-          .evTable { width:100%; min-width:980px; border-collapse:collapse; }
+          .evTable { width:100%; min-width:1120px; border-collapse:collapse; }
           .evTable thead th { text-align:left; font-size:12px; padding:12px 10px; border-bottom:1px solid rgba(10,42,106,.12); color:rgba(0,0,0,.7); font-weight:900; background:rgba(247,249,255,.7); }
           .evTable tbody td { padding:12px 10px; border-bottom:1px solid rgba(10,42,106,.08); vertical-align:top; }
           .evEmpty { padding:14px!important; opacity:.8; }
