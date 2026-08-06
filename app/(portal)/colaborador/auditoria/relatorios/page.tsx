@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSession } from "@/src/lib/auth";
+
+import { guardAdmin } from "@/src/lib/accessGuard";
 
 type AuditEventEntry = {
   id: string;
@@ -23,13 +24,82 @@ type AuditEventEntry = {
   userAgent?: string;
 };
 
-const REPORTS = [
-  { id: "TODOS", label: "Todos os eventos", hint: "Visão geral do logger central." },
-  { id: "TREINAMENTOS", label: "Treinamentos", hint: "Conclusões registradas por colaborador/CPF." },
-  { id: "PROVAS", label: "Provas", hint: "Avaliações, pontuações e aprovações registradas." },
-  { id: "TERMOS", label: "Termos", hint: "Ciência em termo de confidencialidade e documentos obrigatórios." },
-  { id: "SCRIPTS", label: "Scripts", hint: "Ciência dos scripts operacionais por versão." },
-  { id: "ACESSOS", label: "Acessos", hint: "Login, perfil, alterações e eventos administrativos." },
+type ReportCard = {
+  icon: string;
+  title: string;
+  text: string;
+  href: string;
+  button: string;
+  tag: string;
+  tone?: "yellow" | "outline";
+};
+
+const REPORT_CARDS: ReportCard[] = [
+  {
+    icon: "🧾",
+    title: "Dossiê por Colaborador",
+    text: "Consulta individual de evidências: treinamentos, provas vinculadas, notas, pendências e detalhe por colaborador.",
+    href: "/colaborador/auditoria/evidencias",
+    button: "Abrir Central de Evidências",
+    tag: "Consulta individual",
+    tone: "yellow",
+  },
+  {
+    icon: "📚",
+    title: "Controle de Treinamentos",
+    text: "Relatório consolidado de treinamentos concluídos, por colaborador, CPF, empresa, data/hora e categoria.",
+    href: "/colaborador/auditoria/treinamentos-controle",
+    button: "Abrir Treinamentos",
+    tag: "Exportação",
+  },
+  {
+    icon: "📝",
+    title: "Resultados das Provas",
+    text: "Relatório final por colaborador/prova: nota, aprovação/reprovação, tentativa registrada e data/hora.",
+    href: "/colaborador/auditoria/provas-resultados",
+    button: "Abrir Resultados",
+    tag: "Exportação",
+  },
+  {
+    icon: "🎓",
+    title: "Certificações",
+    text: "Controle de Consignado, LGPD e PLDFT, com status, vencimentos, pendências e exportação para auditoria.",
+    href: "/colaborador/auditoria/certificacoes",
+    button: "Abrir Certificações",
+    tag: "Controle",
+  },
+  {
+    icon: "👤",
+    title: "Usuários & Perfis",
+    text: "Relatório de usuários, perfil do portal, perfil de auditoria, status ativo/inativo e senha inicial.",
+    href: "/colaborador/auditoria/usuarios",
+    button: "Abrir Usuários",
+    tag: "Controle de acesso",
+  },
+  {
+    icon: "🛡️",
+    title: "Alterações de Acesso",
+    text: "Histórico específico das alterações de status/perfil, com antes/depois, responsável e data/hora.",
+    href: "/colaborador/auditoria/acessos",
+    button: "Abrir Alterações",
+    tag: "Rastreabilidade",
+  },
+  {
+    icon: "🔐",
+    title: "Log de Login",
+    text: "Consulta dos acessos ao portal, autenticações, falhas, IP, data/hora e contexto técnico.",
+    href: "/colaborador/auditoria/logins",
+    button: "Abrir Log de Login",
+    tag: "Segurança",
+  },
+  {
+    icon: "🧠",
+    title: "Logger Central Completo",
+    text: "Base técnica completa dos eventos do portal. Use como trilha bruta de rastreabilidade quando necessário.",
+    href: "/colaborador/auditoria/events",
+    button: "Abrir Logger",
+    tag: "Histórico bruto",
+  },
 ];
 
 function formatDate(iso: string) {
@@ -45,41 +115,73 @@ function csvEscape(value: unknown) {
   return `"${s.replace(/"/g, '""')}"`;
 }
 
-function reportMatch(item: AuditEventEntry, report: string) {
-  const type = String(item.type || "").toUpperCase();
-  const module = String(item.module || "").toUpperCase();
-  const entity = String(item.entityTitle || item.entityId || "").toUpperCase();
+function reportTypeCount(items: AuditEventEntry[], predicate: (item: AuditEventEntry) => boolean) {
+  return items.filter(predicate).length;
+}
 
-  if (report === "TODOS") return true;
-  if (report === "TREINAMENTOS") return type.includes("TREINAMENTO") || module.includes("TREINAMENTO");
-  if (report === "PROVAS") return type.includes("PROVA") || module.includes("PROVA") || entity.includes("PROVA");
-  if (report === "TERMOS") return type.includes("TERMO") || module.includes("TERMO") || entity.includes("TERMO") || entity.includes("CONFIDENCIALIDADE");
-  if (report === "SCRIPTS") return type.includes("SCRIPT") || module.includes("SCRIPT") || entity.includes("SCRIPT");
-  if (report === "ACESSOS") return type.includes("LOGIN") || type.includes("ACESSO") || type.includes("ADMIN") || module.includes("AUDITORIA");
-  return true;
+function exportarLoggerCsv(items: AuditEventEntry[]) {
+  const header = ["Data/Hora", "Tipo", "Colaborador", "CPF", "Empresa", "Modulo", "Item", "Observacao", "IP"];
+  const rows = items.map((it) => [
+    formatDate(it.atISO),
+    it.type || "",
+    it.actorNome || "",
+    it.actorCpf || "",
+    it.actorEmpresa || "",
+    it.module || "",
+    it.entityTitle || it.entityId || "",
+    it.obs || "",
+    it.ip || "",
+  ]);
+
+  const csv = [header, ...rows].map((row) => row.map(csvEscape).join(";")).join("\n");
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `logger-central-completo-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function ReportTile({ card }: { card: ReportCard }) {
+  return (
+    <section className="reportTile" aria-label={card.title}>
+      <div className="tileHead">
+        <div className="tileIcon" aria-hidden="true">{card.icon}</div>
+        <div>
+          <div className="tileTag">{card.tag}</div>
+          <div className="tileTitle">{card.title}</div>
+        </div>
+      </div>
+      <p className="tileText">{card.text}</p>
+      <div className="tileActions">
+        <Link className={`btn ${card.tone === "yellow" ? "btn-yellow" : "btn-outline"}`} href={card.href} style={{ width: "100%", textAlign: "center" }}>
+          {card.button}
+        </Link>
+      </div>
+    </section>
+  );
 }
 
 export default function RelatoriosAuditoriaPage() {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<AuditEventEntry[]>([]);
   const [err, setErr] = useState<string | null>(null);
-  const [report, setReport] = useState("TREINAMENTOS");
-  const [q, setQ] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
 
   async function load() {
     try {
       setLoading(true);
       setErr(null);
-      const res = await fetch("/api/audit/events?all=1", { method: "GET" });
+      const res = await fetch("/api/audit/events?all=1", { method: "GET", cache: "no-store" });
       const data = await res.json();
-      if (!data?.ok) throw new Error("Falha ao carregar relatórios.");
+      if (!data?.ok) throw new Error("Falha ao carregar resumo.");
       setItems(Array.isArray(data.items) ? data.items : []);
     } catch {
-      setErr("Não foi possível carregar os registros de auditoria.");
+      setErr("Não foi possível carregar o resumo do Logger Central.");
       setItems([]);
     } finally {
       setLoading(false);
@@ -87,100 +189,35 @@ export default function RelatoriosAuditoriaPage() {
   }
 
   useEffect(() => {
-    setMounted(true);
-    const session = getSession();
-    if (!session) {
-      router.replace("/colaborador/login");
-      return;
-    }
-    if (session.perfil !== "ADMIN") {
-      router.replace("/colaborador");
-      return;
-    }
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const g = guardAdmin(router);
+    if (!g.ok) return;
+    setReady(true);
+    void load();
   }, [router]);
-
-  const filtered = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
-    const toTime = to ? new Date(`${to}T23:59:59`).getTime() : null;
-
-    return items
-      .filter((it) => reportMatch(it, report))
-      .filter((it) => {
-        const t = it.atISO ? new Date(it.atISO).getTime() : 0;
-        if (fromTime && t < fromTime) return false;
-        if (toTime && t > toTime) return false;
-        if (!query) return true;
-
-        const hay = [
-          it.type,
-          it.actorCpf,
-          it.actorNome,
-          it.actorPerfil,
-          it.actorEmpresa,
-          it.targetCpf,
-          it.module,
-          it.entityId,
-          it.entityTitle,
-          it.obs,
-          it.ip,
-          it.meta ? JSON.stringify(it.meta) : "",
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-
-        return hay.includes(query);
-      });
-  }, [items, report, q, from, to]);
 
   const stats = useMemo(() => {
     const cpfs = new Set<string>();
-    const modulos = new Set<string>();
-    for (const it of filtered) {
-      if (it.actorCpf) cpfs.add(it.actorCpf);
-      if (it.module) modulos.add(it.module);
+    const modules = new Set<string>();
+
+    for (const it of items) {
+      if (it.actorCpf) cpfs.add(String(it.actorCpf));
+      if (it.module) modules.add(String(it.module));
     }
+
     return {
-      registros: filtered.length,
+      eventos: items.length,
       colaboradores: cpfs.size,
-      modulos: modulos.size,
+      modulos: modules.size,
+      treinamentos: reportTypeCount(items, (it) => String(it.type || "").includes("TREINAMENTO")),
+      provas: reportTypeCount(items, (it) => String(it.type || "").includes("PROVA")),
+      acessos: reportTypeCount(items, (it) => {
+        const t = String(it.type || "").toUpperCase();
+        return t.includes("LOGIN") || t.includes("ACESSO") || t.includes("ADMIN") || t.includes("USUARIO");
+      }),
     };
-  }, [filtered]);
+  }, [items]);
 
-  function exportarCsv() {
-    const header = ["Data/Hora", "Tipo", "Colaborador", "CPF", "Empresa", "Módulo", "Item", "Status/Obs", "IP"];
-    const rows = filtered.map((it) => [
-      formatDate(it.atISO),
-      it.type || "",
-      it.actorNome || "",
-      it.actorCpf || "",
-      it.actorEmpresa || "",
-      it.module || "",
-      it.entityTitle || it.entityId || "",
-      it.obs || "",
-      it.ip || "",
-    ]);
-
-    const csv = [header, ...rows].map((row) => row.map(csvEscape).join(";")).join("\n");
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `relatorio-auditoria-${report.toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function imprimir() {
-    window.print();
-  }
-
-  if (!mounted) {
+  if (!ready) {
     return (
       <main className="section gray">
         <div className="container"><p>Carregando…</p></div>
@@ -190,135 +227,98 @@ export default function RelatoriosAuditoriaPage() {
 
   return (
     <main className="section gray">
-      <div className="container reportPage">
-        <div className="noPrint" style={{ marginBottom: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div className="container reportHubPage">
+        <div className="topActions noPrint">
           <Link href="/colaborador/auditoria" className="btn btn-outline small">← Voltar para Auditoria</Link>
           <Link href="/colaborador" className="btn btn-outline small">← Área do Colaborador</Link>
         </div>
 
-        <div className="reportHeader">
+        <header className="reportHero">
           <div>
             <h1>Relatórios de Auditoria</h1>
             <div className="bar" />
             <p>
-              Painel administrativo para consulta, filtro, impressão e exportação de registros do Portal do Colaborador.
+              Painel para emissão, consulta e exportação dos relatórios formais do Portal do Colaborador. A Central de Evidências fica reservada ao dossiê individual por colaborador.
             </p>
           </div>
-          <div className="reportStamp">
-            <strong>Gerado em:</strong><br />{formatDate(new Date().toISOString())}
+          <div className="stampBox">
+            <span>Atualizado em</span>
+            <strong>{formatDate(new Date().toISOString())}</strong>
           </div>
+        </header>
+
+        <section className="summaryBox" aria-label="Resumo do Logger Central">
+          <div className="summaryHead">
+            <div>
+              <strong>Resumo geral do Logger Central</strong>
+              <span>{loading ? "Carregando registros..." : err ? err : "Dados técnicos usados como base para relatórios e rastreabilidade."}</span>
+            </div>
+            <div className="summaryActions noPrint">
+              <button className="btn btn-outline small" type="button" onClick={load}>Atualizar</button>
+              <button className="btn btn-yellow small" type="button" disabled={items.length === 0} onClick={() => exportarLoggerCsv(items)}>
+                Exportar Logger CSV
+              </button>
+            </div>
+          </div>
+
+          <div className="statsGrid">
+            <div><span>Eventos</span><strong>{stats.eventos}</strong></div>
+            <div><span>Colaboradores/CPFs</span><strong>{stats.colaboradores}</strong></div>
+            <div><span>Módulos</span><strong>{stats.modulos}</strong></div>
+            <div><span>Treinamentos</span><strong>{stats.treinamentos}</strong></div>
+            <div><span>Provas</span><strong>{stats.provas}</strong></div>
+            <div><span>Acessos/Admin</span><strong>{stats.acessos}</strong></div>
+          </div>
+        </section>
+
+        <section className="guidanceBox">
+          <strong>Como usar esta área:</strong>
+          <span>
+            Use os cards abaixo para abrir o relatório específico, aplicar filtros e exportar em Excel/CSV ou imprimir/salvar PDF. Para analisar uma pessoa específica, utilize a Central de Evidências.
+          </span>
+        </section>
+
+        <div className="reportGrid">
+          {REPORT_CARDS.map((card) => <ReportTile key={card.title} card={card} />)}
         </div>
 
-        <div className="reportCards noPrint">
-          {REPORTS.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              className={`reportType ${report === r.id ? "active" : ""}`}
-              onClick={() => setReport(r.id)}
-            >
-              <strong>{r.label}</strong>
-              <span>{r.hint}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="reportTools noPrint">
-          <input className="reportInput" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome, CPF, empresa, módulo ou item..." />
-          <input className="reportDate" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
-          <input className="reportDate" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
-          <button className="btn btn-yellow small" onClick={exportarCsv} disabled={filtered.length === 0}>Exportar Excel/CSV</button>
-          <button className="btn btn-outline small" onClick={imprimir} disabled={filtered.length === 0}>Imprimir / Salvar PDF</button>
-          <button className="btn btn-outline small" onClick={load}>Atualizar</button>
-        </div>
-
-        <div className="reportSummary">
-          <div><span>Registros</span><strong>{stats.registros}</strong></div>
-          <div><span>Colaboradores/CPFs</span><strong>{stats.colaboradores}</strong></div>
-          <div><span>Módulos</span><strong>{stats.modulos}</strong></div>
-          <div><span>Relatório</span><strong>{REPORTS.find((r) => r.id === report)?.label || report}</strong></div>
-        </div>
-
-        <div className="reportTableCard">
-          {loading ? (
-            <p>Carregando registros…</p>
-          ) : err ? (
-            <p className="reportError">{err}</p>
-          ) : filtered.length === 0 ? (
-            <p>Nenhum registro encontrado para os filtros selecionados.</p>
-          ) : (
-            <table className="reportTable">
-              <thead>
-                <tr>
-                  <th>Data/Hora</th>
-                  <th>Colaborador</th>
-                  <th>CPF</th>
-                  <th>Empresa</th>
-                  <th>Tipo</th>
-                  <th>Módulo</th>
-                  <th>Item / Evidência</th>
-                  <th>Observação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.slice(0, 500).map((it) => (
-                  <tr key={it.id}>
-                    <td>{formatDate(it.atISO)}</td>
-                    <td><strong>{it.actorNome || "—"}</strong></td>
-                    <td>{it.actorCpf || "—"}</td>
-                    <td>{it.actorEmpresa || "—"}</td>
-                    <td><code>{it.type || "—"}</code></td>
-                    <td>{it.module || "—"}</td>
-                    <td>{it.entityTitle || it.entityId || "—"}</td>
-                    <td>{it.obs || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-
-        <p className="reportNote">
-          Nota de auditoria: os registros apresentados são extraídos do Logger Central do Portal do Colaborador e devem ser utilizados como evidência complementar de rastreabilidade, ciência, conclusão, avaliação ou ação administrativa, conforme o tipo de evento registrado.
-        </p>
+        <section className="reportNote">
+          <strong>Nota de auditoria:</strong> esta página funciona como índice de relatórios e exportações. O histórico bruto permanece no Logger Central, enquanto os relatórios específicos apresentam visões filtradas e mais adequadas para anexos de auditoria.
+        </section>
       </div>
 
       <style jsx global>{`
-        .reportPage { max-width: 1180px; }
-        .reportHeader { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; margin-bottom: 16px; }
-        .reportHeader h1 { margin: 0; font-size: 34px; color: #0b2a6f; font-weight: 900; }
-        .reportHeader p { margin: 10px 0 0; max-width: 780px; font-size: 14px; font-weight: 700; color: rgba(0,0,0,.68); line-height: 1.45; }
-        .reportStamp { background: #fff; border: 1px solid rgba(10,42,106,.12); border-radius: 14px; padding: 12px 14px; font-size: 12px; box-shadow: 0 10px 26px rgba(0,0,0,.05); }
-        .reportCards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
-        .reportType { text-align: left; border: 1px solid rgba(10,42,106,.12); background: #fff; border-radius: 16px; padding: 14px; cursor: pointer; box-shadow: 0 10px 22px rgba(0,0,0,.04); }
-        .reportType strong { display: block; color: #0b2a6f; font-size: 15px; font-weight: 900; }
-        .reportType span { display: block; margin-top: 5px; font-size: 12px; font-weight: 700; color: rgba(0,0,0,.62); line-height: 1.35; }
-        .reportType.active { border-color: rgba(255,204,0,.95); background: #fff9db; }
-        .reportTools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 14px 0; }
-        .reportInput { flex: 1; min-width: 260px; border: 1px solid rgba(10,42,106,.14); border-radius: 999px; padding: 10px 13px; font-weight: 700; background: #fff; outline: none; }
-        .reportDate { border: 1px solid rgba(10,42,106,.14); border-radius: 999px; padding: 9px 11px; font-weight: 800; background: #fff; }
-        .reportSummary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
-        .reportSummary div { background: #fff; border: 1px solid rgba(10,42,106,.10); border-radius: 15px; padding: 13px; box-shadow: 0 10px 24px rgba(0,0,0,.04); }
-        .reportSummary span { display: block; font-size: 12px; color: rgba(0,0,0,.62); font-weight: 800; }
-        .reportSummary strong { display: block; margin-top: 4px; color: #0b2a6f; font-size: 22px; font-weight: 900; }
-        .reportTableCard { background: #fff; border: 1px solid rgba(10,42,106,.10); border-radius: 16px; padding: 12px; box-shadow: 0 12px 28px rgba(0,0,0,.05); overflow: auto; }
-        .reportTable { width: 100%; border-collapse: collapse; min-width: 1050px; }
-        .reportTable th, .reportTable td { padding: 10px; border-bottom: 1px solid rgba(0,0,0,.07); text-align: left; vertical-align: top; font-size: 12px; font-weight: 700; }
-        .reportTable th { background: #f6f8fe; color: #0b2a6f; font-weight: 900; }
-        .reportTable code { font-family: monospace; font-size: 11px; }
-        .reportNote { font-size: 12px; font-weight: 700; color: rgba(0,0,0,.62); margin: 12px 0 0; }
-        .reportError { color: #8b0000; font-weight: 900; }
-        @media (max-width: 900px) { .reportCards, .reportSummary { grid-template-columns: 1fr; } .reportHeader { flex-direction: column; } }
-        @media print {
-          .noPrint, header, nav, .topbar, .siteHeader, footer { display: none !important; }
-          body { background: #fff !important; }
-          .section.gray { background: #fff !important; padding: 0 !important; }
-          .container { max-width: 100% !important; width: 100% !important; }
-          .reportHeader h1 { font-size: 24px; }
-          .reportTableCard, .reportSummary div, .reportStamp { box-shadow: none !important; }
-          .reportTable { min-width: 0; }
-          .reportTable th, .reportTable td { font-size: 9px; padding: 6px; }
-        }
+        .reportHubPage { max-width: 1280px; }
+        .topActions { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+        .reportHero { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; flex-wrap:wrap; margin-bottom:16px; }
+        .reportHero h1 { margin:0; font-size:34px; color:#0b2a6f; font-weight:950; letter-spacing:-.02em; }
+        .reportHero p { margin:10px 0 0; max-width:820px; font-size:14px; font-weight:750; color:rgba(0,0,0,.68); line-height:1.45; }
+        .stampBox { background:#fff; border:1px solid rgba(10,42,106,.12); border-radius:16px; padding:12px 14px; min-width:180px; box-shadow:0 12px 28px rgba(15,23,42,.05); }
+        .stampBox span { display:block; font-size:11px; font-weight:850; opacity:.65; }
+        .stampBox strong { display:block; margin-top:4px; font-size:12px; color:#0a2a6a; }
+        .summaryBox { background:#fff; border:1px solid rgba(10,42,106,.1); border-radius:20px; padding:16px; box-shadow:0 12px 30px rgba(15,23,42,.06); margin:16px 0; }
+        .summaryHead { display:flex; justify-content:space-between; gap:14px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+        .summaryHead strong { display:block; color:#0a2a6a; font-size:15px; font-weight:950; }
+        .summaryHead span { display:block; margin-top:4px; font-size:12px; font-weight:750; opacity:.7; }
+        .summaryActions { display:flex; gap:8px; flex-wrap:wrap; }
+        .statsGrid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+        .statsGrid div { background:linear-gradient(180deg,#fff,#f7f9ff); border:1px solid rgba(10,42,106,.1); border-radius:16px; padding:11px; }
+        .statsGrid span { display:block; font-size:11px; font-weight:850; opacity:.65; }
+        .statsGrid strong { display:block; margin-top:4px; font-size:22px; color:#0a2a6a; font-weight:950; }
+        .guidanceBox { display:flex; gap:8px; align-items:flex-start; background:#fff9dd; border:1px solid rgba(244,196,0,.35); border-radius:16px; padding:12px 14px; font-size:12px; font-weight:800; color:rgba(0,0,0,.72); line-height:1.45; margin:16px 0; }
+        .guidanceBox strong { color:#0a2a6a; white-space:nowrap; }
+        .reportGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:16px; }
+        .reportTile { background:#fff; border:1px solid rgba(10,42,106,.1); border-radius:20px; padding:16px; box-shadow:0 12px 28px rgba(15,23,42,.055); min-height:170px; display:flex; flex-direction:column; }
+        .tileHead { display:flex; align-items:flex-start; gap:10px; }
+        .tileIcon { width:40px; height:40px; border-radius:14px; display:grid; place-items:center; background:rgba(11,79,217,.08); border:1px solid rgba(11,79,217,.12); flex:0 0 auto; }
+        .tileTag { display:inline-flex; border-radius:999px; padding:4px 8px; background:#f3f5f9; border:1px solid rgba(10,42,106,.08); color:#0a2a6a; font-size:10px; font-weight:950; text-transform:uppercase; letter-spacing:.03em; }
+        .tileTitle { margin-top:6px; color:#0b1f3a; font-size:16px; font-weight:950; }
+        .tileText { margin:10px 0 0; font-size:13px; line-height:1.4; color:rgba(0,0,0,.7); font-weight:700; }
+        .tileActions { margin-top:auto; padding-top:14px; }
+        .reportNote { margin:16px 0 0; background:#fff; border:1px dashed rgba(10,42,106,.18); border-radius:16px; padding:12px 14px; font-size:12px; line-height:1.45; font-weight:750; color:rgba(0,0,0,.68); }
+        .reportNote strong { color:#0a2a6a; }
+        @media (max-width: 980px) { .reportGrid { grid-template-columns:1fr; } .statsGrid { grid-template-columns:repeat(2,minmax(0,1fr)); } .stampBox { width:100%; } .guidanceBox { display:block; } .guidanceBox span { display:block; margin-top:4px; } }
+        @media print { .noPrint { display:none!important; } .reportTile, .summaryBox, .guidanceBox, .reportNote { box-shadow:none!important; } }
       `}</style>
     </main>
   );
