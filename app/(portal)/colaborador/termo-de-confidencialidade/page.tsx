@@ -1,643 +1,306 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getSession } from "@/src/lib/auth";
+import { COLABORADORES } from "@/src/data/colaboradores";
 
-type DocTipo = "politica" | "procedimento" | "termo" | "sgq" | "institucional";
-type DocStatus = "vigente" | "atualizar";
-
-type Documento = {
-  id: string;
-  titulo: string;
-  tipo: DocTipo;
-  status: DocStatus;
-  arquivoPdf: string;
-  versao?: string;
-  data?: string;
-  descricao?: string;
-  obrigatorio?: boolean;
+const TERMO = {
+  id: "termo-confidencialidade",
+  titulo: "Termo de Confidencialidade e Sigilo",
+  versao: "v3.0",
+  revisao: "02/2027",
+  categoria: "Compliance / Segurança da Informação / LGPD",
+  responsavel: "Área de Qualidade e Compliance",
+  arquivoPdf: "/materiais/termos/termo-confidencialidade-sgq.pdf",
 };
 
-const TAGS: Record<DocTipo, { label: string; badgeClass: string; icon: string }> = {
-  politica: { label: "Política", badgeClass: "badge badge-blue", icon: "📘" },
-  procedimento: { label: "Procedimento", badgeClass: "badge badge-green", icon: "🧩" },
-  termo: { label: "Termo", badgeClass: "badge badge-red", icon: "🔐" },
-  sgq: { label: "SGQ", badgeClass: "badge badge-purple", icon: "🗂️" },
-  institucional: { label: "Institucional", badgeClass: "badge badge-gray", icon: "🏛️" },
-};
-
-const STATUS: Record<DocStatus, { label: string; badgeClass: string }> = {
-  vigente: { label: "Vigente", badgeClass: "badge badge-ok" },
-  atualizar: { label: "Revisar", badgeClass: "badge badge-warn" },
-};
-
-const TERMOS: Documento[] = [
-  {
-    id: "termo-confidencialidade",
-    titulo: "Termo de Confidencialidade",
-    tipo: "termo",
-    status: "vigente",
-    arquivoPdf: "/materiais/termos/termo-confidencialidade-sgq.pdf",
-    versao: "v3.0",
-    data: "02/2027",
-    obrigatorio: true,
-    descricao: "Documento obrigatório para ciência e compromisso de sigilo, conformidade e boas práticas de tratamento das informações.",
-  },
-];
-
-const POLITICAS: Documento[] = [
-  {
-    id: "politica-atendimento",
-    titulo: "Política de Atendimento ao Cliente",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-atendimento-ao-cliente.pdf",
-    descricao: "Diretrizes de atendimento, postura e relacionamento com clientes.",
-  },
-  {
-    id: "politica-prevencao-fraude",
-    titulo: "Política de Prevenção à Fraude",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-prevencao-fraude.pdf",
-    descricao: "Diretrizes de prevenção, detecção e resposta a fraudes.",
-  },
-  {
-    id: "politica-privacidade",
-    titulo: "Política de Privacidade de Dados (LGPD)",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-privacidade-dados.pdf",
-    descricao: "Regras de privacidade, tratamento e proteção de dados pessoais.",
-  },
-  {
-    id: "politica-seguranca-firewall",
-    titulo: "Política de Segurança da Informação e Uso de Firewall",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-seguranca-informacao-firewall.pdf",
-    descricao: "Controles e boas práticas de segurança da informação e uso de infraestrutura.",
-  },
-  {
-    id: "politica-concessao-acessos",
-    titulo: "Política de Concessão de Acesso aos Sistemas e Aplicativos Internos",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-concessao-acesso-sistemas-aplicativos-internos.pdf",
-    descricao: "Regras para concessão, manutenção e revogação de acessos internos.",
-  },
-  {
-    id: "politica-governanca",
-    titulo: "Política de Governança",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-governanca.pdf",
-    descricao: "Princípios, responsabilidades e diretrizes de governança corporativa.",
-  },
-  {
-    id: "politica-portabilidade-credito",
-    titulo: "Política de Portabilidade de Crédito",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-portabilidade-credito.pdf",
-    descricao: "Normas e controles aplicáveis ao processo de portabilidade de crédito.",
-  },
-  {
-    id: "politica-rh",
-    titulo: "Política de Recursos Humanos",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-recursos-humanos.pdf",
-    descricao: "Diretrizes institucionais relacionadas à gestão de pessoas e conduta interna.",
-  },
-  {
-    id: "politica-incidentes",
-    titulo: "Política de Gestão de Incidentes",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-gestao-incidentes.pdf",
-    descricao: "Fluxos e responsabilidades para identificação, tratamento e comunicação de incidentes.",
-  },
-  {
-    id: "politica-vulnerabilidades",
-    titulo: "Política de Gestão de Vulnerabilidades",
-    tipo: "politica",
-    status: "vigente",
-    arquivoPdf: "/materiais/politicas/politica-gestao-vulnerabilidades-ti.pdf",
-    descricao: "Diretrizes de segurança para gestão de vulnerabilidades de sistemas e infraestrutura.",
-  },
-];
-
-const SGQ: Documento[] = [
-  {
-    id: "sgq-inventario-tratamento-dados",
-    titulo: "Inventário de Tratamento de Dados",
-    tipo: "sgq",
-    status: "vigente",
-    arquivoPdf: "/materiais/sgq/sgq-inventario-tratamento-dados.pdf",
-    descricao: "Registro institucional de operações e fluxos de tratamento de dados.",
-  },
-  {
-    id: "sgq-manual-gestao-planejamento-fin",
-    titulo: "Manual de Gestão e Planejamento Financeiro",
-    tipo: "sgq",
-    status: "vigente",
-    arquivoPdf: "/materiais/sgq/sgq-manual-gestao-planejamento-financeiro.pdf",
-    descricao: "Documento de referência para controles e organização financeira interna.",
-  },
-  {
-    id: "sgq-manual-atendimento-etico",
-    titulo: "Manual para um Atendimento Ético e Transparente",
-    tipo: "sgq",
-    status: "vigente",
-    arquivoPdf: "/materiais/sgq/sgq-manual-atendimento-etico-transparente.pdf",
-    descricao: "Manual orientativo para conduta ética e transparência no atendimento.",
-  },
-  {
-    id: "proc-plano-anual-auditoria",
-    titulo: "Plano Anual de Auditoria Interna",
-    tipo: "sgq",
-    status: "vigente",
-    arquivoPdf: "/materiais/sgq/sgq-plano-anual-auditoria-interna.pdf",
-    descricao: "Planejamento anual das atividades e frentes de auditoria interna.",
-  },
-];
-
-const PROCEDIMENTOS: Documento[] = [
-  {
-    id: "proc-auditoria-interna",
-    titulo: "Procedimento de Auditoria Interna",
-    tipo: "procedimento",
-    status: "vigente",
-    arquivoPdf: "/materiais/procedimentos/procedimento-auditoria-interna.pdf",
-    descricao: "Fluxo operacional para execução e registro de auditorias internas.",
-  },
-  {
-    id: "proc-prevencao-fraude",
-    titulo: "Procedimento de Prevenção à Fraude",
-    tipo: "procedimento",
-    status: "vigente",
-    arquivoPdf: "/materiais/procedimentos/procedimento-prevencao-fraude.pdf",
-    descricao: "Procedimentos formais de apoio ao controle e prevenção de fraudes.",
-  },
-  {
-    id: "proc-concessao-acessos-sistemas",
-    titulo: "Procedimento para Concessão de Acesso aos Sistemas",
-    tipo: "procedimento",
-    status: "vigente",
-    arquivoPdf: "/materiais/procedimentos/procedimento-concessao-acesso-sistemas.pdf",
-    descricao: "Fluxo operacional para concessão, alteração e revogação de acessos.",
-  },
-  {
-    id: "proc-contratacao-desenvolvimento",
-    titulo: "Procedimento para Contratação e Desenvolvimento",
-    tipo: "procedimento",
-    status: "vigente",
-    arquivoPdf: "/materiais/procedimentos/procedimento-contratacao-desenvolvimento.pdf",
-    descricao: "Procedimento de contratação, integração e desenvolvimento de colaboradores e parceiros.",
-  },
-  {
-    id: "proc-tratamento-mailing",
-    titulo: "Procedimento para Tratamento de Lista de Mailing",
-    tipo: "procedimento",
-    status: "vigente",
-    arquivoPdf: "/materiais/procedimentos/procedimento-tratamento-lista-mailing.pdf",
-    descricao: "Procedimento formal para uso, controle e tratamento de listas de mailing.",
-  },
-  {
-    id: "proc-concessao-acessos-chavej-portal",
-    titulo: "Concessão de Acessos (Chave J e Portal do Correspondente)",
-    tipo: "procedimento",
-    status: "vigente",
-    arquivoPdf: "/materiais/concessao-acessos-chavej-portal.pdf",
-    descricao: "Procedimento operacional para concessão de acessos a ambientes críticos.",
-  },
-];
-
-const INSTITUCIONAIS: Documento[] = [
-  {
-    id: "institucional-termo-adocao-sgq",
-    titulo: "Termo de Adoção Institucional – SGQ",
-    tipo: "institucional",
-    status: "vigente",
-    arquivoPdf: "/materiais/termos/termo-adocao-institucional-sgq.pdf",
-    descricao: "Documento institucional de formalização e adesão ao Sistema de Gestão da Qualidade.",
-  },
-];
-
-function DocRow({ doc }: { doc: Documento }) {
-  const tipo = TAGS[doc.tipo];
-  const status = STATUS[doc.status];
-
-  return (
-    <div className="doc-row">
-      <div className="doc-left">
-        <div className="doc-title">
-          <span className="doc-icon" aria-hidden="true">
-            {tipo.icon}
-          </span>
-          <span>{doc.titulo}</span>
-        </div>
-
-        <div className="doc-meta">
-          <span className={tipo.badgeClass}>{tipo.label}</span>
-          <span className={status.badgeClass}>{status.label}</span>
-          {doc.obrigatorio ? <span className="badge badge-red">Obrigatório</span> : null}
-          {doc.versao ? <span className="meta-pill">Versão: {doc.versao}</span> : null}
-          {doc.data ? <span className="meta-pill">Revisão: {doc.data}</span> : null}
-        </div>
-
-        <div className="doc-sub">
-          {doc.descricao || "Documento institucional para consulta, padronização e conformidade."}
-        </div>
-      </div>
-
-      <div className="doc-actions">
-        <a
-          className="btn btn-yellow btn-sm"
-          href={doc.arquivoPdf}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Abrir
-        </a>
-
-        <a className="btn btn-outline btn-sm" href={doc.arquivoPdf} download>
-          Baixar
-        </a>
-      </div>
-    </div>
-  );
+function onlyDigits(value: unknown) {
+  return String(value ?? "").replace(/\D/g, "");
 }
 
-function SectionBox({
-  title,
-  subtitle,
-  docs,
-}: {
-  title: string;
-  subtitle: string;
-  docs: Documento[];
-}) {
-  if (!docs.length) return null;
-
-  return (
-    <div className="box">
-      <div className="box-head">
-        <div>
-          <h3 className="box-title">{title}</h3>
-          <p className="box-sub">{subtitle}</p>
-        </div>
-        <div className="box-count">{docs.length}</div>
-      </div>
-
-      <div className="doc-list">
-        {docs.map((d) => (
-          <DocRow key={d.id} doc={d} />
-        ))}
-      </div>
-    </div>
-  );
+function mascararCpf(cpf: string) {
+  const d = onlyDigits(cpf);
+  if (d.length !== 11) return cpf || "—";
+  return `${d.slice(0, 3)}.***.***-${d.slice(9, 11)}`;
 }
 
-export default function MateriaisPage() {
-  const termo = TERMOS[0];
+function formatarData(iso?: string | null) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("pt-BR");
+  } catch {
+    return String(iso);
+  }
+}
+
+export default function TermoConfidencialidadePage() {
+  const router = useRouter();
+
+  const [mounted, setMounted] = useState(false);
+  const [sessionNome, setSessionNome] = useState("");
+  const [sessionCpf, setSessionCpf] = useState("");
+  const [sessionPerfil, setSessionPerfil] = useState("");
+  const [sessionEmpresa, setSessionEmpresa] = useState("");
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+  const [cienciaISO, setCienciaISO] = useState<string | null>(null);
+  const [confirmouLeitura, setConfirmouLeitura] = useState(false);
+
+  const cienciaRegistrada = Boolean(cienciaISO);
+
+  const statusLabel = useMemo(() => {
+    if (cienciaRegistrada) return "Ciência registrada";
+    return "Pendente de ciência";
+  }, [cienciaRegistrada]);
+
+  async function consultarCiencia(cpf: string) {
+    try {
+      setCarregando(true);
+      setErro(null);
+
+      const res = await fetch(
+        `/api/audit/events?actorCpf=${encodeURIComponent(cpf)}&module=termos&action=TERMO_CONFIDENCIALIDADE_CIENCIA`,
+        { cache: "no-store" }
+      );
+      const data = await res.json();
+
+      const progress = data?.progress || {};
+      const item = progress[TERMO.id] || progress[TERMO.titulo] || null;
+
+      if (item?.dataISO) {
+        setCienciaISO(item.dataISO);
+        setConfirmouLeitura(true);
+      } else {
+        setCienciaISO(null);
+      }
+    } catch {
+      setErro("Não foi possível consultar se já existe ciência registrada para este termo.");
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  useEffect(() => {
+    setMounted(true);
+
+    const session: any = getSession();
+    if (!session) {
+      router.replace("/colaborador/login");
+      return;
+    }
+
+    const cpf = onlyDigits(session.cpf || "");
+    const user = COLABORADORES.find((c) => onlyDigits(c.cpf) === cpf);
+
+    setSessionNome(session.nome || user?.nome || "");
+    setSessionCpf(cpf);
+    setSessionPerfil(session.perfil || user?.perfil || "");
+    setSessionEmpresa((session.empresa || user?.empresa || "").trim());
+
+    consultarCiencia(cpf);
+  }, [router]);
+
+  async function registrarCiencia() {
+    if (!sessionCpf || salvando || cienciaRegistrada) return;
+    if (!confirmouLeitura) {
+      alert("Para registrar a ciência, confirme que leu e compreendeu o termo.");
+      return;
+    }
+
+    const dataISO = new Date().toISOString();
+
+    try {
+      setSalvando(true);
+      setErro(null);
+
+      const res = await fetch("/api/audit/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "TERMO_CONFIDENCIALIDADE_CIENCIA",
+          module: "termos",
+          entityId: TERMO.id,
+          entityTitle: TERMO.titulo,
+          actorCpf: sessionCpf,
+          actorNome: sessionNome,
+          actorPerfil: sessionPerfil,
+          actorEmpresa: sessionEmpresa,
+          atISO: dataISO,
+          obs: "Colaborador registrou ciência do Termo de Confidencialidade e Sigilo.",
+          meta: {
+            documento: TERMO.titulo,
+            versao: TERMO.versao,
+            revisao: TERMO.revisao,
+            categoria: TERMO.categoria,
+            responsavel: TERMO.responsavel,
+            arquivoPdf: TERMO.arquivoPdf,
+            declaracao: "Li, compreendi e estou ciente do Termo de Confidencialidade e Sigilo.",
+          },
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok || data?.ok === false) throw new Error("Falha ao registrar ciência.");
+
+      setCienciaISO(dataISO);
+      alert("✅ Ciência registrada com sucesso.");
+    } catch (e: any) {
+      setErro(e?.message || "Não foi possível registrar a ciência do termo.");
+    } finally {
+      setSalvando(false);
+    }
+  }
+
+  if (!mounted) {
+    return (
+      <main className="section gray">
+        <div className="container"><p>Carregando…</p></div>
+      </main>
+    );
+  }
 
   return (
     <main className="section gray">
-      <div className="container">
-        <div className="section-title">
-          <h2>Biblioteca de Governança</h2>
+      <div className="container termoPage">
+        <div className="termoTop noPrint">
+          <Link className="btn btn-outline termoBtnPill" href="/colaborador">← Voltar para Área do Colaborador</Link>
+          <Link className="btn btn-outline termoBtnPill" href="/colaborador/governanca">Biblioteca de Governança</Link>
+        </div>
+
+        <div className="section-title" style={{ marginTop: 0 }}>
+          <h2>Termo de Confidencialidade</h2>
           <div className="bar" />
         </div>
 
-        <p className="section-text">
-          Documentos institucionais para consulta: políticas internas, procedimentos, materiais do
-          Sistema de Gestão da Qualidade e documentos obrigatórios de suporte às atividades.
+        <p className="section-text" style={{ maxWidth: 920 }}>
+          Documento obrigatório para ciência individual dos colaboradores, compromisso de sigilo, proteção de informações, LGPD e conformidade operacional. O registro de ciência é salvo no Logger Central para fins de auditoria.
         </p>
 
-        <div className="highlight">
-          <div className="highlight-top">
-            <div className="highlight-title">🔐 Termo de Confidencialidade (Obrigatório)</div>
-            <div className="highlight-badges">
-              <span className="badge badge-red">Termo</span>
-              <span className="badge badge-ok">Vigente</span>
+        <div className="card termoStatusCard">
+          <div className="termoStatusLeft">
+            <div className="termoMiniLabel">Colaborador</div>
+            <div className="termoNome">{sessionNome || "—"}</div>
+            <div className="termoDados">CPF: <strong>{mascararCpf(sessionCpf)}</strong> • Empresa: <strong>{sessionEmpresa || "—"}</strong></div>
+          </div>
+
+          <div className={`termoStatus ${cienciaRegistrada ? "ok" : "pend"}`}>
+            {cienciaRegistrada ? "✅" : "⏳"} {statusLabel}
+          </div>
+        </div>
+
+        <div className="card termoDocCard">
+          <div className="termoDocHead">
+            <div>
+              <div className="termoDocTitle">🔐 {TERMO.titulo}</div>
+              <div className="termoDocSub">{TERMO.categoria}</div>
+            </div>
+
+            <div className="termoBadges">
+              <span className="termoBadge red">Obrigatório</span>
+              <span className="termoBadge green">Vigente</span>
+              <span className="termoBadge blue">{TERMO.versao}</span>
             </div>
           </div>
 
-          <div className="highlight-desc">
-            Documento obrigatório para ciência e compromisso de sigilo, conformidade e boas práticas
-            de tratamento das informações.
+          <div className="termoInfoGrid">
+            <div><span>Versão</span><strong>{TERMO.versao}</strong></div>
+            <div><span>Revisão</span><strong>{TERMO.revisao}</strong></div>
+            <div><span>Responsável</span><strong>{TERMO.responsavel}</strong></div>
+            <div><span>Ciência registrada em</span><strong>{formatarData(cienciaISO)}</strong></div>
           </div>
 
-          <div className="highlight-actions">
-            <a
-              className="btn btn-yellow"
-              href={termo.arquivoPdf}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Abrir termo
-            </a>
-
-            <a className="btn btn-outline" href={termo.arquivoPdf} download>
-              Baixar
-            </a>
+          <div className="termoActions noPrint">
+            <a className="btn btn-yellow termoBtnPill" href={TERMO.arquivoPdf} target="_blank" rel="noopener noreferrer">Abrir termo em PDF</a>
+            <a className="btn btn-outline termoBtnPill" href={TERMO.arquivoPdf} download>Baixar termo</a>
           </div>
         </div>
 
-        <SectionBox
-          title="📘 Políticas Institucionais"
-          subtitle="Diretrizes internas obrigatórias para governança, segurança, privacidade, RH e prevenção de riscos."
-          docs={POLITICAS}
-        />
+        <div className="card termoPreviewCard">
+          <div className="termoPreviewHead">
+            <div>
+              <div className="termoPreviewTitle">Visualização do termo</div>
+              <div className="termoPreviewSub">Leia o documento antes de registrar a ciência.</div>
+            </div>
+          </div>
 
-        <SectionBox
-          title="🗂️ Sistema de Gestão da Qualidade (SGQ)"
-          subtitle="Documentos formais de apoio, gestão, qualidade e estrutura institucional."
-          docs={SGQ}
-        />
+          <iframe className="termoFrame" src={TERMO.arquivoPdf} title="Termo de Confidencialidade" />
+        </div>
 
-        <SectionBox
-          title="🧩 Procedimentos Internos"
-          subtitle="Procedimentos e manuais utilizados como evidência formal em auditorias internas e externas."
-          docs={PROCEDIMENTOS}
-        />
+        <div className="card termoCienciaCard">
+          <div className="termoCienciaTitle">Declaração de ciência</div>
+          <p className="termoCienciaText">
+            Declaro que li, compreendi e estou ciente do conteúdo do Termo de Confidencialidade e Sigilo, comprometendo-me a observar as regras de sigilo, confidencialidade, proteção de dados, segurança da informação e uso adequado das informações às quais tiver acesso em razão das minhas atividades.
+          </p>
 
-        <SectionBox
-          title="🏛️ Documentos Institucionais"
-          subtitle="Documentos institucionais complementares de formalização, adesão e governança."
-          docs={INSTITUCIONAIS}
-        />
+          {erro ? <div className="termoErro">{erro}</div> : null}
 
-        <div className="mt-18">
-          <Link className="btn btn-outline" href="/colaborador">
-            ← Voltar para Área do Colaborador
-          </Link>
+          <label className="termoCheck noPrint">
+            <input
+              type="checkbox"
+              checked={confirmouLeitura}
+              disabled={cienciaRegistrada || salvando}
+              onChange={(e) => setConfirmouLeitura(e.target.checked)}
+            />
+            <span>Confirmo que li e estou ciente do Termo de Confidencialidade.</span>
+          </label>
+
+          <div className="termoFooterActions noPrint">
+            <button
+              type="button"
+              className="btn btn-yellow termoBtnPill"
+              disabled={cienciaRegistrada || salvando || carregando}
+              onClick={registrarCiencia}
+            >
+              {cienciaRegistrada ? "✅ Ciência já registrada" : salvando ? "Registrando…" : "Registrar ciência"}
+            </button>
+
+            <button type="button" className="btn btn-outline termoBtnPill" onClick={() => window.print()}>
+              Imprimir / Salvar PDF
+            </button>
+          </div>
+
+          <div className="termoAuditNote">
+            Nota de auditoria: o registro de ciência é individual por CPF e fica armazenado no Logger Central com data/hora, documento, versão e dados do colaborador.
+          </div>
         </div>
 
         <style jsx global>{`
-          .highlight {
-            background: #fff;
-            border-radius: 18px;
-            padding: 18px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
-            margin-top: 14px;
-            margin-bottom: 18px;
-            position: relative;
-            overflow: hidden;
-          }
-
-          .highlight::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 10% 10%, rgba(247, 198, 0, 0.18), transparent 55%);
-            pointer-events: none;
-          }
-
-          .highlight-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            position: relative;
-            z-index: 1;
-          }
-
-          .highlight-title {
-            font-weight: 900;
-            font-size: 16px;
-            color: #0b1f3a;
-          }
-
-          .highlight-badges {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-          }
-
-          .highlight-desc {
-            margin-top: 10px;
-            color: rgba(0, 0, 0, 0.7);
-            font-size: 13px;
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
-            max-width: 840px;
-          }
-
-          .highlight-actions {
-            margin-top: 14px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-          }
-
-          .box {
-            background: #fff;
-            border-radius: 18px;
-            padding: 14px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
-            margin-top: 16px;
-          }
-
-          .box-head {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 6px 6px 12px 6px;
-            border-bottom: 1px dashed rgba(0, 0, 0, 0.12);
-          }
-
-          .box-title {
-            margin: 0;
-            font-weight: 900;
-            font-size: 15px;
-            color: #0b1f3a;
-          }
-
-          .box-sub {
-            margin: 6px 0 0 0;
-            font-size: 12px;
-            font-weight: 700;
-            color: rgba(0, 0, 0, 0.65);
-            max-width: 820px;
-          }
-
-          .box-count {
-            min-width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            background: rgba(11, 59, 138, 0.06);
-            border: 1px solid rgba(11, 59, 138, 0.14);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: rgba(0, 0, 0, 0.7);
-          }
-
-          .doc-list {
-            margin-top: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          }
-
-          .doc-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.9);
-          }
-
-          .doc-left {
-            min-width: 0;
-            flex: 1;
-          }
-
-          .doc-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 900;
-            color: #0b1f3a;
-            font-size: 14px;
-            line-height: 1.2;
-          }
-
-          .doc-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(11, 59, 138, 0.06);
-            border: 1px solid rgba(11, 59, 138, 0.14);
-            flex: 0 0 auto;
-          }
-
-          .doc-meta {
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-          }
-
-          .doc-sub {
-            margin-top: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            color: rgba(0, 0, 0, 0.62);
-            max-width: 920px;
-            line-height: 1.45;
-          }
-
-          .meta-pill {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            color: rgba(0, 0, 0, 0.72);
-          }
-
-          .doc-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: flex-end;
-            min-width: 160px;
-          }
-
-          .btn-sm {
-            padding: 10px 12px !important;
-            font-size: 12px !important;
-            border-radius: 999px !important;
-          }
-
-          .badge {
-            font-size: 11px;
-            font-weight: 900;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            background: rgba(0, 0, 0, 0.04);
-            color: rgba(0, 0, 0, 0.75);
-            line-height: 1;
-            white-space: nowrap;
-          }
-
-          .badge-blue {
-            background: rgba(11, 59, 138, 0.06);
-            border-color: rgba(11, 59, 138, 0.14);
-            color: rgba(11, 59, 138, 0.95);
-          }
-
-          .badge-green {
-            background: rgba(20, 180, 90, 0.1);
-            border-color: rgba(20, 180, 90, 0.22);
-            color: rgba(14, 122, 61, 1);
-          }
-
-          .badge-red {
-            background: rgba(210, 30, 30, 0.08);
-            border-color: rgba(210, 30, 30, 0.18);
-            color: rgba(150, 20, 20, 1);
-          }
-
-          .badge-purple {
-            background: rgba(110, 60, 210, 0.08);
-            border-color: rgba(110, 60, 210, 0.18);
-            color: rgba(90, 40, 170, 1);
-          }
-
-          .badge-gray {
-            background: rgba(80, 80, 80, 0.08);
-            border-color: rgba(80, 80, 80, 0.16);
-            color: rgba(70, 70, 70, 1);
-          }
-
-          .badge-ok {
-            background: rgba(20, 180, 90, 0.1);
-            border-color: rgba(20, 180, 90, 0.22);
-            color: rgba(14, 122, 61, 1);
-          }
-
-          .badge-warn {
-            background: rgba(247, 198, 0, 0.12);
-            border-color: rgba(247, 198, 0, 0.26);
-            color: rgba(140, 104, 0, 1);
-          }
-
-          @media (max-width: 780px) {
-            .doc-row {
-              flex-direction: column;
-            }
-
-            .doc-actions {
-              justify-content: flex-start;
-              min-width: 0;
-            }
-
-            .highlight-top {
-              flex-direction: column;
-            }
-          }
+          .termoPage { max-width: 1180px; }
+          .termoTop { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+          .termoBtnPill { border-radius:999px!important; padding:10px 14px!important; }
+          .termoStatusCard { margin-top:14px; padding:16px!important; border-radius:18px!important; display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; border:1px solid rgba(10,42,106,.12)!important; background:linear-gradient(180deg,#fff,#f7f9ff)!important; }
+          .termoMiniLabel { font-size:11px; font-weight:900; opacity:.6; text-transform:uppercase; }
+          .termoNome { margin-top:3px; font-size:18px; font-weight:900; color:#0a2a6a; }
+          .termoDados { margin-top:3px; font-size:12px; font-weight:700; opacity:.78; }
+          .termoStatus { border-radius:999px; padding:10px 14px; font-size:12px; font-weight:900; border:1px solid rgba(10,42,106,.12); white-space:nowrap; }
+          .termoStatus.ok { background:#eaf7ef; color:#0f6b36; border-color:rgba(20,180,90,.22); }
+          .termoStatus.pend { background:#fff7e3; color:#7a5a00; border-color:rgba(247,198,0,.35); }
+          .termoDocCard,.termoPreviewCard,.termoCienciaCard { margin-top:14px; padding:18px!important; border-radius:18px!important; border:1px solid rgba(10,42,106,.12)!important; background:#fff!important; box-shadow:0 12px 28px rgba(15,23,42,.05)!important; }
+          .termoDocHead,.termoPreviewHead { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+          .termoDocTitle,.termoPreviewTitle,.termoCienciaTitle { font-size:18px; font-weight:900; color:#0a2a6a; }
+          .termoDocSub,.termoPreviewSub { margin-top:4px; font-size:12px; font-weight:700; opacity:.7; }
+          .termoBadges { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+          .termoBadge { display:inline-flex; border-radius:999px; padding:7px 10px; font-size:11px; font-weight:900; border:1px solid rgba(10,42,106,.12); }
+          .termoBadge.red { background:#fff4f4; color:#8a1f1f; border-color:rgba(180,40,40,.18); }
+          .termoBadge.green { background:#eaf7ef; color:#0f6b36; border-color:rgba(20,180,90,.22); }
+          .termoBadge.blue { background:#eef4ff; color:#0b3b8a; border-color:rgba(11,59,138,.18); }
+          .termoInfoGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:16px; }
+          .termoInfoGrid div { border:1px solid rgba(10,42,106,.1); border-radius:14px; padding:12px; background:#f8faff; }
+          .termoInfoGrid span { display:block; font-size:11px; font-weight:900; opacity:.62; }
+          .termoInfoGrid strong { display:block; margin-top:4px; font-size:13px; color:#0a2a6a; }
+          .termoActions,.termoFooterActions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+          .termoFrame { width:100%; height:620px; border:1px solid rgba(10,42,106,.12); border-radius:14px; margin-top:14px; background:#f7f9ff; }
+          .termoCienciaText { margin:10px 0 0; font-size:13px; line-height:1.6; font-weight:700; opacity:.78; }
+          .termoCheck { display:flex; gap:10px; align-items:flex-start; margin-top:16px; font-size:13px; font-weight:800; }
+          .termoCheck input { margin-top:2px; }
+          .termoErro { margin-top:12px; border:1px solid rgba(180,40,40,.18); background:#fff4f4; color:#8a1f1f; border-radius:12px; padding:10px 12px; font-size:12px; font-weight:800; }
+          .termoAuditNote { margin-top:14px; font-size:12px; font-weight:700; opacity:.65; }
+          button:disabled { opacity:.65; cursor:not-allowed; }
+          @media (max-width: 820px) { .termoInfoGrid{grid-template-columns:1fr;} .termoFrame{height:460px;} }
+          @media print { .noPrint{display:none!important;} .termoFrame{height:900px;} .termoPage{max-width:100%;} }
         `}</style>
       </div>
     </main>
