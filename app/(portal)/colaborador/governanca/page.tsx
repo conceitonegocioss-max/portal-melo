@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-type DocTipo = "politica" | "procedimento" | "termo" | "sgq" | "institucional";
+type DocTipo = "politica" | "procedimento" | "sgq" | "institucional";
 type DocStatus = "vigente" | "atualizar";
 
 type Documento = {
@@ -20,7 +20,6 @@ type Documento = {
 const TAGS: Record<DocTipo, { label: string; badgeClass: string; icon: string }> = {
   politica: { label: "Política", badgeClass: "badge badge-blue", icon: "📘" },
   procedimento: { label: "Procedimento", badgeClass: "badge badge-green", icon: "🧩" },
-  termo: { label: "Termo", badgeClass: "badge badge-red", icon: "🔐" },
   sgq: { label: "SGQ", badgeClass: "badge badge-purple", icon: "🗂️" },
   institucional: { label: "Institucional", badgeClass: "badge badge-gray", icon: "🏛️" },
 };
@@ -29,20 +28,6 @@ const STATUS: Record<DocStatus, { label: string; badgeClass: string }> = {
   vigente: { label: "Vigente", badgeClass: "badge badge-ok" },
   atualizar: { label: "Revisar", badgeClass: "badge badge-warn" },
 };
-
-const TERMOS: Documento[] = [
-  {
-    id: "termo-confidencialidade",
-    titulo: "Termo de Confidencialidade",
-    tipo: "termo",
-    status: "vigente",
-    arquivoPdf: "/materiais/termos/termo-confidencialidade-sgq.pdf",
-    versao: "v3.0",
-    data: "02/2027",
-    obrigatorio: true,
-    descricao: "Documento obrigatório para ciência e compromisso de sigilo, conformidade e boas práticas de tratamento das informações.",
-  },
-];
 
 const POLITICAS: Documento[] = [
   { id: "politica-atendimento", titulo: "Política de Atendimento ao Cliente", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-atendimento-ao-cliente.pdf", descricao: "Diretrizes de atendimento, postura e relacionamento com clientes." },
@@ -107,25 +92,19 @@ function SectionBox({ title, subtitle, docs }: { title: string; subtitle: string
 }
 
 export default function GovernancaPage() {
-  const termo = TERMOS[0];
   return (
     <main className="section gray">
       <div className="container">
         <div style={{ marginBottom: 12 }}><Link href="/colaborador" className="btn btn-outline small">← Voltar para Área do Colaborador</Link></div>
         <div className="section-title"><h2>Biblioteca de Governança</h2><div className="bar" /></div>
         <p className="section-text">Documentos institucionais para consulta: políticas internas, procedimentos, materiais do Sistema de Gestão da Qualidade e documentos obrigatórios de suporte às atividades.</p>
-        <div className="highlight">
-          <div className="highlight-top"><div className="highlight-title">🔐 Termo de Confidencialidade (Obrigatório)</div><div className="highlight-badges"><span className="badge badge-red">Termo</span><span className="badge badge-ok">Vigente</span></div></div>
-          <div className="highlight-desc">Documento obrigatório para ciência e compromisso de sigilo, conformidade e boas práticas de tratamento das informações.</div>
-          <div className="highlight-actions"><Link className="btn btn-yellow" href="/colaborador/termo-de-confidencialidade">Registrar ciência</Link><a className="btn btn-outline" href={termo.arquivoPdf} target="_blank" rel="noopener noreferrer">Abrir PDF</a><a className="btn btn-outline" href={termo.arquivoPdf} download>Baixar</a></div>
-        </div>
         <SectionBox title="📘 Políticas Institucionais" subtitle="Diretrizes internas obrigatórias para governança, segurança, privacidade, RH e prevenção de riscos." docs={POLITICAS} />
         <SectionBox title="🗂️ Sistema de Gestão da Qualidade (SGQ)" subtitle="Documentos formais de apoio, gestão, qualidade e estrutura institucional." docs={SGQ} />
         <SectionBox title="🧩 Procedimentos Internos" subtitle="Procedimentos e manuais utilizados como evidência formal em auditorias internas e externas." docs={PROCEDIMENTOS} />
         <SectionBox title="🏛️ Documentos Institucionais" subtitle="Documentos institucionais complementares de formalização, adesão e governança." docs={INSTITUCIONAIS} />
         <div className="mt-18"><Link className="btn btn-outline" href="/colaborador">← Voltar para Área do Colaborador</Link></div>
         <style jsx global>{`
-          .highlight{background:#fff;border-radius:18px;padding:18px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:14px;margin-bottom:18px;position:relative;overflow:hidden}.highlight::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 10% 10%,rgba(247,198,0,.18),transparent 55%);pointer-events:none}.highlight-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;z-index:1}.highlight-title{font-weight:900;font-size:16px;color:#0b1f3a}.highlight-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.highlight-desc{margin-top:10px;color:rgba(0,0,0,.7);font-size:13px;font-weight:600;position:relative;z-index:1;max-width:840px}.highlight-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}.box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}.box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px 6px;border-bottom:1px dashed rgba(0,0,0,.12)}.box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}.box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(0,0,0,.7)}.doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}.doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}.doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.meta-pill,.badge{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}.btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-red{background:rgba(210,30,30,.08);border-color:rgba(210,30,30,.18);color:rgba(150,20,20,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}@media(max-width:780px){.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}.highlight-top{flex-direction:column}}
+          .box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}.box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px 6px;border-bottom:1px dashed rgba(0,0,0,.12)}.box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}.box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(0,0,0,.7)}.doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}.doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}.doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.meta-pill,.badge{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}.btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-red{background:rgba(210,30,30,.08);border-color:rgba(210,30,30,.18);color:rgba(150,20,20,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}@media(max-width:780px){.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}}
         `}</style>
       </div>
     </main>
