@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { getSession } from "@/src/lib/auth";
 
 type Prova = {
   slug: string;
   titulo: string;
   produto: string;
   publico: string;
+};
+
+type Resultado = {
+  nota: number;
+  aprovado: boolean;
+  tentativas: number;
+  respondidoEm?: string;
 };
 
 const PROVAS: Prova[] = [
@@ -29,282 +38,161 @@ const PROVAS: Prova[] = [
   { slug: "mailing", titulo: "Prova — Tratamento e Uso da Lista de Mailing", produto: "Crédito", publico: "Equipe do Suporte" },
 ];
 
+function onlyDigits(v: string) {
+  return String(v || "").replace(/\D/g, "");
+}
+
+function formatDate(iso?: string) {
+  if (!iso) return "";
+  try {
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
+function lerResultados(cpf: string): Record<string, Resultado> {
+  try {
+    const raw = localStorage.getItem("portal_exam_results_v1") || "{}";
+    const all = JSON.parse(raw);
+    return all?.[cpf] || all?.[onlyDigits(cpf)] || {};
+  } catch {
+    return {};
+  }
+}
+
 export default function ProvasPage() {
+  const [resultados, setResultados] = useState<Record<string, Resultado>>({});
+
+  useEffect(() => {
+    const session = getSession();
+    const cpf = onlyDigits(session?.cpf || "");
+    if (cpf) setResultados(lerResultados(cpf));
+  }, []);
+
+  const resumo = useMemo(() => {
+    const realizados = PROVAS.filter((p) => resultados[p.slug]).length;
+    const aprovados = PROVAS.filter((p) => resultados[p.slug]?.aprovado).length;
+    return { total: PROVAS.length, realizados, aprovados, pendentes: PROVAS.length - realizados };
+  }, [resultados]);
+
   return (
-    <main
-      style={{
-        minHeight: "100%",
-        background: "#f3f5f9",
-        color: "#0b2a6f",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <section
-        style={{
-          maxWidth: 1280,
-          margin: "0 auto",
-          padding: "34px 24px 48px",
-        }}
-      >
-        <h1
-          style={{
-            margin: 0,
-            fontSize: 54,
-            lineHeight: 1.05,
-            fontWeight: 800,
-            color: "#0b2a6f",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Provas e Avaliações
-        </h1>
+    <main className="provasPage">
+      <section className="provasWrap">
+        <div className="topNav">
+          <Link href="/colaborador" className="miniLink">← Área do Colaborador</Link>
+          <Link href="/colaborador/treinamentos" className="miniLink">Treinamentos</Link>
+        </div>
 
-        <div
-          style={{
-            marginTop: 14,
-            width: 60,
-            height: 6,
-            borderRadius: 999,
-            background: "#f4c400",
-          }}
-        />
-
-        <p
-          style={{
-            marginTop: 22,
-            marginBottom: 0,
-            fontSize: 18,
-            lineHeight: 1.5,
-            color: "#17326e",
-            fontWeight: 700,
-            maxWidth: 980,
-          }}
-        >
-          Avaliações vinculadas aos treinamentos, utilizadas como critério de conformidade,
-          controle interno e auditoria.
-        </p>
-
-        <div
-          style={{
-            marginTop: 26,
-            background: "#ffffff",
-            border: "1px solid #dbe3f0",
-            borderRadius: 24,
-            padding: "22px 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-            boxShadow: "0 8px 24px rgba(15, 35, 95, 0.05)",
-          }}
-        >
+        <header className="headerBox">
           <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 18,
-                color: "#0b2a6f",
-                fontWeight: 800,
-              }}
-            >
-              Acesso às provas
-            </h2>
-            <p
-              style={{
-                margin: "8px 0 0",
-                color: "#5b6980",
-                fontSize: 15,
-                fontWeight: 600,
-              }}
-            >
-              Seu acesso está liberado. Selecione uma prova para iniciar.
-            </p>
+            <h1>Provas e Avaliações</h1>
+            <div className="bar" />
+            <p>Avaliações vinculadas aos treinamentos, utilizadas como critério de conformidade, controle interno e auditoria.</p>
           </div>
-
-          <div
-            style={{
-              border: "1px solid #acdcbc",
-              background: "#ebf8ef",
-              color: "#1b9a57",
-              borderRadius: 999,
-              padding: "10px 18px",
-              fontWeight: 800,
-              fontSize: 14,
-              whiteSpace: "nowrap",
-            }}
-          >
-            ✅ Acesso liberado
+          <div className="summaryPill">
+            <strong>{resumo.realizados}/{resumo.total}</strong>
+            <span>realizadas</span>
           </div>
+        </header>
+
+        <div className="summaryGrid">
+          <div className="summaryCard"><span>Total</span><strong>{resumo.total}</strong></div>
+          <div className="summaryCard"><span>Realizadas</span><strong>{resumo.realizados}</strong></div>
+          <div className="summaryCard"><span>Aprovadas</span><strong>{resumo.aprovados}</strong></div>
+          <div className="summaryCard"><span>Pendentes</span><strong>{resumo.pendentes}</strong></div>
         </div>
 
-        <div
-          style={{
-            marginTop: 20,
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))",
-            gap: 18,
-          }}
-        >
-          {PROVAS.map((prova) => (
-            <article
-              key={prova.slug}
-              style={{
-                background: "#ffffff",
-                border: "1px solid #e1e7f0",
-                borderRadius: 24,
-                padding: 22,
-                boxShadow: "0 8px 24px rgba(15, 35, 95, 0.04)",
-              }}
-            >
-              <h3
-                style={{
-                  margin: 0,
-                  fontSize: 18,
-                  lineHeight: 1.35,
-                  color: "#0b2a6f",
-                  fontWeight: 800,
-                }}
-              >
-                📄 {prova.titulo}
-              </h3>
+        <div className="provasGrid">
+          {PROVAS.map((prova) => {
+            const resultado = resultados[prova.slug];
+            const realizada = Boolean(resultado);
+            const aprovado = Boolean(resultado?.aprovado);
+            const bloqueada = realizada && aprovado;
 
-              <div
-                style={{
-                  marginTop: 14,
-                  display: "grid",
-                  gap: 6,
-                  color: "#17326e",
-                  fontSize: 15,
-                  fontWeight: 700,
-                }}
-              >
-                <p style={{ margin: 0 }}>
-                  <strong>Produto:</strong> {prova.produto}
-                </p>
-                <p style={{ margin: 0 }}>
-                  <strong>Público:</strong> {prova.publico}
-                </p>
-              </div>
+            return (
+              <article key={prova.slug} className={`provaCard ${realizada ? "realizada" : ""}`}>
+                <div className="cardTop">
+                  <h3>📄 {prova.titulo}</h3>
+                  {realizada ? (
+                    <span className={`statusPill ${aprovado ? "ok" : "bad"}`}>{aprovado ? "APROVADA" : "REPROVADA"}</span>
+                  ) : (
+                    <span className="statusPill pending">PENDENTE</span>
+                  )}
+                </div>
 
-              <p
-                style={{
-                  marginTop: 14,
-                  marginBottom: 0,
-                  color: "#0b2a6f",
-                  fontSize: 15,
-                  fontWeight: 800,
-                }}
-              >
-                Regra: 70% mínimo • até 3 tentativas
-              </p>
+                <div className="metaGrid">
+                  <span><strong>Produto:</strong> {prova.produto}</span>
+                  <span><strong>Público:</strong> {prova.publico}</span>
+                  <span><strong>Regra:</strong> 70% mínimo • até 3 tentativas</span>
+                </div>
 
-              <div
-                style={{
-                  marginTop: 18,
-                  display: "grid",
-                  gap: 12,
-                }}
-              >
-                <Link
-                  href={`/colaborador/provas/${prova.slug}`}
-                  style={{
-                    textDecoration: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: 50,
-                    borderRadius: 999,
-                    background: "#f4c400",
-                    color: "#0b2a6f",
-                    fontWeight: 800,
-                    fontSize: 15,
-                    border: "1px solid #e0b900",
-                  }}
-                >
-                  Iniciar prova
-                </Link>
+                {realizada ? (
+                  <div className="resultadoBox">
+                    <div><strong>Nota:</strong> {resultado.nota}%</div>
+                    <div><strong>Tentativas:</strong> {resultado.tentativas || 1}</div>
+                    {resultado.respondidoEm ? <div><strong>Realizada em:</strong> {formatDate(resultado.respondidoEm)}</div> : null}
+                  </div>
+                ) : null}
 
-                <Link
-                  href="/colaborador/treinamentos"
-                  style={{
-                    textDecoration: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    minHeight: 50,
-                    borderRadius: 999,
-                    background: "#ffffff",
-                    color: "#0b2a6f",
-                    fontWeight: 800,
-                    fontSize: 15,
-                    border: "1px solid #ccd6e6",
-                  }}
-                >
-                  Ver treinamentos
-                </Link>
-              </div>
-            </article>
-          ))}
+                <div className="actions">
+                  <Link className={`mainBtn ${bloqueada ? "done" : ""}`} href={`/colaborador/provas/${prova.slug}`}>
+                    {realizada ? (aprovado ? "Ver resultado" : "Tentar novamente") : "Iniciar prova"}
+                  </Link>
+                  <Link className="outlineBtn" href="/colaborador/treinamentos">Ver treinamentos</Link>
+                </div>
+              </article>
+            );
+          })}
         </div>
-
-        <div
-          style={{
-            marginTop: 22,
-            display: "flex",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <Link
-            href="/colaborador"
-            style={{
-              textDecoration: "none",
-              borderRadius: 999,
-              border: "1px solid #ccd6e6",
-              background: "#ffffff",
-              color: "#0b2a6f",
-              padding: "12px 18px",
-              fontWeight: 800,
-              fontSize: 15,
-            }}
-          >
-            ← Área do Colaborador
-          </Link>
-
-          <Link
-            href="/colaborador/treinamentos"
-            style={{
-              textDecoration: "none",
-              borderRadius: 999,
-              border: "1px solid #ccd6e6",
-              background: "#ffffff",
-              color: "#0b2a6f",
-              padding: "12px 18px",
-              fontWeight: 800,
-              fontSize: 15,
-            }}
-          >
-            ← Treinamentos
-          </Link>
-        </div>
-
-        <footer
-          style={{
-            marginTop: 46,
-            paddingBottom: 16,
-            textAlign: "center",
-            color: "#6f7b8f",
-            fontSize: 14,
-            lineHeight: 1.7,
-            fontWeight: 600,
-          }}
-        >
-          <div>© 2026 — Portal do Colaborador</div>
-          <div>Uso interno e restrito aos colaboradores</div>
-          <div>Área de Qualidade e Compliance</div>
-        </footer>
       </section>
+
+      <style jsx global>{`
+        .provasPage { min-height: 100%; background:#f3f5f9; color:#0b2a6f; font-family:Arial,sans-serif; }
+        .provasWrap { max-width:1180px; margin:0 auto; padding:22px 20px 34px; }
+        .topNav { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+        .miniLink { text-decoration:none; border:1px solid #ccd6e6; background:#fff; color:#0b2a6f; border-radius:999px; padding:9px 13px; font-weight:900; font-size:12px; }
+        .headerBox { display:flex; justify-content:space-between; align-items:flex-end; gap:18px; background:#fff; border:1px solid #dbe3f0; border-radius:20px; padding:20px 22px; box-shadow:0 8px 24px rgba(15,35,95,.05); }
+        .headerBox h1 { margin:0; font-size:38px; line-height:1.05; font-weight:950; color:#0b2a6f; letter-spacing:-.02em; }
+        .headerBox .bar { margin-top:12px; width:54px; height:5px; border-radius:999px; background:#f4c400; }
+        .headerBox p { margin:14px 0 0; max-width:820px; font-size:15px; line-height:1.45; font-weight:750; color:#17326e; }
+        .summaryPill { min-width:122px; border:1px solid #acdcbc; background:#ebf8ef; color:#1b9a57; border-radius:18px; padding:12px 16px; text-align:center; font-weight:900; }
+        .summaryPill strong { display:block; font-size:22px; }
+        .summaryPill span { display:block; font-size:12px; margin-top:2px; }
+        .summaryGrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-top:12px; }
+        .summaryCard { background:#fff; border:1px solid #dbe3f0; border-radius:16px; padding:10px 12px; box-shadow:0 8px 20px rgba(15,35,95,.04); }
+        .summaryCard span { display:block; font-size:11px; font-weight:900; color:#5b6980; }
+        .summaryCard strong { display:block; margin-top:2px; font-size:21px; color:#0b2a6f; }
+        .provasGrid { margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:12px; }
+        .provaCard { background:#fff; border:1px solid #e1e7f0; border-radius:18px; padding:16px; box-shadow:0 8px 20px rgba(15,35,95,.04); display:flex; flex-direction:column; gap:12px; }
+        .provaCard.realizada { border-color:rgba(27,154,87,.28); }
+        .cardTop { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+        .cardTop h3 { margin:0; font-size:16px; line-height:1.3; color:#0b2a6f; font-weight:950; }
+        .statusPill { flex:0 0 auto; border-radius:999px; padding:6px 9px; font-size:10px; font-weight:950; border:1px solid transparent; }
+        .statusPill.ok { color:#14884d; background:#ebf8ef; border-color:#acdcbc; }
+        .statusPill.bad { color:#a22b2b; background:#fff4f4; border-color:#f1c8c8; }
+        .statusPill.pending { color:#6f5b00; background:#fff8d6; border-color:#f0dc80; }
+        .metaGrid { display:grid; gap:4px; color:#17326e; font-size:13px; font-weight:750; }
+        .resultadoBox { display:grid; gap:3px; background:#f7f9ff; border:1px solid #dbe3f0; border-radius:14px; padding:10px 12px; color:#17326e; font-size:12px; font-weight:750; }
+        .actions { margin-top:auto; display:grid; gap:8px; }
+        .mainBtn, .outlineBtn { text-decoration:none; min-height:42px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:950; font-size:13px; }
+        .mainBtn { background:#f4c400; color:#0b2a6f; border:1px solid #e0b900; }
+        .mainBtn.done { background:#ebf8ef; border-color:#acdcbc; color:#14884d; }
+        .outlineBtn { background:#fff; color:#0b2a6f; border:1px solid #ccd6e6; }
+        @media (max-width:760px) {
+          .provasWrap { padding:16px 14px 28px; }
+          .headerBox { align-items:flex-start; flex-direction:column; padding:18px; }
+          .headerBox h1 { font-size:30px; }
+          .summaryGrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+          .provasGrid { grid-template-columns:1fr; }
+        }
+      `}</style>
     </main>
   );
 }
