@@ -40,8 +40,12 @@ function provaTitulo(item: Item) {
   return String(item.entityTitle || item.meta?.provaTitulo || "Prova");
 }
 
+function colaboradorCpf(item: Item) {
+  return onlyDigits(item.actorCpf || String(item.meta?.cpf || ""));
+}
+
 function resultadoKey(item: Item) {
-  return [onlyDigits(item.actorCpf || String(item.meta?.cpf || "")), item.entityId || provaTitulo(item)].join("::");
+  return [colaboradorCpf(item), item.entityId || provaTitulo(item)].join("::");
 }
 
 function statusProva(item: Item) {
@@ -50,6 +54,26 @@ function statusProva(item: Item) {
   if (aprovado === "NAO" || aprovado === "NÃO" || aprovado === "FALSE") return "REPROVADO";
   if (item.type === "PROVA_APROVADA") return "APROVADO";
   return "REGISTRADO";
+}
+
+function shouldReplaceResult(current: Item, next: Item) {
+  const currentStatus = statusProva(current);
+  const nextStatus = statusProva(next);
+
+  // Se existir aprovação para a mesma pessoa/prova, ela é o resultado principal.
+  if (currentStatus !== "APROVADO" && nextStatus === "APROVADO") return true;
+  if (currentStatus === "APROVADO" && nextStatus !== "APROVADO") return false;
+
+  const currentTime = new Date(current.atISO || current.meta?.respondidoEm || 0).getTime();
+  const nextTime = new Date(next.atISO || next.meta?.respondidoEm || 0).getTime();
+
+  if (nextTime > currentTime) return true;
+  if (nextTime < currentTime) return false;
+
+  // No mesmo horário, prioriza o evento de aprovação em vez do envio.
+  if (current.type !== "PROVA_APROVADA" && next.type === "PROVA_APROVADA") return true;
+
+  return false;
 }
 
 export default function ProvasResultadosPage() {
@@ -86,22 +110,24 @@ export default function ProvasResultadosPage() {
   }, [ready]);
 
   const resultados = useMemo(() => {
-    const aprovados = new Set(
-      items
-        .filter((item) => item.type === "PROVA_APROVADA" || statusProva(item) === "APROVADO")
-        .map(resultadoKey)
-    );
+    const grupos = new Map<string, Item>();
 
-    return items.filter((item) => {
-      const st = statusProva(item);
+    for (const item of items) {
+      if (item.type !== "PROVA_APROVADA" && item.type !== "PROVA_ENVIADA") continue;
 
-      // Para aprovado, a tela mostra somente PROVA_APROVADA.
-      // Para reprovado, mantém PROVA_ENVIADA, pois não existe PROVA_APROVADA.
-      if (item.type === "PROVA_ENVIADA" && st === "APROVADO" && aprovados.has(resultadoKey(item))) {
-        return false;
+      const key = resultadoKey(item);
+      if (!key || key === "::") continue;
+
+      const atual = grupos.get(key);
+      if (!atual || shouldReplaceResult(atual, item)) {
+        grupos.set(key, item);
       }
+    }
 
-      return item.type === "PROVA_APROVADA" || item.type === "PROVA_ENVIADA";
+    return Array.from(grupos.values()).sort((a, b) => {
+      const ta = new Date(a.atISO || a.meta?.respondidoEm || 0).getTime();
+      const tb = new Date(b.atISO || b.meta?.respondidoEm || 0).getTime();
+      return tb - ta;
     });
   }, [items]);
 
@@ -120,8 +146,9 @@ export default function ProvasResultadosPage() {
       const hay = [
         item.actorNome,
         item.actorCpf,
-        onlyDigits(item.actorCpf),
+        colaboradorCpf(item),
         item.actorEmpresa,
+        String(item.meta?.empresa || ""),
         titulo,
         st,
         String(item.meta?.nota ?? ""),
@@ -143,7 +170,7 @@ export default function ProvasResultadosPage() {
     const lines = rows.map((i) => [
       formatDate(i.atISO),
       i.actorNome,
-      i.actorCpf,
+      i.actorCpf || String(i.meta?.cpf || ""),
       i.actorEmpresa || String(i.meta?.empresa || ""),
       provaTitulo(i),
       i.type,
@@ -174,12 +201,12 @@ export default function ProvasResultadosPage() {
 
         <div className="section-title"><h2>Resultados das Provas</h2><div className="bar" /></div>
         <p className="section-text" style={{ maxWidth: 980 }}>
-          Consulta auditável consolidada: quando há aprovação, aparece somente o evento de aprovação; quando há reprovação, aparece a tentativa enviada com status reprovado.
+          Consulta auditável consolidada: aparece um resultado final por colaborador e prova. Quando há aprovação, é exibido o evento de aprovação; quando não há aprovação, é exibida a tentativa enviada com status reprovado.
         </p>
 
         <div className="summaryGrid">
           <div className="summaryCard"><span>Total resultados</span><strong>{resumo.total}</strong></div>
-          <div className="summaryCard"><span>Tentativas</span><strong>{resumo.tentativas}</strong></div>
+          <div className="summaryCard"><span>Tentativas registradas</span><strong>{resumo.tentativas}</strong></div>
           <div className="summaryCard"><span>Aprovados</span><strong>{resumo.aprovados}</strong></div>
           <div className="summaryCard"><span>Reprovados</span><strong>{resumo.reprovados}</strong></div>
           <div className="summaryCard"><span>Filtrados</span><strong>{resumo.filtrados}</strong></div>
@@ -206,7 +233,7 @@ export default function ProvasResultadosPage() {
               {rows.map((i) => {
                 const st = statusProva(i);
                 return (
-                  <tr key={i.id}>
+                  <tr key={resultadoKey(i)}>
                     <td>{formatDate(i.atISO)}</td>
                     <td><strong>{i.actorNome || String(i.meta?.nome || "—")}</strong></td>
                     <td className="mono">{i.actorCpf || String(i.meta?.cpf || "—")}</td>
