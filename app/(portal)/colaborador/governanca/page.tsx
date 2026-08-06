@@ -93,7 +93,7 @@ export default function GovernancaPage() {
         </div>
 
         <p className="section-text" style={{ maxWidth: 920 }}>
-          Painel executivo do Portal do Colaborador com resumo dos treinamentos, documentos, políticas, procedimentos, termos obrigatórios e estrutura de conformidade utilizada como apoio à auditoria.
+          Painel institucional do Portal do Colaborador com resumo dos treinamentos, documentos, políticas, procedimentos e termos obrigatórios disponíveis para consulta e apoio às atividades.
         </p>
 
         <div className="govTop">
@@ -104,9 +104,9 @@ export default function GovernancaPage() {
           </div>
 
           <div className="govUserCard govSoft">
-            <div className="govMini">Escopo monitorado</div>
-            <div className="govUserName">Governança documental e evidências</div>
-            <div className="govUserSub">Treinamentos, provas, documentos, scripts, termos e trilhas de auditoria.</div>
+            <div className="govMini">Escopo do portal</div>
+            <div className="govUserName">Governança documental</div>
+            <div className="govUserSub">Treinamentos, materiais, políticas, scripts e termos obrigatórios.</div>
           </div>
         </div>
 
@@ -137,12 +137,12 @@ export default function GovernancaPage() {
             <strong>Ativo</strong>
           </div>
           <div className="govLine">
-            <span>Registros de treinamento e provas no Logger Central</span>
-            <strong>Ativo</strong>
+            <span>Treinamentos obrigatórios disponíveis</span>
+            <strong>Ativos</strong>
           </div>
           <div className="govLine">
-            <span>Trilha de auditoria administrativa</span>
-            <strong>Ativa</strong>
+            <span>Próxima revisão documental prevista</span>
+            <strong>{PROXIMA_REVISAO}</strong>
           </div>
         </div>
 
@@ -153,12 +153,12 @@ export default function GovernancaPage() {
             <Link className="govNode" href="/colaborador/treinamentos">
               <span>🎓</span>
               <strong>Treinamentos</strong>
-              <small>Conclusão por CPF</small>
+              <small>Conteúdos obrigatórios</small>
             </Link>
             <Link className="govNode" href="/colaborador/provas">
               <span>📝</span>
               <strong>Provas</strong>
-              <small>Notas e aprovação</small>
+              <small>Avaliações vinculadas</small>
             </Link>
             <Link className="govNode" href="/colaborador/materiais">
               <span>📄</span>
@@ -175,38 +175,6 @@ export default function GovernancaPage() {
               <strong>Scripts</strong>
               <small>Roteiros operacionais</small>
             </Link>
-            <Link className="govNode" href="/colaborador/auditoria">
-              <span>🗂️</span>
-              <strong>Auditoria</strong>
-              <small>Evidências e relatórios</small>
-            </Link>
-          </div>
-        </div>
-
-        <div className="govBox">
-          <h3>Resumo executivo para auditoria</h3>
-
-          <div className="govSummaryGrid">
-            <div className="govSummaryCard">
-              <div className="govSummaryTitle">Base documental</div>
-              <div className="govSummaryText">
-                A biblioteca documental fica concentrada em <strong>Materiais & Políticas</strong>, com políticas, procedimentos, SGQ e documentos institucionais para consulta e suporte às atividades.
-              </div>
-            </div>
-
-            <div className="govSummaryCard">
-              <div className="govSummaryTitle">Rastreabilidade</div>
-              <div className="govSummaryText">
-                Treinamentos, provas, termos e ações administrativas possuem registros no <strong>Logger Central</strong>, permitindo consulta por CPF, colaborador, módulo e data/hora.
-              </div>
-            </div>
-
-            <div className="govSummaryCard">
-              <div className="govSummaryTitle">Evidências</div>
-              <div className="govSummaryText">
-                A área de Auditoria consolida evidências individuais, resultados de provas, controle de treinamentos, certificações, acessos e relatórios exportáveis.
-              </div>
-            </div>
           </div>
         </div>
 
@@ -235,11 +203,7 @@ export default function GovernancaPage() {
           .govNode span { font-size:22px; }
           .govNode strong { color:#0a2a6a; font-size:13px; }
           .govNode small { opacity:.68; font-weight:700; }
-          .govSummaryGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-          .govSummaryCard { background:#f8faff; border:1px solid rgba(10,42,106,.1); border-radius:16px; padding:14px; }
-          .govSummaryTitle { font-weight:900; color:#0a2a6a; margin-bottom:7px; }
-          .govSummaryText { font-size:12px; line-height:1.55; font-weight:700; opacity:.72; }
-          @media (max-width: 900px) { .govTop,.govGrid,.govMap,.govSummaryGrid{grid-template-columns:1fr;} }
+          @media (max-width: 900px) { .govTop,.govGrid,.govMap{grid-template-columns:1fr;} }
         `}</style>
       </div>
     </main>
