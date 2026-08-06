@@ -36,6 +36,14 @@ function onlyDigits(value: string) {
   return String(value || "").replace(/\D/g, "");
 }
 
+function provaTitulo(item: Item) {
+  return String(item.entityTitle || item.meta?.provaTitulo || "Prova");
+}
+
+function resultadoKey(item: Item) {
+  return [onlyDigits(item.actorCpf || String(item.meta?.cpf || "")), item.entityId || provaTitulo(item)].join("::");
+}
+
 function statusProva(item: Item) {
   const aprovado = String(item.meta?.aprovado || "").toUpperCase();
   if (aprovado === "SIM" || aprovado === "TRUE") return "APROVADO";
@@ -77,15 +85,35 @@ export default function ProvasResultadosPage() {
     void load();
   }, [ready]);
 
-  const provas = useMemo(() => {
-    return ["TODAS", ...Array.from(new Set(items.map((i) => i.entityTitle || i.meta?.provaTitulo || "Prova"))).sort()];
+  const resultados = useMemo(() => {
+    const aprovados = new Set(
+      items
+        .filter((item) => item.type === "PROVA_APROVADA" || statusProva(item) === "APROVADO")
+        .map(resultadoKey)
+    );
+
+    return items.filter((item) => {
+      const st = statusProva(item);
+
+      // Para aprovado, a tela mostra somente PROVA_APROVADA.
+      // Para reprovado, mantém PROVA_ENVIADA, pois não existe PROVA_APROVADA.
+      if (item.type === "PROVA_ENVIADA" && st === "APROVADO" && aprovados.has(resultadoKey(item))) {
+        return false;
+      }
+
+      return item.type === "PROVA_APROVADA" || item.type === "PROVA_ENVIADA";
+    });
   }, [items]);
+
+  const provas = useMemo(() => {
+    return ["TODAS", ...Array.from(new Set(resultados.map((i) => provaTitulo(i)))).sort()];
+  }, [resultados]);
 
   const rows = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return items.filter((item) => {
+    return resultados.filter((item) => {
       const st = statusProva(item);
-      const titulo = String(item.entityTitle || item.meta?.provaTitulo || "Prova");
+      const titulo = provaTitulo(item);
       if (statusFiltro !== "TODOS" && st !== statusFiltro) return false;
       if (provaFiltro !== "TODAS" && titulo !== provaFiltro) return false;
       if (!query) return true;
@@ -101,14 +129,14 @@ export default function ProvasResultadosPage() {
       ].join(" ").toLowerCase();
       return hay.includes(query);
     });
-  }, [items, q, statusFiltro, provaFiltro]);
+  }, [resultados, q, statusFiltro, provaFiltro]);
 
   const resumo = useMemo(() => {
-    const enviados = items.filter((i) => i.type === "PROVA_ENVIADA").length;
-    const aprovados = items.filter((i) => statusProva(i) === "APROVADO").length;
-    const reprovados = items.filter((i) => statusProva(i) === "REPROVADO").length;
-    return { total: items.length, enviados, aprovados, reprovados, filtrados: rows.length };
-  }, [items, rows.length]);
+    const tentativas = items.filter((i) => i.type === "PROVA_ENVIADA").length;
+    const aprovados = resultados.filter((i) => statusProva(i) === "APROVADO").length;
+    const reprovados = resultados.filter((i) => statusProva(i) === "REPROVADO").length;
+    return { total: resultados.length, tentativas, aprovados, reprovados, filtrados: rows.length };
+  }, [items, resultados, rows.length]);
 
   function exportarCsv() {
     const header = ["Data/Hora", "Nome", "CPF", "Empresa", "Prova", "Evento", "Nota", "Status"];
@@ -117,7 +145,7 @@ export default function ProvasResultadosPage() {
       i.actorNome,
       i.actorCpf,
       i.actorEmpresa || String(i.meta?.empresa || ""),
-      i.entityTitle || String(i.meta?.provaTitulo || ""),
+      provaTitulo(i),
       i.type,
       String(i.meta?.nota ?? ""),
       statusProva(i),
@@ -145,11 +173,13 @@ export default function ProvasResultadosPage() {
         </div>
 
         <div className="section-title"><h2>Resultados das Provas</h2><div className="bar" /></div>
-        <p className="section-text" style={{ maxWidth: 980 }}>Consulta auditável dos eventos de provas registrados no banco: envio, nota, aprovação/reprovação, colaborador, CPF, empresa e data/hora.</p>
+        <p className="section-text" style={{ maxWidth: 980 }}>
+          Consulta auditável consolidada: quando há aprovação, aparece somente o evento de aprovação; quando há reprovação, aparece a tentativa enviada com status reprovado.
+        </p>
 
         <div className="summaryGrid">
-          <div className="summaryCard"><span>Total eventos</span><strong>{resumo.total}</strong></div>
-          <div className="summaryCard"><span>Enviadas</span><strong>{resumo.enviados}</strong></div>
+          <div className="summaryCard"><span>Total resultados</span><strong>{resumo.total}</strong></div>
+          <div className="summaryCard"><span>Tentativas</span><strong>{resumo.tentativas}</strong></div>
           <div className="summaryCard"><span>Aprovados</span><strong>{resumo.aprovados}</strong></div>
           <div className="summaryCard"><span>Reprovados</span><strong>{resumo.reprovados}</strong></div>
           <div className="summaryCard"><span>Filtrados</span><strong>{resumo.filtrados}</strong></div>
@@ -171,7 +201,7 @@ export default function ProvasResultadosPage() {
 
         <div className="tableWrap">
           <table className="resultTable">
-            <thead><tr><th>Data/Hora</th><th>Colaborador</th><th>CPF</th><th>Empresa</th><th>Prova</th><th>Nota</th><th>Status</th><th>Evento</th></tr></thead>
+            <thead><tr><th>Data/Hora</th><th>Colaborador</th><th>CPF</th><th>Empresa</th><th>Prova</th><th>Nota</th><th>Status</th><th>Evento exibido</th></tr></thead>
             <tbody>
               {rows.map((i) => {
                 const st = statusProva(i);
@@ -181,7 +211,7 @@ export default function ProvasResultadosPage() {
                     <td><strong>{i.actorNome || String(i.meta?.nome || "—")}</strong></td>
                     <td className="mono">{i.actorCpf || String(i.meta?.cpf || "—")}</td>
                     <td>{i.actorEmpresa || String(i.meta?.empresa || "—")}</td>
-                    <td>{i.entityTitle || String(i.meta?.provaTitulo || "—")}</td>
+                    <td>{provaTitulo(i)}</td>
                     <td className="nota">{String(i.meta?.nota ?? "—")}{i.meta?.nota !== undefined ? "%" : ""}</td>
                     <td><span className={`pill ${st.toLowerCase()}`}>{st}</span></td>
                     <td className="mono evento">{i.type}</td>
