@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getSession } from "@/src/lib/auth";
 
 type DocTipo = "politica" | "procedimento" | "sgq" | "institucional";
@@ -17,6 +17,9 @@ type Documento = {
   responsavel: string;
   revisao: string;
 };
+
+const CICLO_BIBLIOTECA = "2026/2027";
+const TOTAL_DOCUMENTOS = 21;
 
 const TAGS: Record<DocTipo, { label: string; badgeClass: string; icon: string }> = {
   politica: { label: "Política", badgeClass: "badge badge-blue", icon: "📘" },
@@ -41,19 +44,16 @@ const DOCUMENTOS: Documento[] = [
   { id: "politica-rh", titulo: "Política de Recursos Humanos", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-recursos-humanos.pdf", descricao: "Diretrizes institucionais relacionadas à gestão de pessoas e conduta interna.", responsavel: "RH", revisao: "02/2027" },
   { id: "politica-incidentes", titulo: "Política de Gestão de Incidentes", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-gestao-incidentes.pdf", descricao: "Fluxos e responsabilidades para identificação, tratamento e comunicação de incidentes.", responsavel: "TI / Compliance", revisao: "02/2027" },
   { id: "politica-vulnerabilidades", titulo: "Política de Gestão de Vulnerabilidades", tipo: "politica", status: "vigente", arquivoPdf: "/materiais/politicas/politica-gestao-vulnerabilidades-ti.pdf", descricao: "Diretrizes de segurança para gestão de vulnerabilidades de sistemas e infraestrutura.", responsavel: "TI / Compliance", revisao: "02/2027" },
-
   { id: "sgq-inventario-tratamento-dados", titulo: "Inventário de Tratamento de Dados", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-inventario-tratamento-dados.pdf", descricao: "Registro institucional de operações e fluxos de tratamento de dados.", responsavel: "DPO / Compliance", revisao: "02/2027" },
   { id: "sgq-manual-gestao-planejamento-fin", titulo: "Manual de Gestão e Planejamento Financeiro", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-manual-gestao-planejamento-financeiro.pdf", descricao: "Documento de referência para controles e organização financeira interna.", responsavel: "Financeiro / Diretoria", revisao: "02/2027" },
   { id: "sgq-manual-atendimento-etico", titulo: "Manual para um Atendimento Ético e Transparente", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-manual-atendimento-etico-transparente.pdf", descricao: "Manual orientativo para conduta ética e transparência no atendimento.", responsavel: "Qualidade e Compliance", revisao: "02/2027" },
   { id: "proc-plano-anual-auditoria", titulo: "Plano Anual de Auditoria Interna", tipo: "sgq", status: "vigente", arquivoPdf: "/materiais/sgq/sgq-plano-anual-auditoria-interna.pdf", descricao: "Planejamento anual das atividades e frentes de auditoria interna.", responsavel: "Auditoria Interna", revisao: "02/2027" },
-
   { id: "proc-auditoria-interna", titulo: "Procedimento de Auditoria Interna", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-auditoria-interna.pdf", descricao: "Fluxo operacional para execução e registro de auditorias internas.", responsavel: "Auditoria Interna", revisao: "02/2027" },
   { id: "proc-prevencao-fraude", titulo: "Procedimento de Prevenção à Fraude", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-prevencao-fraude.pdf", descricao: "Procedimentos formais de apoio ao controle e prevenção de fraudes.", responsavel: "Qualidade e Compliance", revisao: "02/2027" },
   { id: "proc-concessao-acessos-sistemas", titulo: "Procedimento para Concessão de Acesso aos Sistemas", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-concessao-acesso-sistemas.pdf", descricao: "Fluxo operacional para concessão, alteração e revogação de acessos.", responsavel: "Qualidade / TI", revisao: "02/2027" },
   { id: "proc-contratacao-desenvolvimento", titulo: "Procedimento para Contratação e Desenvolvimento", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-contratacao-desenvolvimento.pdf", descricao: "Procedimento de contratação, integração e desenvolvimento de colaboradores e parceiros.", responsavel: "RH / Qualidade", revisao: "02/2027" },
   { id: "proc-tratamento-mailing", titulo: "Procedimento para Tratamento de Lista de Mailing", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/procedimento-tratamento-lista-mailing.pdf", descricao: "Procedimento formal para uso, controle e tratamento de listas de mailing.", responsavel: "Qualidade e Compliance", revisao: "02/2027" },
   { id: "proc-concessao-acessos-chavej-portal", titulo: "Concessão de Acessos (Chave J e Portal do Correspondente)", tipo: "procedimento", status: "vigente", arquivoPdf: "/materiais/procedimentos/concessao-acessos.pdf", descricao: "Procedimento operacional para concessão de acessos a ambientes críticos.", responsavel: "Qualidade / TI", revisao: "02/2027" },
-
   { id: "institucional-termo-adocao-sgq", titulo: "Termo de Adoção Institucional – SGQ", tipo: "institucional", status: "vigente", arquivoPdf: "/materiais/termos/termo-adocao-institucional-sgq.pdf", descricao: "Documento institucional de formalização e adesão ao Sistema de Gestão da Qualidade.", responsavel: "Diretoria / Qualidade", revisao: "02/2027" },
 ];
 
@@ -61,42 +61,45 @@ function normalizarCpf(value: unknown) {
   return String(value ?? "").replace(/\D/g, "");
 }
 
-async function registrarConsultaDocumento(doc: Documento) {
+async function registrarEvento(payload: any) {
   try {
-    const session: any = getSession();
-    const tipo = TAGS[doc.tipo];
-    const dataISO = new Date().toISOString();
-
     await fetch("/api/audit/events", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "DOCUMENTO_CONSULTADO",
-        module: "materiais-politicas",
-        entityId: doc.id,
-        entityTitle: doc.titulo,
-        actorCpf: normalizarCpf(session?.cpf || ""),
-        actorNome: session?.nome || "",
-        actorPerfil: session?.perfil || "",
-        actorEmpresa: session?.empresa || "",
-        atISO: dataISO,
-        obs: `Colaborador consultou documento em Materiais & Políticas: ${doc.titulo}.`,
-        meta: {
-          documento: doc.titulo,
-          documentoId: doc.id,
-          categoria: tipo.label,
-          tipo: doc.tipo,
-          status: STATUS[doc.status].label,
-          responsavel: doc.responsavel,
-          revisao: doc.revisao,
-          arquivoPdf: doc.arquivoPdf,
-          origem: "materiais_e_politicas",
-        },
-      }),
+      body: JSON.stringify(payload),
     });
-  } catch {
-    // A consulta não deve bloquear a abertura do documento.
-  }
+  } catch {}
+}
+
+async function registrarConsultaDocumento(doc: Documento, acao: "ABRIR" | "BAIXAR") {
+  const session: any = getSession();
+  const tipo = TAGS[doc.tipo];
+  const dataISO = new Date().toISOString();
+
+  await registrarEvento({
+    type: "DOCUMENTO_CONSULTADO",
+    module: "materiais-politicas",
+    entityId: doc.id,
+    entityTitle: doc.titulo,
+    actorCpf: normalizarCpf(session?.cpf || ""),
+    actorNome: session?.nome || "",
+    actorPerfil: session?.perfil || "",
+    actorEmpresa: session?.empresa || "",
+    atISO: dataISO,
+    obs: `Colaborador ${acao === "BAIXAR" ? "baixou" : "consultou"} documento em Materiais & Políticas: ${doc.titulo}.`,
+    meta: {
+      documento: doc.titulo,
+      documentoId: doc.id,
+      categoria: tipo.label,
+      tipo: doc.tipo,
+      status: STATUS[doc.status].label,
+      responsavel: doc.responsavel,
+      revisao: doc.revisao,
+      arquivoPdf: doc.arquivoPdf,
+      acao,
+      origem: "materiais_e_politicas",
+    },
+  });
 }
 
 function DocRow({ doc }: { doc: Documento }) {
@@ -105,26 +108,19 @@ function DocRow({ doc }: { doc: Documento }) {
 
   async function abrirDocumento() {
     const novaJanela = window.open("about:blank", "_blank", "noopener,noreferrer");
-    await registrarConsultaDocumento(doc);
-
-    if (novaJanela) {
-      novaJanela.location.href = doc.arquivoPdf;
-    } else {
-      window.open(doc.arquivoPdf, "_blank", "noopener,noreferrer");
-    }
+    await registrarConsultaDocumento(doc, "ABRIR");
+    if (novaJanela) novaJanela.location.href = doc.arquivoPdf;
+    else window.open(doc.arquivoPdf, "_blank", "noopener,noreferrer");
   }
 
   async function baixarDocumento() {
-    await registrarConsultaDocumento(doc);
+    await registrarConsultaDocumento(doc, "BAIXAR");
   }
 
   return (
     <div className="doc-row">
       <div className="doc-left">
-        <div className="doc-title">
-          <span className="doc-icon" aria-hidden="true">{tipo.icon}</span>
-          <span>{doc.titulo}</span>
-        </div>
+        <div className="doc-title"><span className="doc-icon" aria-hidden="true">{tipo.icon}</span><span>{doc.titulo}</span></div>
         <div className="doc-meta">
           <span className={tipo.badgeClass}>{tipo.label}</span>
           <span className={status.badgeClass}>{status.label}</span>
@@ -143,24 +139,70 @@ function DocRow({ doc }: { doc: Documento }) {
 
 function SectionBox({ title, subtitle, docs }: { title: string; subtitle: string; docs: Documento[] }) {
   if (!docs.length) return null;
-
-  return (
-    <div className="box">
-      <div className="box-head">
-        <div>
-          <h3 className="box-title">{title}</h3>
-          <p className="box-sub">{subtitle}</p>
-        </div>
-        <div className="box-count">{docs.length}</div>
-      </div>
-      <div className="doc-list">{docs.map((d) => <DocRow key={d.id} doc={d} />)}</div>
-    </div>
-  );
+  return <div className="box"><div className="box-head"><div><h3 className="box-title">{title}</h3><p className="box-sub">{subtitle}</p></div><div className="box-count">{docs.length}</div></div><div className="doc-list">{docs.map((d) => <DocRow key={d.id} doc={d} />)}</div></div>;
 }
 
 export default function MateriaisPage() {
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<"TODOS" | DocTipo>("TODOS");
+  const [confirmou, setConfirmou] = useState(false);
+  const [cienciaISO, setCienciaISO] = useState<string | null>(null);
+  const [salvandoCiencia, setSalvandoCiencia] = useState(false);
+
+  useEffect(() => {
+    async function consultarCiencia() {
+      const session: any = getSession();
+      const cpf = normalizarCpf(session?.cpf || "");
+      if (!cpf) return;
+      try {
+        const res = await fetch(`/api/audit/events?actorCpf=${encodeURIComponent(cpf)}&module=materiais-politicas&action=BIBLIOTECA_GOVERNANCA_CIENCIA`, { cache: "no-store" });
+        const data = await res.json();
+        const item = data?.progress?.["biblioteca-materiais-politicas"] || null;
+        if (item?.dataISO) {
+          setCienciaISO(item.dataISO);
+          setConfirmou(true);
+        }
+      } catch {}
+    }
+    void consultarCiencia();
+  }, []);
+
+  async function registrarCienciaBiblioteca() {
+    if (cienciaISO || salvandoCiencia) return;
+    if (!confirmou) {
+      alert("Para registrar a ciência, confirme que está ciente da Biblioteca de Materiais & Políticas.");
+      return;
+    }
+
+    const session: any = getSession();
+    const dataISO = new Date().toISOString();
+    setSalvandoCiencia(true);
+    await registrarEvento({
+      type: "BIBLIOTECA_GOVERNANCA_CIENCIA",
+      module: "materiais-politicas",
+      entityId: "biblioteca-materiais-politicas",
+      entityTitle: "Biblioteca de Materiais & Políticas",
+      actorCpf: normalizarCpf(session?.cpf || ""),
+      actorNome: session?.nome || "",
+      actorPerfil: session?.perfil || "",
+      actorEmpresa: session?.empresa || "",
+      atISO: dataISO,
+      obs: "Colaborador registrou ciência geral da Biblioteca de Materiais & Políticas.",
+      meta: {
+        ciclo: CICLO_BIBLIOTECA,
+        totalDocumentos: TOTAL_DOCUMENTOS,
+        politicas: 10,
+        sgq: 4,
+        procedimentos: 6,
+        institucionais: 1,
+        declaracao: "Declaro estar ciente da Biblioteca de Materiais & Políticas disponibilizada no Portal do Colaborador, contendo políticas institucionais, procedimentos internos, documentos do SGQ e materiais de governança aplicáveis às minhas atividades, comprometendo-me a consultar e observar as diretrizes ali disponibilizadas.",
+        origem: "materiais_e_politicas",
+      },
+    });
+    setCienciaISO(dataISO);
+    setSalvandoCiencia(false);
+    alert("✅ Ciência geral da biblioteca registrada com sucesso.");
+  }
 
   const docsFiltrados = useMemo(() => {
     const q = busca.trim().toLowerCase();
@@ -189,14 +231,20 @@ export default function MateriaisPage() {
   return (
     <main className="section gray">
       <div className="container materiaisPage">
-        <div className="section-title">
-          <h2>Materiais & Políticas</h2>
-          <div className="bar" />
-        </div>
+        <div className="section-title"><h2>Materiais & Políticas</h2><div className="bar" /></div>
+        <p className="section-text" style={{ maxWidth: 920 }}>Biblioteca documental para consulta dos colaboradores. Os documentos abaixo integram a base de políticas, procedimentos e materiais internos divulgados no Portal do Colaborador para suporte operacional e evidência de auditoria.</p>
 
-        <p className="section-text" style={{ maxWidth: 920 }}>
-          Biblioteca documental para consulta dos colaboradores. Os documentos abaixo integram a base de políticas, procedimentos e materiais internos divulgados no Portal do Colaborador para suporte operacional e evidência de auditoria.
-        </p>
+        <div className="cienciaBox">
+          <div>
+            <div className="cienciaTitle">📌 Ciência geral da Biblioteca</div>
+            <div className="cienciaText">Declaro estar ciente da Biblioteca de Materiais & Políticas disponibilizada no Portal do Colaborador, contendo políticas institucionais, procedimentos internos, documentos do SGQ e materiais de governança aplicáveis às minhas atividades.</div>
+            <div className="cienciaStatus">Status: <strong>{cienciaISO ? `Ciência registrada em ${new Date(cienciaISO).toLocaleString("pt-BR")}` : "Pendente de ciência"}</strong></div>
+          </div>
+          <div className="cienciaActions">
+            <label className="cienciaCheck"><input type="checkbox" checked={confirmou} disabled={Boolean(cienciaISO)} onChange={(e) => setConfirmou(e.target.checked)} /> Confirmo a ciência da biblioteca.</label>
+            <button type="button" className="btn btn-yellow btn-sm" disabled={Boolean(cienciaISO) || salvandoCiencia} onClick={registrarCienciaBiblioteca}>{cienciaISO ? "✅ Ciência registrada" : salvandoCiencia ? "Registrando..." : "Registrar ciência"}</button>
+          </div>
+        </div>
 
         <div className="docResumoGrid">
           <div className="docResumo"><strong>{resumo.total}</strong><span>Documentos</span></div>
@@ -206,28 +254,16 @@ export default function MateriaisPage() {
           <div className="docResumo"><strong>{resumo.institucionais}</strong><span>Institucional</span></div>
         </div>
 
-        <div className="docFilters card">
-          <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por documento, responsável ou descrição..." />
-          <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as "TODOS" | DocTipo)}>
-            <option value="TODOS">Todas as categorias</option>
-            <option value="politica">Políticas</option>
-            <option value="sgq">SGQ</option>
-            <option value="procedimento">Procedimentos</option>
-            <option value="institucional">Institucionais</option>
-          </select>
-        </div>
+        <div className="docFilters card"><input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por documento, responsável ou descrição..." /><select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value as "TODOS" | DocTipo)}><option value="TODOS">Todas as categorias</option><option value="politica">Políticas</option><option value="sgq">SGQ</option><option value="procedimento">Procedimentos</option><option value="institucional">Institucionais</option></select></div>
 
         <SectionBox title="📘 Políticas Institucionais" subtitle="Diretrizes internas obrigatórias para governança, segurança, privacidade, RH e prevenção de riscos." docs={grupos.politicas} />
         <SectionBox title="🗂️ Sistema de Gestão da Qualidade (SGQ)" subtitle="Documentos formais de apoio, gestão, qualidade e estrutura institucional." docs={grupos.sgq} />
         <SectionBox title="🧩 Procedimentos Internos" subtitle="Procedimentos e manuais utilizados como evidência formal em auditorias internas e externas." docs={grupos.procedimentos} />
         <SectionBox title="🏛️ Documentos Institucionais" subtitle="Documentos institucionais complementares de formalização, adesão e governança." docs={grupos.institucionais} />
-
-        <div className="mt-18">
-          <Link className="btn btn-outline" href="/colaborador">← Voltar para Área do Colaborador</Link>
-        </div>
+        <div className="mt-18"><Link className="btn btn-outline" href="/colaborador">← Voltar para Área do Colaborador</Link></div>
 
         <style jsx global>{`
-          .materiaisPage{max-width:1180px}.docResumoGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}.docResumo{background:#fff;border:1px solid rgba(10,42,106,.1);border-radius:16px;padding:14px;box-shadow:0 8px 22px rgba(15,23,42,.05)}.docResumo strong{display:block;font-size:28px;color:#0a2a6a;line-height:1;font-weight:900}.docResumo span{display:block;margin-top:6px;font-size:12px;font-weight:800;opacity:.7}.docFilters{margin-top:16px!important;display:grid;grid-template-columns:1fr 230px;gap:10px;padding:14px!important;border-radius:18px!important}.docFilters input,.docFilters select{width:100%;border:1px solid rgba(10,42,106,.14);border-radius:12px;padding:12px 12px;font-weight:700;background:#fff;color:#0b1f3a}.box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}.box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px 6px;border-bottom:1px dashed rgba(0,0,0,.12)}.box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}.box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(0,0,0,.7)}.doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}.doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}.doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}.btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.badge,.meta-pill{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.meta-pill{font-weight:800}.badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}@media(max-width:900px){.docResumoGrid,.docFilters{grid-template-columns:1fr}}@media(max-width:780px){.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}}
+          .materiaisPage{max-width:1180px}.cienciaBox{margin-top:14px;background:linear-gradient(180deg,#fff,#f7f9ff);border:1px solid rgba(10,42,106,.12);border-radius:18px;padding:16px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;box-shadow:0 10px 24px rgba(15,23,42,.05)}.cienciaTitle{font-weight:900;color:#0a2a6a;font-size:16px}.cienciaText{margin-top:6px;max-width:800px;font-size:12px;font-weight:750;line-height:1.5;opacity:.76}.cienciaStatus{margin-top:8px;font-size:12px;font-weight:800}.cienciaActions{display:flex;flex-direction:column;gap:10px;min-width:250px}.cienciaCheck{font-size:12px;font-weight:800;display:flex;gap:8px;align-items:flex-start}.docResumoGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0}.docResumo{background:#fff;border:1px solid rgba(10,42,106,.1);border-radius:16px;padding:12px;box-shadow:0 10px 24px rgba(15,23,42,.05)}.docResumo strong{display:block;font-size:24px;color:#0a2a6a}.docResumo span{font-size:11px;font-weight:900;opacity:.65}.docFilters{display:flex;gap:10px;flex-wrap:wrap;padding:12px!important;border-radius:16px!important}.docFilters input{flex:1;min-width:260px;border:1px solid rgba(10,42,106,.14);border-radius:999px;padding:10px 12px;font-weight:700}.docFilters select{border:1px solid rgba(10,42,106,.14);border-radius:999px;padding:10px 12px;font-weight:800;color:#0a2a6a}.box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}.box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px;border-bottom:1px dashed rgba(0,0,0,.12)}.box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}.box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900}.doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}.doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}.doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}.btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.meta-pill,.badge{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}button:disabled{opacity:.65;cursor:not-allowed}@media(max-width:820px){.docResumoGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}.cienciaActions{min-width:0}}
         `}</style>
       </div>
     </main>
