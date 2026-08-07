@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { getSession } from "@/src/lib/auth";
 
 type DocTipo = "politica" | "procedimento" | "sgq" | "institucional";
 type DocStatus = "vigente" | "atualizar";
@@ -56,9 +57,66 @@ const DOCUMENTOS: Documento[] = [
   { id: "institucional-termo-adocao-sgq", titulo: "Termo de Adoção Institucional – SGQ", tipo: "institucional", status: "vigente", arquivoPdf: "/materiais/termos/termo-adocao-institucional-sgq.pdf", descricao: "Documento institucional de formalização e adesão ao Sistema de Gestão da Qualidade.", responsavel: "Diretoria / Qualidade", revisao: "02/2027" },
 ];
 
+function normalizarCpf(value: unknown) {
+  return String(value ?? "").replace(/\D/g, "");
+}
+
+async function registrarConsultaDocumento(doc: Documento) {
+  try {
+    const session: any = getSession();
+    const tipo = TAGS[doc.tipo];
+    const dataISO = new Date().toISOString();
+
+    await fetch("/api/audit/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "DOCUMENTO_CONSULTADO",
+        module: "materiais-politicas",
+        entityId: doc.id,
+        entityTitle: doc.titulo,
+        actorCpf: normalizarCpf(session?.cpf || ""),
+        actorNome: session?.nome || "",
+        actorPerfil: session?.perfil || "",
+        actorEmpresa: session?.empresa || "",
+        atISO: dataISO,
+        obs: `Colaborador consultou documento em Materiais & Políticas: ${doc.titulo}.`,
+        meta: {
+          documento: doc.titulo,
+          documentoId: doc.id,
+          categoria: tipo.label,
+          tipo: doc.tipo,
+          status: STATUS[doc.status].label,
+          responsavel: doc.responsavel,
+          revisao: doc.revisao,
+          arquivoPdf: doc.arquivoPdf,
+          origem: "materiais_e_politicas",
+        },
+      }),
+    });
+  } catch {
+    // A consulta não deve bloquear a abertura do documento.
+  }
+}
+
 function DocRow({ doc }: { doc: Documento }) {
   const tipo = TAGS[doc.tipo];
   const status = STATUS[doc.status];
+
+  async function abrirDocumento() {
+    const novaJanela = window.open("about:blank", "_blank", "noopener,noreferrer");
+    await registrarConsultaDocumento(doc);
+
+    if (novaJanela) {
+      novaJanela.location.href = doc.arquivoPdf;
+    } else {
+      window.open(doc.arquivoPdf, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  async function baixarDocumento() {
+    await registrarConsultaDocumento(doc);
+  }
 
   return (
     <div className="doc-row">
@@ -76,8 +134,8 @@ function DocRow({ doc }: { doc: Documento }) {
         <div className="doc-sub">{doc.descricao}</div>
       </div>
       <div className="doc-actions">
-        <a className="btn btn-yellow btn-sm" href={doc.arquivoPdf} target="_blank" rel="noopener noreferrer">Abrir</a>
-        <a className="btn btn-outline btn-sm" href={doc.arquivoPdf} download>Baixar</a>
+        <button className="btn btn-yellow btn-sm" type="button" onClick={abrirDocumento}>Abrir</button>
+        <a className="btn btn-outline btn-sm" href={doc.arquivoPdf} download onClick={baixarDocumento}>Baixar</a>
       </div>
     </div>
   );
@@ -164,30 +222,12 @@ export default function MateriaisPage() {
         <SectionBox title="🧩 Procedimentos Internos" subtitle="Procedimentos e manuais utilizados como evidência formal em auditorias internas e externas." docs={grupos.procedimentos} />
         <SectionBox title="🏛️ Documentos Institucionais" subtitle="Documentos institucionais complementares de formalização, adesão e governança." docs={grupos.institucionais} />
 
-        {docsFiltrados.length === 0 ? <div className="card emptyBox">Nenhum documento encontrado com os filtros selecionados.</div> : null}
-
         <div className="mt-18">
           <Link className="btn btn-outline" href="/colaborador">← Voltar para Área do Colaborador</Link>
         </div>
 
         <style jsx global>{`
-          .materiaisPage { max-width: 1180px; }
-          .docResumoGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px;margin-bottom:14px}
-          .docResumo{background:#fff;border:1px solid rgba(10,42,106,.1);border-radius:16px;padding:14px;box-shadow:0 8px 20px rgba(15,23,42,.05)}
-          .docResumo strong{display:block;font-size:24px;line-height:1;color:#0a2a6a;font-weight:900}.docResumo span{display:block;margin-top:5px;font-size:12px;font-weight:800;opacity:.7}
-          .docFilters{padding:14px!important;border-radius:18px!important;border:1px solid rgba(10,42,106,.1)!important;background:linear-gradient(180deg,#fff,#f8faff)!important;display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-          .docFilters input,.docFilters select{border:1px solid rgba(10,42,106,.12);border-radius:14px;background:#fff;padding:11px 12px;font-weight:800;outline:none}.docFilters input{flex:1;min-width:260px}.docFilters select{min-width:210px}
-          .box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}
-          .box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px 6px;border-bottom:1px dashed rgba(0,0,0,.12)}
-          .box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}
-          .box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(0,0,0,.7)}
-          .doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}
-          .doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}
-          .doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}
-          .btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.badge,.meta-pill{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.meta-pill{font-weight:800;color:rgba(0,0,0,.68)}
-          .badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}
-          .emptyBox{padding:16px!important;border-radius:18px!important;margin-top:14px;font-weight:800;opacity:.75}
-          @media(max-width:900px){.docResumoGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}.docFilters input,.docFilters select{width:100%;min-width:0}}
+          .materiaisPage{max-width:1180px}.docResumoGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:16px}.docResumo{background:#fff;border:1px solid rgba(10,42,106,.1);border-radius:16px;padding:14px;box-shadow:0 8px 22px rgba(15,23,42,.05)}.docResumo strong{display:block;font-size:28px;color:#0a2a6a;line-height:1;font-weight:900}.docResumo span{display:block;margin-top:6px;font-size:12px;font-weight:800;opacity:.7}.docFilters{margin-top:16px!important;display:grid;grid-template-columns:1fr 230px;gap:10px;padding:14px!important;border-radius:18px!important}.docFilters input,.docFilters select{width:100%;border:1px solid rgba(10,42,106,.14);border-radius:12px;padding:12px 12px;font-weight:700;background:#fff;color:#0b1f3a}.box{background:#fff;border-radius:18px;padding:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 8px 22px rgba(0,0,0,.05);margin-top:16px}.box-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:6px 6px 12px 6px;border-bottom:1px dashed rgba(0,0,0,.12)}.box-title{margin:0;font-weight:900;font-size:15px;color:#0b1f3a}.box-sub{margin:6px 0 0 0;font-size:12px;font-weight:700;color:rgba(0,0,0,.65);max-width:820px}.box-count{min-width:34px;height:34px;border-radius:999px;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(0,0,0,.7)}.doc-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}.doc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:rgba(255,255,255,.9)}.doc-left{min-width:0;flex:1}.doc-title{display:flex;align-items:center;gap:10px;font-weight:900;color:#0b1f3a;font-size:14px;line-height:1.2}.doc-icon{width:28px;height:28px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:rgba(11,59,138,.06);border:1px solid rgba(11,59,138,.14);flex:0 0 auto}.doc-meta{margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.doc-sub{margin-top:8px;font-size:12px;font-weight:700;color:rgba(0,0,0,.62);max-width:920px;line-height:1.45}.doc-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:160px}.btn-sm{padding:10px 12px!important;font-size:12px!important;border-radius:999px!important}.badge,.meta-pill{font-size:11px;font-weight:900;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.75);line-height:1;white-space:nowrap}.meta-pill{font-weight:800}.badge-blue{background:rgba(11,59,138,.06);border-color:rgba(11,59,138,.14);color:rgba(11,59,138,.95)}.badge-green{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-purple{background:rgba(110,60,210,.08);border-color:rgba(110,60,210,.18);color:rgba(90,40,170,1)}.badge-gray{background:rgba(80,80,80,.08);border-color:rgba(80,80,80,.16);color:rgba(70,70,70,1)}.badge-ok{background:rgba(20,180,90,.1);border-color:rgba(20,180,90,.22);color:rgba(14,122,61,1)}.badge-warn{background:rgba(247,198,0,.12);border-color:rgba(247,198,0,.26);color:rgba(140,104,0,1)}@media(max-width:900px){.docResumoGrid,.docFilters{grid-template-columns:1fr}}@media(max-width:780px){.doc-row{flex-direction:column}.doc-actions{justify-content:flex-start;min-width:0}}
         `}</style>
       </div>
     </main>
