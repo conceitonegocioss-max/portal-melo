@@ -36,7 +36,8 @@ function keyByCpf(cpf: string) {
 
 function resumirProgresso(obj: ProgressoPorTreino): ProgressoResumo {
   const values = Object.values(obj || {});
-  const concluidos = values.filter((v) => String(v?.status || "").toLowerCase().includes("conclu")).length;
+  const concluidosRaw = values.filter((v) => String(v?.status || "").toLowerCase().includes("conclu")).length;
+  const concluidos = Math.min(concluidosRaw, TOTAL_TREINAMENTOS);
   const datas = values.map((v) => v?.dataISO).filter(Boolean) as string[];
   const ultimaISO = datas.length ? datas.sort().slice(-1)[0] : null;
   return { concluidos, ultimaISO };
@@ -128,7 +129,8 @@ export default function ColaboradorHomePage() {
   }, [isAdmin, sessionEmpresa]);
 
   const pct = useMemo(() => {
-    return TOTAL_TREINAMENTOS > 0 ? Math.round((progresso.concluidos / TOTAL_TREINAMENTOS) * 100) : 0;
+    if (TOTAL_TREINAMENTOS <= 0) return 0;
+    return Math.min(100, Math.max(0, Math.round((progresso.concluidos / TOTAL_TREINAMENTOS) * 100)));
   }, [progresso.concluidos]);
 
   if (!mounted) {
