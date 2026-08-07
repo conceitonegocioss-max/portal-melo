@@ -24,6 +24,7 @@ type Evidencia = {
   origem?: "MANUAL" | "LOGGER" | "MISTA";
   provas?: number;
   provasAprovadas?: number;
+  provasTotal?: number;
 };
 
 type AuditEvent = {
@@ -33,6 +34,10 @@ type AuditEvent = {
   actorCpf?: string;
   actorNome?: string;
   actorEmpresa?: string;
+  actorPerfil?: string;
+  cpf?: string;
+  nome?: string;
+  empresa?: string;
   entityId?: string;
   entityTitle?: string;
   module?: string;
@@ -60,14 +65,71 @@ const TREINAMENTOS_BASE = [
   "lista-de-mailing",
 ];
 
+const PROVAS_BASE = [
+  "atendimento-ao-cliente",
+  "codigo-de-etica",
+  "credito-responsavel",
+  "autorregulacao-consignado",
+  "fraude",
+  "lgpd",
+  "pldft",
+  "seguranca-informacao",
+  "publico-vulneravel",
+  "resumo-contratual",
+  "produtos-consignado",
+  "consorcio",
+  "ourocap",
+  "abertura-conta",
+  "seguridade",
+  "portabilidade",
+  "mailing",
+];
+
+const TOTAL_PROVAS_OBRIGATORIAS = PROVAS_BASE.length;
+
 function onlyDigits(v: string) {
   return (v || "").replace(/\D/g, "");
+}
+
+function slugify(value: string) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function normalizarTreinamentoId(id: string) {
   const value = String(id || "").trim();
   if (value === "ourocapp") return "ourocap";
   return value;
+}
+
+function normalizarProvaId(rawId?: string, rawTitle?: string) {
+  const base = `${rawId || ""} ${rawTitle || ""}`;
+  const slug = slugify(base.replace(/^prova[-\s—]+/i, ""));
+
+  if (!slug) return "";
+  if (slug.includes("atendimento-ao-cliente")) return "atendimento-ao-cliente";
+  if (slug.includes("codigo-de-etica")) return "codigo-de-etica";
+  if (slug.includes("credito-responsavel")) return "credito-responsavel";
+  if (slug.includes("autorregulacao") || slug.includes("auto-regulacao")) return "autorregulacao-consignado";
+  if (slug.includes("prevencao-a-fraude") || slug === "fraude" || slug.includes("fraude")) return "fraude";
+  if (slug.includes("lgpd")) return "lgpd";
+  if (slug.includes("pldft") || slug.includes("pld-ft") || slug.includes("pld")) return "pldft";
+  if (slug.includes("seguranca-informacao") || slug.includes("seguranca-da-informacao")) return "seguranca-informacao";
+  if (slug.includes("publico-vulneravel")) return "publico-vulneravel";
+  if (slug.includes("resumo-contratual")) return "resumo-contratual";
+  if (slug.includes("produtos-consignado") || slug.includes("produtos-modalidades") || slug.includes("modalidades-do-credito-consignado")) return "produtos-consignado";
+  if (slug.includes("consorcio")) return "consorcio";
+  if (slug.includes("ourocap") || slug.includes("ourocapp")) return "ourocap";
+  if (slug.includes("abertura-conta") || slug.includes("abertura-de-conta")) return "abertura-conta";
+  if (slug.includes("seguridade")) return "seguridade";
+  if (slug.includes("portabilidade")) return "portabilidade";
+  if (slug.includes("mailing") || slug.includes("lista-de-mailing")) return "mailing";
+
+  return PROVAS_BASE.includes(slug) ? slug : "";
 }
 
 function mascararCpf(cpf: string) {
@@ -91,8 +153,13 @@ function pct(concluidos: number, total: number) {
 }
 
 function situacaoEvidencia(ev: Evidencia) {
-  if (!ev.total || ev.concluidos <= 0) return "SEM_CONCLUSAO" as const;
-  if (ev.concluidos >= ev.total) return "COMPLETO" as const;
+  const treinamentosOk = Boolean(ev.total) && ev.concluidos >= ev.total;
+  const provasOk = (ev.provasAprovadas || 0) >= TOTAL_PROVAS_OBRIGATORIAS;
+  const semTreinamento = !ev.total || ev.concluidos <= 0;
+  const semProva = (ev.provasAprovadas || 0) <= 0;
+
+  if (treinamentosOk && provasOk) return "COMPLETO" as const;
+  if (semTreinamento && semProva) return "SEM_CONCLUSAO" as const;
   return "PARCIAL" as const;
 }
 
@@ -114,6 +181,15 @@ function dataMaisRecente(a?: string, b?: string) {
   return bt > at ? b || a || "" : a || b || "";
 }
 
+function eventoProvaAprovada(ev: AuditEvent) {
+  const type = String(ev.type || "").toUpperCase();
+  const status = String(ev.meta?.status || ev.meta?.resultado || "").toUpperCase();
+  const aprovado = String(ev.meta?.aprovado || "").toUpperCase();
+  const nota = Number(ev.meta?.nota ?? ev.meta?.pontuacao ?? NaN);
+
+  return type === "PROVA_APROVADA" || aprovado === "SIM" || aprovado === "TRUE" || status === "APROVADA" || (!Number.isNaN(nota) && nota >= 70);
+}
+
 function evidenciaFromLogger(events: AuditEvent[]) {
   const porCpf = new Map<string, {
     cpf: string;
@@ -121,8 +197,8 @@ function evidenciaFromLogger(events: AuditEvent[]) {
     empresa: string;
     ultimaData: string;
     treinamentos: Map<string, string>;
-    provas: number;
-    provasAprovadas: number;
+    provasRealizadas: Map<string, string>;
+    provasAprovadas: Map<string, string>;
   }>();
 
   for (const ev of events) {
@@ -133,21 +209,21 @@ function evidenciaFromLogger(events: AuditEvent[]) {
 
     if (!isTreinamento && !isProva) continue;
 
-    const cpf = onlyDigits(ev.actorCpf || String(ev.meta?.cpf || ""));
+    const cpf = onlyDigits(ev.actorCpf || ev.cpf || String(ev.meta?.cpf || ""));
     if (!cpf) continue;
 
     const atual = porCpf.get(cpf) || {
       cpf,
-      nome: ev.actorNome || String(ev.meta?.nome || ""),
-      empresa: ev.actorEmpresa || String(ev.meta?.empresa || ""),
+      nome: ev.actorNome || ev.nome || String(ev.meta?.nome || ""),
+      empresa: ev.actorEmpresa || ev.empresa || String(ev.meta?.empresa || ""),
       ultimaData: ev.atISO || "",
       treinamentos: new Map<string, string>(),
-      provas: 0,
-      provasAprovadas: 0,
+      provasRealizadas: new Map<string, string>(),
+      provasAprovadas: new Map<string, string>(),
     };
 
-    if (!atual.nome && ev.actorNome) atual.nome = ev.actorNome;
-    if (!atual.empresa && ev.actorEmpresa) atual.empresa = ev.actorEmpresa;
+    if (!atual.nome && (ev.actorNome || ev.nome)) atual.nome = ev.actorNome || ev.nome || "";
+    if (!atual.empresa && (ev.actorEmpresa || ev.empresa)) atual.empresa = ev.actorEmpresa || ev.empresa || "";
     atual.ultimaData = dataMaisRecente(atual.ultimaData, ev.atISO);
 
     if (isTreinamento) {
@@ -159,10 +235,19 @@ function evidenciaFromLogger(events: AuditEvent[]) {
     }
 
     if (isProva) {
-      atual.provas += 1;
-      const aprovadoMeta = String(ev.meta?.aprovado || "").toUpperCase();
-      if (type === "PROVA_APROVADA" || aprovadoMeta === "SIM" || aprovadoMeta === "TRUE") {
-        atual.provasAprovadas += 1;
+      const provaId = normalizarProvaId(
+        ev.entityId || String(ev.meta?.provaId || ev.meta?.slug || ev.meta?.id || ""),
+        ev.entityTitle || String(ev.meta?.prova || ev.meta?.titulo || ev.meta?.documento || "")
+      );
+
+      if (provaId) {
+        const dataAtual = atual.provasRealizadas.get(provaId);
+        atual.provasRealizadas.set(provaId, dataMaisRecente(dataAtual, ev.atISO));
+
+        if (eventoProvaAprovada(ev)) {
+          const dataAprovada = atual.provasAprovadas.get(provaId);
+          atual.provasAprovadas.set(provaId, dataMaisRecente(dataAprovada, ev.atISO));
+        }
       }
     }
 
@@ -187,8 +272,9 @@ function evidenciaFromLogger(events: AuditEvent[]) {
       total: itens.length,
       itens,
       origem: "LOGGER",
-      provas: x.provas,
-      provasAprovadas: x.provasAprovadas,
+      provas: x.provasRealizadas.size,
+      provasAprovadas: x.provasAprovadas.size,
+      provasTotal: TOTAL_PROVAS_OBRIGATORIAS,
     };
   });
 }
@@ -201,7 +287,7 @@ function consolidarPorColaborador(items: Evidencia[]) {
     const atual = map.get(key);
 
     if (!atual) {
-      map.set(key, ev);
+      map.set(key, { ...ev, provasTotal: ev.provasTotal || TOTAL_PROVAS_OBRIGATORIAS });
       continue;
     }
 
@@ -209,10 +295,16 @@ function consolidarPorColaborador(items: Evidencia[]) {
     const atualPct = pct(atual.concluidos, atual.total);
     const evTime = new Date(ev.emitidoEmISO || 0).getTime();
     const atualTime = new Date(atual.emitidoEmISO || 0).getTime();
+    const base = evPct > atualPct || (evPct === atualPct && evTime > atualTime) ? ev : atual;
 
-    if (evPct > atualPct || (evPct === atualPct && evTime > atualTime)) {
-      map.set(key, { ...ev, origem: atual.origem && atual.origem !== ev.origem ? "MISTA" : ev.origem });
-    }
+    map.set(key, {
+      ...base,
+      origem: atual.origem && atual.origem !== ev.origem ? "MISTA" : base.origem,
+      provas: Math.max(atual.provas || 0, ev.provas || 0),
+      provasAprovadas: Math.max(atual.provasAprovadas || 0, ev.provasAprovadas || 0),
+      provasTotal: TOTAL_PROVAS_OBRIGATORIAS,
+      emitidoEmISO: dataMaisRecente(atual.emitidoEmISO, ev.emitidoEmISO),
+    });
   }
 
   return Array.from(map.values()).sort((a, b) => (a.colaborador || "").localeCompare(b.colaborador || "", "pt-BR"));
@@ -268,7 +360,7 @@ export default function EvidenciasPage() {
 
         if (evidenciasRes.status === "fulfilled") {
           const json = await evidenciasRes.value.json();
-          manuais = Array.isArray(json?.items) ? json.items.map((x: Evidencia) => ({ ...x, origem: "MANUAL" as const })) : [];
+          manuais = Array.isArray(json?.items) ? json.items.map((x: Evidencia) => ({ ...x, origem: "MANUAL" as const, provasTotal: TOTAL_PROVAS_OBRIGATORIAS })) : [];
         }
 
         if (eventosRes.status === "fulfilled") {
@@ -347,7 +439,7 @@ export default function EvidenciasPage() {
             </div>
 
             <p className="section-text" style={{ maxWidth: 920 }}>
-              Consulta consolidada por colaborador, com evidências de treinamentos e provas registradas no portal.
+              Consulta consolidada por colaborador, com evidências de treinamentos e provas únicas aprovadas no portal.
             </p>
           </div>
 
@@ -429,6 +521,8 @@ export default function EvidenciasPage() {
                       const percentual = pct(ev.concluidos, ev.total);
                       const situacao = situacaoEvidencia(ev);
                       const linkDetalhe = `/colaborador/auditoria/evidencias/${encodeURIComponent(ev.id)}`;
+                      const provasAprovadas = ev.provasAprovadas || 0;
+                      const provasTotal = ev.provasTotal || TOTAL_PROVAS_OBRIGATORIAS;
 
                       return (
                         <tr key={ev.id}>
@@ -444,7 +538,10 @@ export default function EvidenciasPage() {
                             <div className="evBar"><div className="evBarFill" style={{ width: `${Math.min(100, Math.max(0, percentual))}%` }} /></div>
                           </td>
 
-                          <td className="evTdMuted">{ev.provasAprovadas || 0}/{ev.provas || 0}</td>
+                          <td className="evTdMuted">
+                            <strong>{provasAprovadas}/{provasTotal}</strong>
+                            <div className="evMiniNote">aprovadas</div>
+                          </td>
                           <td><span className={`evStatus ${situacaoClass(situacao)}`}>{situacaoLabel(situacao)}</span></td>
 
                           <td style={{ textAlign: "right" }}>
@@ -459,7 +556,7 @@ export default function EvidenciasPage() {
             </div>
 
             <div className="evObs">
-              Nota de auditoria: esta listagem consolida as evidências de treinamentos e provas por colaborador. O histórico bruto permanece disponível no Logger Central.
+              Nota de auditoria: esta listagem consolida treinamentos concluídos e provas únicas aprovadas por colaborador. O histórico bruto de tentativas e eventos permanece disponível no Logger Central.
             </div>
           </div>
         )}
@@ -500,6 +597,7 @@ export default function EvidenciasPage() {
           .evTdStrong { font-weight:900; color:#0a2a6a; }
           .evTdMuted { font-weight:700; opacity:.85; }
           .evProgRow { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+          .evMiniNote { font-size:10px; opacity:.65; margin-top:2px; font-weight:800; }
           .evStatus { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:900; line-height:1; border:1px solid rgba(10,42,106,.12); background:#f7f9ff; color:#0a2a6a; white-space:nowrap; }
           .evStatus.ok { background:rgba(20,180,90,.1); border-color:rgba(20,180,90,.22); color:#0e7a3d; }
           .evStatus.partial { background:rgba(247,198,0,.12); border-color:rgba(247,198,0,.26); color:#8c6800; }
