@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { normalizeCpf, setSession } from "@/src/lib/auth";
-import { COLABORADORES } from "@/src/data/colaboradores";
 
 export default function ColaboradorLoginPage() {
   const router = useRouter();
@@ -49,11 +48,21 @@ export default function ColaboradorLoginPage() {
       return;
     }
 
-    const user = COLABORADORES.find(
-      (c) => normalizeCpf(c.cpf) === cpfLimpo && c.senha === senha
-    );
+    let data: any = null;
 
-    if (!user) {
+    try {
+      const res = await fetch("/api/auth/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", cpf: cpfLimpo, senha }),
+      });
+
+      data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.ok || !data?.user) {
+        throw new Error(data?.message || "CPF ou senha inválidos.");
+      }
+    } catch (error: any) {
       const atISO = new Date().toISOString();
 
       await registrarLoginAudit({
@@ -63,7 +72,7 @@ export default function ColaboradorLoginPage() {
         empresa: "",
         atISO,
         sucesso: false,
-        motivo: "CPF ou senha inválidos",
+        motivo: error?.message || "CPF ou senha inválidos",
       });
 
       await registrarEventoCentral({
@@ -76,52 +85,22 @@ export default function ColaboradorLoginPage() {
         perfil: "",
         empresa: "",
         atISO,
-        obs: "CPF ou senha inválidos",
+        obs: error?.message || "CPF ou senha inválidos",
       });
 
       setLoading(false);
-      setErro("CPF ou senha inválidos. Verifique e tente novamente.");
-      return;
-    }
-
-    if (user.status === "INATIVO") {
-      const atISO = new Date().toISOString();
-
-      await registrarLoginAudit({
-        cpf: user.cpf,
-        nome: user.nome,
-        perfil: user.perfil,
-        empresa: user.empresa || "",
-        atISO,
-        sucesso: false,
-        motivo: "Usuário inativo",
-      });
-
-      await registrarEventoCentral({
-        type: "LOGIN_BLOQUEADO_INATIVO",
-        module: "auth",
-        entity: "Login",
-        entityId: normalizeCpf(user.cpf),
-        cpf: user.cpf,
-        nome: user.nome,
-        perfil: user.perfil,
-        empresa: user.empresa || "",
-        atISO,
-        obs: "Tentativa de acesso por usuário inativo",
-      });
-
-      setLoading(false);
-      setErro("Usuário inativo. Procure o gestor/qualidade para verificar o acesso.");
+      setErro(error?.message || "CPF ou senha inválidos. Verifique e tente novamente.");
       return;
     }
 
     const session = {
-      id: user.id,
-      nome: user.nome,
-      cpf: user.cpf,
-      perfil: user.perfil,
-      empresa: user.empresa || "",
-      status: user.status,
+      id: data.user.id,
+      nome: data.user.nome,
+      cpf: data.user.cpf,
+      perfil: data.user.perfil,
+      empresa: data.user.empresa || "",
+      status: data.user.status,
+      mustChangePassword: Boolean(data.mustChangePassword || data.user.mustChangePassword),
     };
 
     setSession(session);
@@ -136,10 +115,11 @@ export default function ColaboradorLoginPage() {
       status: session.status,
       atISO,
       sucesso: true,
+      senhaProvisoria: session.mustChangePassword,
     });
 
     await registrarEventoCentral({
-      type: "LOGIN_OK",
+      type: session.mustChangePassword ? "LOGIN_OK_SENHA_PROVISORIA" : "LOGIN_OK",
       module: "auth",
       entity: "Login",
       entityId: normalizeCpf(session.cpf),
@@ -149,10 +129,10 @@ export default function ColaboradorLoginPage() {
       empresa: session.empresa,
       status: session.status,
       atISO,
-      obs: "",
+      obs: session.mustChangePassword ? "Login realizado com senha inicial/provisória." : "",
     });
 
-    router.replace("/colaborador");
+    router.replace(session.mustChangePassword ? "/colaborador/alterar-senha" : "/colaborador");
   }
 
   return (
@@ -171,7 +151,7 @@ export default function ColaboradorLoginPage() {
 
           <h1 className="login-title">Login do Colaborador</h1>
           <p className="login-subtitle">
-            Acesse com seu CPF e senha para visualizar treinamentos e provas.
+            No primeiro acesso, utilize seu CPF e a senha inicial/provisória formada pelos 4 últimos números do CPF. Em seguida, será necessário cadastrar uma nova senha.
           </p>
 
           <form onSubmit={handleLogin} className="login-form">
@@ -190,7 +170,7 @@ export default function ColaboradorLoginPage() {
               className="login-input"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              placeholder="Sua senha"
+              placeholder="Senha inicial ou senha cadastrada"
               type="password"
               autoComplete="current-password"
             />
@@ -200,6 +180,10 @@ export default function ColaboradorLoginPage() {
             <button className="btn btn-yellow login-btn" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </button>
+
+            <div className="login-notice">
+              🔐 Senha inicial/provisória: <strong>4 últimos números do CPF</strong>. Após o primeiro acesso, cadastre uma nova senha de uso pessoal.
+            </div>
 
             <div className="login-links">
               <Link href="/" className="login-link">
@@ -322,6 +306,17 @@ export default function ColaboradorLoginPage() {
           color: rgba(140, 0, 0, 0.95);
           font-size: 12px;
           font-weight: 800;
+        }
+        .login-notice {
+          margin-top: 10px;
+          padding: 10px 12px;
+          border-radius: 14px;
+          background: #f7f9ff;
+          border: 1px solid rgba(10, 42, 106, 0.1);
+          font-size: 12px;
+          font-weight: 800;
+          color: rgba(0, 0, 0, 0.7);
+          line-height: 1.35;
         }
         .login-btn {
           width: 100%;
