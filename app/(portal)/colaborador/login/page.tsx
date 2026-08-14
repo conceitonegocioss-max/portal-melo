@@ -151,7 +151,7 @@ export default function ColaboradorLoginPage() {
 
           <h1 className="login-title">Login do Colaborador</h1>
           <p className="login-subtitle">
-            No primeiro acesso, utilize seu CPF e a senha inicial/provisória formada pelos 4 últimos números do CPF. Em seguida, será necessário cadastrar uma nova senha.
+            Acesse com seu CPF e senha. No primeiro acesso, será necessário cadastrar uma nova senha pessoal.
           </p>
 
           <form onSubmit={handleLogin} className="login-form">
@@ -170,7 +170,7 @@ export default function ColaboradorLoginPage() {
               className="login-input"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              placeholder="Senha inicial ou senha cadastrada"
+              placeholder="Digite sua senha"
               type="password"
               autoComplete="current-password"
             />
@@ -180,10 +180,6 @@ export default function ColaboradorLoginPage() {
             <button className="btn btn-yellow login-btn" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </button>
-
-            <div className="login-notice">
-              🔐 Senha inicial/provisória: <strong>4 últimos números do CPF</strong>. Após o primeiro acesso, cadastre uma nova senha de uso pessoal.
-            </div>
 
             <div className="login-links">
               <Link href="/" className="login-link">
@@ -306,17 +302,6 @@ export default function ColaboradorLoginPage() {
           color: rgba(140, 0, 0, 0.95);
           font-size: 12px;
           font-weight: 800;
-        }
-        .login-notice {
-          margin-top: 10px;
-          padding: 10px 12px;
-          border-radius: 14px;
-          background: #f7f9ff;
-          border: 1px solid rgba(10, 42, 106, 0.1);
-          font-size: 12px;
-          font-weight: 800;
-          color: rgba(0, 0, 0, 0.7);
-          line-height: 1.35;
         }
         .login-btn {
           width: 100%;
