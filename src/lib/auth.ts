@@ -7,6 +7,7 @@ export type SessionUser = {
   perfil: Perfil;
   empresa?: string | null;
   status?: "ATIVO" | "INATIVO";
+  mustChangePassword?: boolean;
 };
 
 const SESSION_KEY = "portal_colaborador_session_v1";
@@ -46,6 +47,7 @@ export function getSession(): SessionUser | null {
       perfil: normalizePerfil(parsed.perfil),
       empresa: parsed.empresa ? String(parsed.empresa) : null,
       status: normalizeStatus(parsed.status),
+      mustChangePassword: Boolean(parsed.mustChangePassword),
     };
   } catch {
     return null;
@@ -62,6 +64,7 @@ export function setSession(user: SessionUser) {
     perfil: normalizePerfil(user.perfil),
     empresa: user.empresa ? String(user.empresa) : null,
     status: normalizeStatus(user.status),
+    mustChangePassword: Boolean(user.mustChangePassword),
   };
 
   window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
