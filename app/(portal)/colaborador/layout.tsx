@@ -11,6 +11,8 @@ export default function ColaboradorLayout({ children }: { children: React.ReactN
   const pathname = usePathname();
 
   const isLoginPage = useMemo(() => pathname === "/colaborador/login", [pathname]);
+  const isAlterarSenhaPage = useMemo(() => pathname === "/colaborador/alterar-senha", [pathname]);
+  const isPublicAuthPage = isLoginPage || isAlterarSenhaPage;
 
   const [ready, setReady] = useState(false);
 
@@ -22,8 +24,13 @@ export default function ColaboradorLayout({ children }: { children: React.ReactN
       return;
     }
 
+    if (session?.mustChangePassword && !isAlterarSenhaPage) {
+      router.replace("/colaborador/alterar-senha");
+      return;
+    }
+
     setReady(true);
-  }, [isLoginPage, router]);
+  }, [isLoginPage, isAlterarSenhaPage, router, pathname]);
 
   // ✅ Evita “piscar” conteúdo protegido antes do redirect
   if (!isLoginPage && !ready) {
@@ -56,12 +63,12 @@ export default function ColaboradorLayout({ children }: { children: React.ReactN
 
   return (
     <div className="portalShell">
-      {!isLoginPage && <PortalAuditEventSync />}
-      {!isLoginPage && <ColaboradorBadge />}
+      {!isPublicAuthPage && <PortalAuditEventSync />}
+      {!isPublicAuthPage && <ColaboradorBadge />}
 
       <div className="portalContent">{children}</div>
 
-      {!isLoginPage && (
+      {!isPublicAuthPage && (
         <footer className="portalFooter" role="contentinfo">
           <div className="portalFooterInner">
             <div>© 2026 — Portal do Colaborador</div>
